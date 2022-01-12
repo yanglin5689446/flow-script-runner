@@ -97,7 +97,7 @@ const Editor = (): ReactJSXElement => {
           fcl.proposer(fcl.currentUser().authorization),
           fcl.payer(fcl.currentUser().authorization),
           fcl.ref(block.id),
-          fcl.limit(100),
+          fcl.limit(9999),
         ];
         if (shouldSign)
           params.push(fcl.authorizations([fcl.currentUser().authorization]));
