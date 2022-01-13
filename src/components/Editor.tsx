@@ -19,6 +19,7 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  MenuGroup,
 } from "@chakra-ui/react";
 import * as fcl from "@blocto/fcl";
 import * as types from "@onflow/types";
@@ -142,104 +143,28 @@ const Editor = (): ReactJSXElement => {
   }, [toast, scriptType, script, response, shouldSign, args, typeKeys]);
 
   return (
-    <Container p={2} mt={3} border="1px solid #e3e3e3" borderRadius={8}>
-      <form>
-        <Flex justify="space-between" align="center" my={3}>
-          <Tabs
-            alignItems="center"
-            variant="solid-rounded"
-            size="sm"
-            onChange={setScriptType}
-            index={scriptType}
-          >
-            <TabList>
-              <Tab>Script</Tab>
-              <Tab>Transaction</Tab>
-            </TabList>
-          </Tabs>
-          <Menu>
-            <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-              Templates
-            </MenuButton>
-            <MenuList>
-              {Object.entries(BloctoDAOTemplates).map(([name, template]) => (
-                <MenuItem key={name} onClick={() => importTemplate(template)}>
-                  DAO/{startCase(name)}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
-        </Flex>
+    <Flex
+      height="calc(100vh - 76px)"
+      flexDirection={{ base: "column", md: "row" }}
+    >
+      <Flex
+        flex={{ base: 3, md: 6 }}
+        height="100%"
+        borderWidth={1}
+        flexDirection="column"
+      >
         <Textarea
-          rows={10}
+          flex={2}
+          borderRadius="none"
+          border="none"
+          boxShadow="none"
           onChange={(e) => setScript(e.target.value)}
           value={script}
           fontFamily="monospace"
+          _focus={{ border: "none", boxShadow: "none" }}
         />
-        <Flex align="center" mt={3} ml={1}>
-          <Box fontWeight="bold">Args</Box>
-          <IconButton
-            ml={2}
-            aria-label="Add Args"
-            isRound
-            icon={<AddIcon />}
-            size="xs"
-            colorScheme="blue"
-            onClick={() =>
-              setArgs((args ?? []).concat({ value: "", type: "" }))
-            }
-          />
-        </Flex>
-        <Box mt={2}>
-          {args?.map(({ value, type, comment }, index) => (
-            <Flex key={index} align="center" mt={2}>
-              <Input
-                value={value || ""}
-                onChange={(e) => {
-                  const updated = args.slice();
-                  updated.splice(index, 1, { type, value: e.target.value });
-                  setArgs(updated);
-                }}
-                placeholder={comment}
-              />
-              <Select
-                value={type}
-                onChange={(e) => {
-                  const updated = args.slice();
-                  updated.splice(index, 1, { value, type: e.target.value });
-                  setArgs(updated);
-                }}
-                ml={2}
-              >
-                <option value="">--</option>
-                {typeKeys.map((key) => (
-                  <option value={key} key={key}>
-                    {key}
-                  </option>
-                ))}
-                {!typeKeys.includes(type) && (
-                  <option value={type}>{type}</option>
-                )}
-              </Select>
-              <IconButton
-                ml={2}
-                aria-label="Delete Arg"
-                isRound
-                icon={<CloseIcon />}
-                size="xs"
-                colorScheme="red"
-                onClick={() => {
-                  const updated = args.slice();
-                  updated.splice(index, 1);
-                  setArgs(updated);
-                }}
-              />
-            </Flex>
-          ))}
-        </Box>
-
         {(response || result) && (
-          <Box ml={1}>
+          <Box flex={1} borderTopWidth={1} p={3}>
             <Box fontWeight="bold" mt={3}>
               {result ? "Run result:" : "Response:"}
             </Box>
@@ -250,15 +175,109 @@ const Editor = (): ReactJSXElement => {
               mt={1}
               p={3}
               whiteSpace="pre-wrap"
-              maxHeight={240}
+              maxHeight={{ base: 120, md: 240 }}
               overflow="auto"
             >
               {JSON.stringify(result || response, null, 2)}
             </Box>
           </Box>
         )}
+      </Flex>
 
-        <Flex justify="end">
+      <Flex flex={3} height="100%" direction="column">
+        <Tabs size="md" onChange={setScriptType} index={scriptType}>
+          <TabList>
+            <Tab>Script</Tab>
+            <Tab>Transaction</Tab>
+          </TabList>
+        </Tabs>
+        <Flex m={4}>
+          <Menu>
+            <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
+              Templates
+            </MenuButton>
+            <MenuList>
+              <MenuGroup title="DAO">
+                {Object.entries(BloctoDAOTemplates).map(([name, template]) => (
+                  <MenuItem
+                    key={name}
+                    pl={5}
+                    color="gray.700"
+                    onClick={() => importTemplate(template)}
+                  >
+                    {startCase(name)}
+                  </MenuItem>
+                ))}
+              </MenuGroup>
+            </MenuList>
+          </Menu>
+        </Flex>
+
+        <Box flex={1} px={4}>
+          <Flex align="center" mt={3} ml={1}>
+            <Box fontWeight="bold">Args</Box>
+            <IconButton
+              ml={2}
+              aria-label="Add Args"
+              isRound
+              icon={<AddIcon />}
+              size="xs"
+              colorScheme="blue"
+              onClick={() =>
+                setArgs((args ?? []).concat({ value: "", type: "" }))
+              }
+            />
+          </Flex>
+          <Box mt={2}>
+            {args?.map(({ value, type, comment }, index) => (
+              <Flex key={index} align="center" mt={2}>
+                <Input
+                  value={value || ""}
+                  onChange={(e) => {
+                    const updated = args.slice();
+                    updated.splice(index, 1, { type, value: e.target.value });
+                    setArgs(updated);
+                  }}
+                  placeholder={comment}
+                />
+                <Select
+                  value={type}
+                  onChange={(e) => {
+                    const updated = args.slice();
+                    updated.splice(index, 1, { value, type: e.target.value });
+                    setArgs(updated);
+                  }}
+                  ml={2}
+                >
+                  <option value="">--</option>
+                  {typeKeys.map((key) => (
+                    <option value={key} key={key}>
+                      {key}
+                    </option>
+                  ))}
+                  {!typeKeys.includes(type) && (
+                    <option value={type}>{type}</option>
+                  )}
+                </Select>
+                <IconButton
+                  ml={2}
+                  aria-label="Delete Arg"
+                  isRound
+                  icon={<CloseIcon />}
+                  size="xs"
+                  colorScheme="red"
+                  onClick={() => {
+                    const updated = args.slice();
+                    updated.splice(index, 1);
+                    setArgs(updated);
+                  }}
+                />
+              </Flex>
+            ))}
+          </Box>
+        </Box>
+
+        <Flex justify="end" p={4}>
           {scriptType === ScriptTypes.TX && (
             <FormControl
               display="flex"
@@ -281,8 +300,8 @@ const Editor = (): ReactJSXElement => {
             Run
           </Button>
         </Flex>
-      </form>
-    </Container>
+      </Flex>
+    </Flex>
   );
 };
 
