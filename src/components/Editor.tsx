@@ -2,7 +2,6 @@ import React, { useCallback, useState } from "react";
 import {
   Box,
   Button,
-  Container,
   Flex,
   Tab,
   TabList,
@@ -27,6 +26,7 @@ import { AddIcon, ChevronDownIcon, CloseIcon } from "@chakra-ui/icons";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import ScriptTypes from "../types/ScriptTypes";
 import * as BloctoDAOTemplates from "../scripts/DAO";
+import * as TransactionsTemplates from "../scripts/Transactions";
 import { startCase } from "lodash";
 
 interface FlowArg {
@@ -208,6 +208,20 @@ const Editor = (): ReactJSXElement => {
                     {startCase(name)}
                   </MenuItem>
                 ))}
+              </MenuGroup>
+              <MenuGroup title="Transactions">
+                {Object.entries(TransactionsTemplates).map(
+                  ([name, template]) => (
+                    <MenuItem
+                      key={name}
+                      pl={5}
+                      color="gray.700"
+                      onClick={() => importTemplate(template)}
+                    >
+                      {startCase(name)}
+                    </MenuItem>
+                  )
+                )}
               </MenuGroup>
             </MenuList>
           </Menu>
