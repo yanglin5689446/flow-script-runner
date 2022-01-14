@@ -71,7 +71,7 @@ const Editor = (): ReactJSXElement => {
     const fclArgs = args?.map(({ value, type }) => {
       let fclArgType = types[type];
       if (!typeKeys.includes(type)) {
-        value = eval(value);
+        value = isNaN(parseFloat(value)) ? eval(value) : value;
         fclArgType = parseFlowArgTypeFromString(type);
       } else if (type.includes("Int")) {
         value = parseInt(value);
@@ -163,7 +163,8 @@ const Editor = (): ReactJSXElement => {
           fontFamily="monospace"
           _focus={{ border: "none", boxShadow: "none" }}
         />
-        {(response || result) && (
+        {((response != null && response !== "") ||
+          (result != null && result !== "")) && (
           <Box flex={1} borderTopWidth={1} p={3}>
             <Box fontWeight="bold" mt={3}>
               {result ? "Run result:" : "Response:"}
@@ -245,7 +246,8 @@ const Editor = (): ReactJSXElement => {
           <Box mt={2}>
             {args?.map(({ value, type, comment }, index) => (
               <Flex key={index} align="center" mt={2}>
-                <Input
+                <Textarea
+                  rows={1}
                   value={value || ""}
                   onChange={(e) => {
                     const updated = args.slice();

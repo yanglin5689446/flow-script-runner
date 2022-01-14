@@ -1,9 +1,10 @@
 import ScriptTypes from "../types/ScriptTypes";
+import getAddress from "../utils/getAddress";
 
 export const getTopics = {
   type: ScriptTypes.SCRIPT,
   script: `\
-import BloctoDAO from 0x18cce040948c8c91
+import BloctoDAO from ${getAddress("BloctoDAO")}
 
 pub fun main(): [BloctoDAO.Topic] {
   return BloctoDAO.getTopics()
@@ -14,7 +15,7 @@ pub fun main(): [BloctoDAO.Topic] {
 export const getTopic = {
   type: ScriptTypes.SCRIPT,
   script: `\
-import BloctoDAO from 0x18cce040948c8c91
+import BloctoDAO from ${getAddress("BloctoDAO")}
 
 pub fun main(id: UInt64): BloctoDAO.Topic {
   return BloctoDAO.getTopic(id: id)
@@ -26,7 +27,7 @@ pub fun main(id: UInt64): BloctoDAO.Topic {
 export const checkIsProposer = {
   type: ScriptTypes.SCRIPT,
   script: `\
-import BloctoDAO from 0x18cce040948c8c91
+import BloctoDAO from ${getAddress("BloctoDAO")}
 
 pub fun main(account: Address): Bool {
   let proposer = getAccount(account).getCapability(/public/bloctoDAOProposer).borrow<&BloctoDAO.Proposer>()
@@ -39,7 +40,7 @@ pub fun main(account: Address): Bool {
 export const checkCanVote = {
   type: ScriptTypes.SCRIPT,
   script: `\
-import BloctoDAO from 0x18cce040948c8c91
+import BloctoDAO from ${getAddress("BloctoDAO")}
 
 pub fun main(address: Address, topicId: UInt64): Bool {
   let amount = BloctoDAO.getStakedBLT(address: address)
@@ -56,7 +57,7 @@ pub fun main(address: Address, topicId: UInt64): Bool {
 export const getVotedOptions = {
   type: ScriptTypes.SCRIPT,
   script: `\
-import BloctoDAO from 0x18cce040948c8c91
+import BloctoDAO from ${getAddress("BloctoDAO")}
 
 pub fun main(account: Address): { UInt64: Int } {
   let voterPublic = getAccount(account).getCapability(BloctoDAO.VoterPublicPath).borrow<&BloctoDAO.Voter{BloctoDAO.VoterPublic}>()
@@ -71,12 +72,12 @@ pub fun main(account: Address): { UInt64: Int } {
 export const createTopic = {
   type: ScriptTypes.TX,
   script: `\
-import BloctoDAO from 0x18cce040948c8c91
+import BloctoDAO from ${getAddress("BloctoDAO")}
 
 transaction(title: String, description: String, options: [String], startAt: UFix64?, endAt: UFix64?, minVoteStakingAmount: UFix64?) {
   let proposer: &BloctoDAO.Proposer;
   prepare(signer: AuthAccount) {
-    self.proposer = signer.getCapability(/public/bloctoDAOProposer).borrow<&BloctoDAO.Proposer>()
+    self.proposer = signer.getCapability(/private/bloctoDAOProposer).borrow<&BloctoDAO.Proposer>()
 	    ?? panic("Could not borrow reference")
   }
 
@@ -106,7 +107,7 @@ transaction(title: String, description: String, options: [String], startAt: UFix
 export const vote = {
   type: ScriptTypes.TX,
   script: `\
-import BloctoDAO from 0x18cce040948c8c91
+import BloctoDAO from ${getAddress("BloctoDAO")}
 
 transaction(topicId: UInt64, optionIndex: Int) {
   let voter: &BloctoDAO.Voter
@@ -137,7 +138,7 @@ transaction(topicId: UInt64, optionIndex: Int) {
 export const count = {
   type: ScriptTypes.TX,
   script: `\
-import BloctoDAO from 0x18cce040948c8c91
+import BloctoDAO from ${getAddress("BloctoDAO")}
 
 transaction(topicId: UInt64, maxSize: Int) {
   prepare() {
@@ -147,7 +148,7 @@ transaction(topicId: UInt64, maxSize: Int) {
 `,
   args: [
     { type: "UInt64", comment: "topicId" },
-    { type: "Int", comment: "optionIndex" },
+    { type: "Int", comment: "maxSize, should be less than 25" },
   ],
   shouldSign: false,
 };
