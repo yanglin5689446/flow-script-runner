@@ -28,6 +28,65 @@ import ScriptTypes from "../types/ScriptTypes";
 import * as BloctoDAOTemplates from "../scripts/DAO";
 import * as TransactionsTemplates from "../scripts/Transactions";
 import { startCase } from "lodash";
+import { ec as EC } from "elliptic";
+import { SHA3 } from "sha3";
+
+const NETWORK = process.env.REACT_APP_NETWORK || "testnet";
+const ec = new EC(NETWORK === "testnet" ? "p256" : "secp256k1");
+
+const signWithKey = (privateKey: string, msgHex: string) => {
+  const key = ec.keyFromPrivate(Buffer.from(privateKey, "hex"));
+  const sig = key.sign(hashMsgHex(msgHex));
+  const n = 32; // half of signature length?
+  const r = sig.r.toArrayLike(Buffer, "be", n);
+  const s = sig.s.toArrayLike(Buffer, "be", n);
+  return Buffer.concat([r, s]).toString("hex");
+};
+
+const hashMsgHex = (msgHex: string) => {
+  const sha = new SHA3(256);
+  sha.update(Buffer.from(msgHex, "hex"));
+  return sha.digest();
+};
+
+// Will be handled by fcl.user(addr).info()
+const getAccount = async (addr: string) => {
+  const { account } = await fcl.send([fcl.getAccount(addr)]);
+  return account;
+};
+
+const authorization =
+  ({ address, privateKey }: { address: string; privateKey: string }) =>
+  async (account: {
+    role: { proposer: string };
+    signature: string;
+    roles: any[];
+  }) => {
+    const user = await getAccount(address);
+    const key = user.keys[0];
+
+    let sequenceNum;
+    if (account.role && account.role.proposer) sequenceNum = key.sequenceNumber;
+
+    const signingFunction = async (data: { message: string }) => {
+      return {
+        addr: user.address,
+        keyId: key.index,
+        signature: signWithKey(privateKey, data.message),
+      };
+    };
+
+    return {
+      ...account,
+      addr: user.address,
+      keyId: key.index,
+      sequenceNum,
+      signature: account.signature || null,
+      signingFunction,
+      resolve: null,
+      roles: account.roles,
+    };
+  };
 
 interface FlowArg {
   value: any;
@@ -51,10 +110,13 @@ const Editor = (): ReactJSXElement => {
   const toast = useToast();
   const [shouldSign, setShouldSign] = useState<boolean>();
   const [args, setArgs] = useState<FlowArg[]>();
+  const [signers, setSigners] =
+    useState<{ privateKey: string; address: string }[]>();
   const [scriptType, setScriptType] = useState<ScriptTypes>(ScriptTypes.SCRIPT);
   const [script, setScript] = useState<string>("");
   const [response, setResponse] = useState<any>(undefined);
   const [result, setResult] = useState<string>("");
+  const [txHash, setTxHash] = useState<string>("");
 
   const typeKeys = Object.keys(types);
 
@@ -68,6 +130,7 @@ const Editor = (): ReactJSXElement => {
   const runScript = useCallback(async () => {
     setResponse("");
     setResult("");
+    setTxHash("");
     const fclArgs = args?.map(({ value, type }) => {
       let fclArgType = types[type];
       if (!typeKeys.includes(type)) {
@@ -100,8 +163,15 @@ const Editor = (): ReactJSXElement => {
           fcl.ref(block.id),
           fcl.limit(9999),
         ];
-        if (shouldSign)
-          params.push(fcl.authorizations([fcl.currentUser().authorization]));
+        const authorizations = [];
+        if (shouldSign) authorizations.push(fcl.currentUser().authorization);
+        if (signers?.length) {
+          signers.forEach((signer) =>
+            authorizations.push(authorization(signer))
+          );
+        }
+        if (authorizations.length)
+          params.push(fcl.authorizations(authorizations));
 
         const { transactionId } = await fcl.send([
           fcl.transaction(script),
@@ -118,6 +188,7 @@ const Editor = (): ReactJSXElement => {
         const unsub = fcl
           .tx({ transactionId })
           .subscribe((transaction: any) => {
+            setTxHash(transactionId);
             if (transaction != response) setResponse(transaction);
 
             if (fcl.tx.isSealed(transaction)) {
@@ -140,7 +211,16 @@ const Editor = (): ReactJSXElement => {
         });
       }
     }
-  }, [toast, scriptType, script, response, shouldSign, args, typeKeys]);
+  }, [
+    args,
+    scriptType,
+    typeKeys,
+    script,
+    shouldSign,
+    signers,
+    toast,
+    response,
+  ]);
 
   return (
     <Flex
@@ -167,7 +247,7 @@ const Editor = (): ReactJSXElement => {
           (result != null && result !== "")) && (
           <Box flex={1} borderTopWidth={1} p={3}>
             <Box fontWeight="bold" mt={3}>
-              {result ? "Run result:" : "Response:"}
+              {result ? "Run result:" : `Response of tx ${txHash}:`}
             </Box>
             <Box
               borderRadius=".5em"
@@ -291,6 +371,71 @@ const Editor = (): ReactJSXElement => {
               </Flex>
             ))}
           </Box>
+          {scriptType === ScriptTypes.TX && (
+            <>
+              <Flex align="center" mt={3} ml={1}>
+                <Box fontWeight="bold">Extra Signers</Box>
+                <IconButton
+                  ml={2}
+                  aria-label="Add Signers"
+                  isRound
+                  icon={<AddIcon />}
+                  size="xs"
+                  colorScheme="blue"
+                  onClick={() =>
+                    setSigners(
+                      (signers ?? []).concat({ privateKey: "", address: "" })
+                    )
+                  }
+                />
+              </Flex>
+              <Box mt={2}>
+                {signers?.map(({ privateKey, address }, index) => (
+                  <Flex key={index} align="center" mt={2}>
+                    <Input
+                      value={privateKey || ""}
+                      onChange={(e) => {
+                        const updated = signers.slice();
+                        updated.splice(index, 1, {
+                          address,
+                          privateKey: e.target.value,
+                        });
+                        setSigners(updated);
+                      }}
+                      placeholder="private key"
+                      type="password"
+                    />
+                    <Input
+                      ml={2}
+                      value={address || ""}
+                      onChange={(e) => {
+                        const updated = signers.slice();
+                        updated.splice(index, 1, {
+                          privateKey,
+                          address: e.target.value,
+                        });
+                        setSigners(updated);
+                      }}
+                      placeholder="public key"
+                    />
+                    <IconButton
+                      ml={2}
+                      aria-label="Delete signers"
+                      isRound
+                      icon={<CloseIcon />}
+                      size="xs"
+                      colorScheme="red"
+                      onClick={() => {
+                        const updated = signers.slice();
+                        updated.splice(index, 1);
+                        setSigners(updated);
+                      }}
+                    />
+                  </Flex>
+                ))}
+              </Box>
+            </>
+          )}
         </Box>
 
         <Flex justify="end" p={4}>
