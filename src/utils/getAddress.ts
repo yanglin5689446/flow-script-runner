@@ -1,7 +1,7 @@
 export default function getAddress(key: string): string {
   if (process.env.REACT_APP_NETWORK === "mainnet") {
     switch (key) {
-      case "Flow":
+      case "FlowToken":
         return "0x1654653399040a61";
       case "BloctoDAO":
         return "0xe0f601b5afd47581";
@@ -18,7 +18,7 @@ export default function getAddress(key: string): string {
     }
   } else {
     switch (key) {
-      case "Flow":
+      case "FlowToken":
         return "0x7e60df042a9c0868";
       case "BloctoDAO":
         return "0x18cce040948c8c91";
