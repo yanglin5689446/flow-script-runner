@@ -27,6 +27,7 @@ import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import ScriptTypes from "../types/ScriptTypes";
 import * as BloctoDAOTemplates from "../scripts/DAO";
 import * as TransactionsTemplates from "../scripts/Transactions";
+import * as SignMessageTemplates from "../scripts/SignMessage";
 import { startCase } from "lodash";
 import { ec as EC } from "elliptic";
 import { SHA3 } from "sha3";
@@ -89,7 +90,7 @@ const authorization =
   };
 
 interface FlowArg {
-  value: any;
+  value?: any;
   type: any;
   comment?: string;
 }
@@ -121,6 +122,13 @@ const Editor = (): ReactJSXElement => {
 
   const typeKeys = Object.keys(types);
 
+  const handleTabChange = useCallback((index) => {
+    setScriptType(index);
+    if (index === ScriptTypes.SIGN) {
+      setArgs(SignMessageTemplates.signMessage.args);
+    }
+  }, []);
+
   const importTemplate = useCallback((template) => {
     setScriptType(template.type);
     setScript(template.script);
@@ -133,25 +141,43 @@ const Editor = (): ReactJSXElement => {
     setResult("");
     setError("");
     setTxHash("");
-    const fclArgs = args?.map(({ value, type }) => {
-      let fclArgType = types[type];
-      if (!typeKeys.includes(type)) {
-        value = isNaN(parseFloat(value)) ? eval(value) : value;
-        fclArgType = parseFlowArgTypeFromString(type);
-      } else if (type.includes("Int")) {
-        value = parseInt(value);
-      } else if (type.includes("Fix")) {
-        value = parseFloat(value).toFixed(8);
-      } else if (type === "Boolean") {
-        value = JSON.parse(value);
-      }
-      return fcl.arg(value, fclArgType);
-    });
+    let fclArgs;
+    if (scriptType !== ScriptTypes.SIGN) {
+      fclArgs = args?.map(({ value, type }) => {
+        let fclArgType = types[type];
+        if (!typeKeys.includes(type)) {
+          value = isNaN(parseFloat(value)) ? eval(value) : value;
+          fclArgType = parseFlowArgTypeFromString(type);
+        } else if (type.includes("Int")) {
+          value = parseInt(value);
+        } else if (type.includes("Fix")) {
+          value = parseFloat(value).toFixed(8);
+        } else if (type === "Boolean") {
+          value = JSON.parse(value);
+        }
+        return fcl.arg(value, fclArgType);
+      });
+    }
     if (scriptType === ScriptTypes.SCRIPT) {
       fcl
         .send([fcl.script(script), fcl.args(fclArgs)])
         .then(fcl.decode)
         .then(setResult)
+        .catch((e: Error) => {
+          setError(e.message);
+        });
+    } else if (scriptType === ScriptTypes.SIGN) {
+      const messageHex = Buffer.from(args?.[0]?.value ?? "").toString("hex");
+      fcl
+        .currentUser()
+        .signUserMessage(messageHex)
+        .then((response: any) => {
+          if (response?.message) {
+            setError(`Error: ${response.message}`);
+            return;
+          }
+          setResult(response);
+        })
         .catch((e: Error) => {
           setError(e.message);
         });
@@ -244,6 +270,8 @@ const Editor = (): ReactJSXElement => {
           value={script}
           fontFamily="monospace"
           _focus={{ border: "none", boxShadow: "none" }}
+          disabled={scriptType === ScriptTypes.SIGN}
+          _disabled={{ bg: "rgba(239, 239, 239, 0.3)", cursor: "not-allowed" }}
         />
         {((response != null && response !== "") ||
           (result != null && result !== "") ||
@@ -269,10 +297,11 @@ const Editor = (): ReactJSXElement => {
       </Flex>
 
       <Flex flex={3} height="100%" direction="column">
-        <Tabs size="md" onChange={setScriptType} index={scriptType}>
+        <Tabs size="md" onChange={handleTabChange} index={scriptType}>
           <TabList>
             <Tab>Script</Tab>
             <Tab>Transaction</Tab>
+            <Tab>Sign Message</Tab>
           </TabList>
         </Tabs>
         <Flex m={4}>
@@ -307,6 +336,20 @@ const Editor = (): ReactJSXElement => {
                   )
                 )}
               </MenuGroup>
+              <MenuGroup title="Sign Message">
+                {Object.entries(SignMessageTemplates).map(
+                  ([name, template]) => (
+                    <MenuItem
+                      key={name}
+                      pl={5}
+                      color="gray.700"
+                      onClick={() => importTemplate(template)}
+                    >
+                      {startCase(name)}
+                    </MenuItem>
+                  )
+                )}
+              </MenuGroup>
             </MenuList>
           </Menu>
         </Flex>
@@ -321,9 +364,13 @@ const Editor = (): ReactJSXElement => {
               icon={<AddIcon />}
               size="xs"
               colorScheme="blue"
-              onClick={() =>
-                setArgs((args ?? []).concat({ value: "", type: "" }))
-              }
+              onClick={() => {
+                const newArgs =
+                  scriptType === ScriptTypes.SIGN
+                    ? SignMessageTemplates.signMessage.args
+                    : (args ?? []).concat({ value: "", type: "" });
+                setArgs(newArgs);
+              }}
             />
           </Flex>
           <Box mt={2}>
@@ -347,6 +394,7 @@ const Editor = (): ReactJSXElement => {
                     setArgs(updated);
                   }}
                   ml={2}
+                  isDisabled={scriptType === ScriptTypes.SIGN}
                 >
                   <option value="">--</option>
                   {typeKeys.map((key) => (
