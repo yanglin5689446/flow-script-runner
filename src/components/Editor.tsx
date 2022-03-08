@@ -116,6 +116,7 @@ const Editor = (): ReactJSXElement => {
   const [script, setScript] = useState<string>("");
   const [response, setResponse] = useState<any>(undefined);
   const [result, setResult] = useState<string>("");
+  const [error, setError] = useState<string>("");
   const [txHash, setTxHash] = useState<string>("");
 
   const typeKeys = Object.keys(types);
@@ -130,6 +131,7 @@ const Editor = (): ReactJSXElement => {
   const runScript = useCallback(async () => {
     setResponse("");
     setResult("");
+    setError("");
     setTxHash("");
     const fclArgs = args?.map(({ value, type }) => {
       let fclArgType = types[type];
@@ -151,7 +153,7 @@ const Editor = (): ReactJSXElement => {
         .then(fcl.decode)
         .then(setResult)
         .catch((e: Error) => {
-          setResult(e.message);
+          setError(e.message);
         });
     } else {
       const block = await fcl.send([fcl.getLatestBlock()]).then(fcl.decode);
@@ -244,22 +246,23 @@ const Editor = (): ReactJSXElement => {
           _focus={{ border: "none", boxShadow: "none" }}
         />
         {((response != null && response !== "") ||
-          (result != null && result !== "")) && (
+          (result != null && result !== "") ||
+          (error != null && error !== "")) && (
           <Box flex={1} borderTopWidth={1} p={3}>
             <Box fontWeight="bold" mt={3}>
-              {result ? "Run result:" : `Response of tx ${txHash}:`}
+              {result || error ? "Run result:" : `Response of tx ${txHash}:`}
             </Box>
             <Box
               borderRadius=".5em"
-              bgColor="#d1e7dd"
-              color="#0f5132"
+              bgColor={error ? "#f8d7da" : "#d1e7dd"}
+              color={error ? "#842029" : "#0f5132"}
               mt={1}
               p={3}
               whiteSpace="pre-wrap"
               maxHeight={{ base: 120, md: 240 }}
               overflow="auto"
             >
-              {JSON.stringify(result || response, null, 2)}
+              {error || JSON.stringify(result || response, null, 2)}
             </Box>
           </Box>
         )}
