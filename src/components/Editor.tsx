@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -24,70 +24,12 @@ import * as fcl from "@blocto/fcl";
 import * as types from "@onflow/types";
 import { AddIcon, ChevronDownIcon, CloseIcon } from "@chakra-ui/icons";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
-import ScriptTypes from "../types/ScriptTypes";
-import * as BloctoDAOTemplates from "../scripts/DAO";
-import * as TransactionsTemplates from "../scripts/Transactions";
-import * as SignMessageTemplates from "../scripts/SignMessage";
 import { startCase } from "lodash";
-import { ec as EC } from "elliptic";
-import { SHA3 } from "sha3";
+import * as FlowSignMessageTemplates from "../scripts/flow/SignMessage";
+import ScriptTypes from "../types/ScriptTypes";
+import Sandbox from "./Sandbox";
 
-const NETWORK = process.env.REACT_APP_NETWORK || "testnet";
-const ec = new EC(NETWORK === "testnet" ? "p256" : "secp256k1");
-
-const signWithKey = (privateKey: string, msgHex: string) => {
-  const key = ec.keyFromPrivate(Buffer.from(privateKey, "hex"));
-  const sig = key.sign(hashMsgHex(msgHex));
-  const n = 32; // half of signature length?
-  const r = sig.r.toArrayLike(Buffer, "be", n);
-  const s = sig.s.toArrayLike(Buffer, "be", n);
-  return Buffer.concat([r, s]).toString("hex");
-};
-
-const hashMsgHex = (msgHex: string) => {
-  const sha = new SHA3(256);
-  sha.update(Buffer.from(msgHex, "hex"));
-  return sha.digest();
-};
-
-// Will be handled by fcl.user(addr).info()
-const getAccount = async (addr: string) => {
-  const { account } = await fcl.send([fcl.getAccount(addr)]);
-  return account;
-};
-
-const authorization =
-  ({ address, privateKey }: { address: string; privateKey: string }) =>
-  async (account: {
-    role: { proposer: string };
-    signature: string;
-    roles: any[];
-  }) => {
-    const user = await getAccount(address);
-    const key = user.keys[0];
-
-    let sequenceNum;
-    if (account.role && account.role.proposer) sequenceNum = key.sequenceNumber;
-
-    const signingFunction = async (data: { message: string }) => {
-      return {
-        addr: user.address,
-        keyId: key.index,
-        signature: signWithKey(privateKey, data.message),
-      };
-    };
-
-    return {
-      ...account,
-      addr: user.address,
-      keyId: key.index,
-      sequenceNum,
-      signature: account.signature || null,
-      signingFunction,
-      resolve: null,
-      roles: account.roles,
-    };
-  };
+const typeKeys = Object.keys(types);
 
 interface FlowArg {
   value?: any;
@@ -107,7 +49,57 @@ function parseFlowArgTypeFromString(type: string): any {
   }
 }
 
-const Editor = (): ReactJSXElement => {
+function parseFclArgs(args: FlowArg[] = []) {
+  return args.map(({ value, type }): { value: any; xform: any } => {
+    let fclArgType = types[type];
+    if (!typeKeys.includes(type)) {
+      value = isNaN(parseFloat(value)) ? eval(value) : value;
+      fclArgType = parseFlowArgTypeFromString(type);
+    } else if (type.includes("Int")) {
+      value = parseInt(value);
+    } else if (type.includes("Fix")) {
+      value = parseFloat(value).toFixed(8);
+    } else if (type === "Boolean") {
+      value = JSON.parse(value);
+    }
+    return fcl.arg(value, fclArgType);
+  });
+}
+
+interface EditorProps {
+  menuGroups: Array<{ title: string; templates: any }>;
+  shouldClearScript?: boolean;
+  isSandboxHidden?: boolean;
+  isScriptTabDisabled?: boolean;
+  isSignMessagePreDefined?: boolean;
+  signMessageArgs?: FlowArg[];
+  onSendScript: (
+    script: string,
+    fclArgs?: Array<{ value: any; xform: any }>
+  ) => Promise<string>;
+  onSignMessage: (args?: FlowArg[]) => Promise<any>;
+  onSendTransactions: (
+    fclArgs: Array<{ value: any; xform: any }> | undefined,
+    shouldSign: boolean | undefined,
+    signers: Array<{ privateKey: string; address: string }> | undefined,
+    script: string
+  ) => Promise<{
+    transactionId: string;
+    transaction: any;
+  }>;
+}
+
+const Editor: React.FC<EditorProps> = ({
+  menuGroups,
+  shouldClearScript,
+  isSandboxHidden,
+  isScriptTabDisabled,
+  isSignMessagePreDefined,
+  signMessageArgs,
+  onSendScript,
+  onSignMessage,
+  onSendTransactions,
+}): ReactJSXElement => {
   const toast = useToast();
   const [shouldSign, setShouldSign] = useState<boolean>();
   const [args, setArgs] = useState<FlowArg[]>();
@@ -120,14 +112,26 @@ const Editor = (): ReactJSXElement => {
   const [error, setError] = useState<string>("");
   const [txHash, setTxHash] = useState<string>("");
 
-  const typeKeys = Object.keys(types);
-
-  const handleTabChange = useCallback((index) => {
-    setScriptType(index);
-    if (index === ScriptTypes.SIGN) {
-      setArgs(SignMessageTemplates.signMessage.args);
+  useEffect(() => {
+    if (shouldClearScript) {
+      setScript("");
+      if (scriptType === ScriptTypes.SCRIPT) {
+        setScriptType(ScriptTypes.TX);
+      }
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldClearScript]);
+
+  const handleTabChange = useCallback(
+    (index) => {
+      setScriptType(index);
+      if (isSignMessagePreDefined && index === ScriptTypes.SIGN) {
+        setScript("");
+        setArgs(FlowSignMessageTemplates.signMessage.args);
+      }
+    },
+    [isSignMessagePreDefined]
+  );
 
   const importTemplate = useCallback((template) => {
     setScriptType(template.type);
@@ -141,36 +145,16 @@ const Editor = (): ReactJSXElement => {
     setResult("");
     setError("");
     setTxHash("");
-    let fclArgs;
-    if (scriptType !== ScriptTypes.SIGN) {
-      fclArgs = args?.map(({ value, type }) => {
-        let fclArgType = types[type];
-        if (!typeKeys.includes(type)) {
-          value = isNaN(parseFloat(value)) ? eval(value) : value;
-          fclArgType = parseFlowArgTypeFromString(type);
-        } else if (type.includes("Int")) {
-          value = parseInt(value);
-        } else if (type.includes("Fix")) {
-          value = parseFloat(value).toFixed(8);
-        } else if (type === "Boolean") {
-          value = JSON.parse(value);
-        }
-        return fcl.arg(value, fclArgType);
-      });
-    }
+    const fclArgs =
+      scriptType !== ScriptTypes.SIGN && args ? parseFclArgs(args) : undefined;
     if (scriptType === ScriptTypes.SCRIPT) {
-      fcl
-        .send([fcl.script(script), fcl.args(fclArgs)])
-        .then(fcl.decode)
+      onSendScript(script, fclArgs)
         .then(setResult)
         .catch((e: Error) => {
           setError(e.message);
         });
     } else if (scriptType === ScriptTypes.SIGN) {
-      const messageHex = Buffer.from(args?.[0]?.value ?? "").toString("hex");
-      fcl
-        .currentUser()
-        .signUserMessage(messageHex)
+      onSignMessage(args)
         .then((response: any) => {
           if (response?.message) {
             setError(`Error: ${response.message}`);
@@ -182,72 +166,34 @@ const Editor = (): ReactJSXElement => {
           setError(e.message);
         });
     } else {
-      const block = await fcl.send([fcl.getLatestBlock()]).then(fcl.decode);
-      try {
-        const params = [
-          fcl.args(fclArgs),
-          fcl.proposer(fcl.currentUser().authorization),
-          fcl.payer(fcl.currentUser().authorization),
-          fcl.ref(block.id),
-          fcl.limit(9999),
-        ];
-        const authorizations = [];
-        if (shouldSign) authorizations.push(fcl.currentUser().authorization);
-        if (signers?.length) {
-          signers.forEach((signer) =>
-            authorizations.push(authorization(signer))
-          );
-        }
-        if (authorizations.length)
-          params.push(fcl.authorizations(authorizations));
-
-        const { transactionId } = await fcl.send([
-          fcl.transaction(script),
-          ...params,
-        ]);
-
-        toast({
-          title: "Transaction sent, waiting for confirmation",
-          status: "success",
-          isClosable: true,
-          duration: 1000,
-        });
-
-        const unsub = fcl
-          .tx({ transactionId })
-          .subscribe((transaction: any) => {
-            setTxHash(transactionId);
-            if (transaction != response) setResponse(transaction);
-
-            if (fcl.tx.isSealed(transaction)) {
-              toast({
-                title: "Transaction is Sealed",
-                status: "success",
-                isClosable: true,
-                duration: 1000,
-              });
-              unsub();
-            }
+      onSendTransactions(fclArgs, shouldSign, signers, script)
+        .then(({ transactionId, transaction }) => {
+          setTxHash(transactionId);
+          if (transaction != response) {
+            setResponse(transaction);
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          toast({
+            title: "Transaction failed",
+            status: "error",
+            isClosable: true,
+            duration: 1000,
           });
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: "Transaction failed",
-          status: "error",
-          isClosable: true,
-          duration: 1000,
         });
-      }
     }
   }, [
-    args,
     scriptType,
-    typeKeys,
+    args,
     script,
     shouldSign,
     signers,
-    toast,
     response,
+    toast,
+    onSendScript,
+    onSignMessage,
+    onSendTransactions,
   ]);
 
   return (
@@ -255,51 +201,25 @@ const Editor = (): ReactJSXElement => {
       height="calc(100vh - 76px)"
       flexDirection={{ base: "column", md: "row" }}
     >
-      <Flex
-        flex={{ base: 3, md: 6 }}
-        height="100%"
-        borderWidth={1}
-        flexDirection="column"
-      >
-        <Textarea
-          flex={2}
-          borderRadius="none"
-          border="none"
-          boxShadow="none"
-          onChange={(e) => setScript(e.target.value)}
-          value={script}
-          fontFamily="monospace"
-          _focus={{ border: "none", boxShadow: "none" }}
-          disabled={scriptType === ScriptTypes.SIGN}
-          _disabled={{ bg: "rgba(239, 239, 239, 0.3)", cursor: "not-allowed" }}
-        />
-        {((response != null && response !== "") ||
-          (result != null && result !== "") ||
-          (error != null && error !== "")) && (
-          <Box flex={1} borderTopWidth={1} p={3}>
-            <Box fontWeight="bold" mt={3}>
-              {result || error ? "Run result:" : `Response of tx ${txHash}:`}
-            </Box>
-            <Box
-              borderRadius=".5em"
-              bgColor={error ? "#f8d7da" : "#d1e7dd"}
-              color={error ? "#842029" : "#0f5132"}
-              mt={1}
-              p={3}
-              whiteSpace="pre-wrap"
-              maxHeight={{ base: 120, md: 240 }}
-              overflow="auto"
-            >
-              {error || JSON.stringify(result || response, null, 2)}
-            </Box>
-          </Box>
-        )}
-      </Flex>
+      <Sandbox
+        script={script}
+        onScriptChange={(event) => setScript(event.target.value)}
+        disabled={scriptType === ScriptTypes.SIGN}
+        hasError={!!error}
+        resultTitle={
+          result || error ? "Run result:" : `Response of tx ${txHash}:`
+        }
+        result={
+          error ||
+          ((result || response) && JSON.stringify(result || response, null, 2))
+        }
+        isShown={!isSandboxHidden}
+      />
 
       <Flex flex={3} height="100%" direction="column">
         <Tabs size="md" onChange={handleTabChange} index={scriptType}>
           <TabList>
-            <Tab>Script</Tab>
+            <Tab isDisabled={isScriptTabDisabled}>Script</Tab>
             <Tab>Transaction</Tab>
             <Tab>Sign Message</Tab>
           </TabList>
@@ -310,46 +230,22 @@ const Editor = (): ReactJSXElement => {
               Templates
             </MenuButton>
             <MenuList>
-              <MenuGroup title="DAO">
-                {Object.entries(BloctoDAOTemplates).map(([name, template]) => (
-                  <MenuItem
-                    key={name}
-                    pl={5}
-                    color="gray.700"
-                    onClick={() => importTemplate(template)}
-                  >
-                    {startCase(name)}
-                  </MenuItem>
-                ))}
-              </MenuGroup>
-              <MenuGroup title="Transactions">
-                {Object.entries(TransactionsTemplates).map(
-                  ([name, template]) => (
-                    <MenuItem
-                      key={name}
-                      pl={5}
-                      color="gray.700"
-                      onClick={() => importTemplate(template)}
-                    >
-                      {startCase(name)}
-                    </MenuItem>
-                  )
-                )}
-              </MenuGroup>
-              <MenuGroup title="Sign Message">
-                {Object.entries(SignMessageTemplates).map(
-                  ([name, template]) => (
-                    <MenuItem
-                      key={name}
-                      pl={5}
-                      color="gray.700"
-                      onClick={() => importTemplate(template)}
-                    >
-                      {startCase(name)}
-                    </MenuItem>
-                  )
-                )}
-              </MenuGroup>
+              {menuGroups.map((menuGroup) => (
+                <MenuGroup key={menuGroup.title} title={menuGroup.title}>
+                  {Object.entries(menuGroup.templates).map(
+                    ([name, template]) => (
+                      <MenuItem
+                        key={name}
+                        pl={5}
+                        color="gray.700"
+                        onClick={() => importTemplate(template)}
+                      >
+                        {startCase(name)}
+                      </MenuItem>
+                    )
+                  )}
+                </MenuGroup>
+              ))}
             </MenuList>
           </Menu>
         </Flex>
@@ -366,8 +262,8 @@ const Editor = (): ReactJSXElement => {
               colorScheme="blue"
               onClick={() => {
                 const newArgs =
-                  scriptType === ScriptTypes.SIGN
-                    ? SignMessageTemplates.signMessage.args
+                  isSignMessagePreDefined && scriptType === ScriptTypes.SIGN
+                    ? signMessageArgs
                     : (args ?? []).concat({ value: "", type: "" });
                 setArgs(newArgs);
               }}

@@ -1,4 +1,4 @@
-import ScriptTypes from "../types/ScriptTypes";
+import ScriptTypes from "../../types/ScriptTypes";
 
 export const signMessage = {
   type: ScriptTypes.SIGN,
