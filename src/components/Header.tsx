@@ -1,22 +1,14 @@
 import React from "react";
-import { Box, Button, Flex } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
-import User from "../types/User";
-import * as fcl from "@blocto/fcl";
+import { Flex, Tab, TabList, Tabs } from "@chakra-ui/react";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
+import LoginButton from "./LoginButton";
 
-const Header = (): ReactJSXElement => {
-  const [user, setUser] = useState<User | undefined>();
-  const signInOrOut = useCallback(() => {
-    if (user?.loggedIn) {
-      fcl.unauthenticate();
-    } else {
-      fcl.authenticate();
-    }
-  }, [user]);
+const TabNames = ["Flow Script Runner", "EVM Runner"];
 
-  useEffect(() => fcl.currentUser().subscribe(setUser), []);
-
+const Header: React.FC<{
+  currentTab: number;
+  setCurrentTab: (index: number) => void;
+}> = ({ currentTab, setCurrentTab }): ReactJSXElement => {
   return (
     <Flex
       height={76}
@@ -25,12 +17,28 @@ const Header = (): ReactJSXElement => {
       boxShadow="rgb(188 188 188 / 40%) 0px -0.5px 0px inset"
       justify="space-between"
     >
-      <Box fontWeight="bold" fontSize="1.5em">
-        Flow Script Runner
-      </Box>
-      <Button colorScheme="blue" onClick={signInOrOut}>
-        {user?.loggedIn ? user.addr : "Connect"}
-      </Button>
+      <Tabs colorScheme="gray" onChange={setCurrentTab}>
+        <TabList border="none">
+          {TabNames.map((name, index) => (
+            <Tab
+              key={name}
+              fontWeight="bold"
+              fontSize="1.5em"
+              border="none"
+              marginLeft="2em"
+              opacity={index === currentTab ? "1" : "0.4"}
+              transform={index === currentTab ? "none" : "scale(0.95)"}
+              _first={{ marginLeft: "0" }}
+              _active={{}}
+              _focus={{}}
+            >
+              {name}
+            </Tab>
+          ))}
+        </TabList>
+      </Tabs>
+
+      <LoginButton chain={currentTab === 0 ? "flow" : "ethereum"} />
     </Flex>
   );
 };
