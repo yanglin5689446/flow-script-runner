@@ -9,7 +9,6 @@ interface SandboxProps {
   hasError: boolean;
   resultTitle: string;
   result: string;
-  isShown: boolean;
 }
 
 const Sandbox: React.FC<SandboxProps> = ({
@@ -19,19 +18,17 @@ const Sandbox: React.FC<SandboxProps> = ({
   hasError,
   resultTitle,
   result,
-  isShown,
 }): ReactJSXElement => {
   return (
     <Flex
-      flex={{ base: 3, md: isShown ? 6 : 0 }}
+      flex={{ base: 3, md: 6 }}
+      minWidth="0"
       height="100%"
       borderWidth={1}
       flexDirection="column"
-      transition="0.2s flex"
     >
       <Textarea
         flex={2}
-        padding={isShown ? undefined : "0"}
         borderRadius="none"
         border="none"
         boxShadow="none"

@@ -4,10 +4,13 @@ import * as fcl from "@blocto/fcl";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import { ec as EC } from "elliptic";
 import { SHA3 } from "sha3";
+import * as types from "@onflow/types";
 import * as BloctoDAOTemplates from "../scripts/flow/DAO";
-import * as FlowSignMessageTemplates from "../scripts/flow/SignMessage";
+import * as SignMessageTemplates from "../scripts/flow/SignMessage";
 import * as TransactionsTemplates from "../scripts/flow/Transactions";
-import Editor from "./Editor";
+import Editor, { FlowArg } from "./Editor";
+
+const typeKeys = Object.keys(types);
 
 const NETWORK = process.env.REACT_APP_NETWORK || "testnet";
 const ec = new EC(NETWORK === "testnet" ? "p256" : "secp256k1");
@@ -66,16 +69,46 @@ const authorization =
     };
   };
 
-const FlowMenuGroups = [
+function parseFlowArgTypeFromString(type: string): any {
+  const striped = type.replaceAll(" ", "");
+  const matched = striped.match(/(Array|Optional)(\(.*\))?$/);
+  if (matched) {
+    return types[matched[1]](
+      parseFlowArgTypeFromString(matched[2].slice(1, -1))
+    );
+  } else {
+    return types[striped];
+  }
+}
+
+function parseFclArgs(args: FlowArg[] = []) {
+  return args.map(({ value, type }): { value: any; xform: any } => {
+    let fclArgType = types[type];
+    if (!typeKeys.includes(type)) {
+      value = isNaN(parseFloat(value)) ? eval(value) : value;
+      fclArgType = parseFlowArgTypeFromString(type);
+    } else if (type.includes("Int")) {
+      value = parseInt(value);
+    } else if (type.includes("Fix")) {
+      value = parseFloat(value).toFixed(8);
+    } else if (type === "Boolean") {
+      value = JSON.parse(value);
+    }
+    return fcl.arg(value, fclArgType);
+  });
+}
+
+const MenuGroups = [
   { title: "DAO", templates: BloctoDAOTemplates },
   { title: "Transactions", templates: TransactionsTemplates },
-  { title: "Sign Message", templates: FlowSignMessageTemplates },
+  { title: "Sign Message", templates: SignMessageTemplates },
 ];
 
 const FlowEditor = (): ReactJSXElement => {
   const toast = useToast();
 
-  const handleSendScript = useCallback((script, fclArgs) => {
+  const handleSendScript = useCallback((script, args) => {
+    const fclArgs = parseFclArgs(args);
     return fcl.send([fcl.script(script), fcl.args(fclArgs)]).then(fcl.decode);
   }, []);
 
@@ -86,11 +119,12 @@ const FlowEditor = (): ReactJSXElement => {
 
   const handleSendTransactions = useCallback(
     async (
-      fclArgs: Array<{ value: any; xform: any }> | undefined,
+      args: FlowArg[] | undefined,
       shouldSign: boolean | undefined,
       signers: Array<{ privateKey: string; address: string }> | undefined,
       script: string
     ) => {
+      const fclArgs = parseFclArgs(args);
       const block = await fcl.send([fcl.getLatestBlock()]).then(fcl.decode);
       return new Promise<{ transactionId: string; transaction: any }>(
         (resolve, reject) => {
@@ -141,6 +175,12 @@ const FlowEditor = (): ReactJSXElement => {
               });
           } catch (error) {
             reject(error);
+            toast({
+              title: "Transaction failed",
+              status: "error",
+              isClosable: true,
+              duration: 1000,
+            });
           }
         }
       );
@@ -150,12 +190,15 @@ const FlowEditor = (): ReactJSXElement => {
 
   return (
     <Editor
-      menuGroups={FlowMenuGroups}
-      isSignMessagePreDefined
-      signMessageArgs={FlowSignMessageTemplates.signMessage.args}
-      onSendScript={handleSendScript}
+      menuGroups={MenuGroups}
       onSignMessage={handleSignMessage}
       onSendTransactions={handleSendTransactions}
+      argTypes={typeKeys}
+      isSignMessagePreDefined
+      signMessageArgs={SignMessageTemplates.signMessage.args}
+      isArgsAdjustable
+      isTransactionsExtraSignersAvailable
+      onSendScript={handleSendScript}
     />
   );
 };
