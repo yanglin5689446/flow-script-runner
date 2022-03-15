@@ -1,16 +1,15 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Button } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
 import * as fcl from "@blocto/fcl";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
-import { bloctoSDK } from "../services";
 import User from "../types/User";
+import { UserContext } from "../context/EvmUserConext";
 
 const LoginButton: React.FC<{
   chain: "flow" | "ethereum";
 }> = ({ chain }): ReactJSXElement => {
+  const { ethAddress, login } = useContext(UserContext);
   const [user, setUser] = useState<User>();
-  const [ethAddress, setEthAddress] = useState<string>();
 
   useEffect(() => fcl.currentUser().subscribe(setUser), []);
 
@@ -23,8 +22,9 @@ const LoginButton: React.FC<{
       }
     } else {
       if (!ethAddress) {
-        const accounts = await bloctoSDK.ethereum.enable();
-        setEthAddress(accounts[0]);
+        if (login) {
+          login();
+        }
       }
     }
   };
