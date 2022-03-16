@@ -1,7 +1,7 @@
 import React, { useCallback, useContext } from "react";
 import { useToast } from "@chakra-ui/react";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
-import { UserContext } from "../context/EvmUserConext";
+import { Context } from "../context/Context";
 import * as SignMessageTemplates from "../scripts/evm/SignMessage";
 import * as TransactionsTemplates from "../scripts/evm/Transactions";
 import Editor, { FlowArg } from "./Editor";
@@ -13,18 +13,18 @@ const MenuGroups = [
 ];
 
 const EvmEditor = (): ReactJSXElement => {
-  const { chain, ethAddress, login } = useContext(UserContext);
+  const { chain, address, login } = useContext(Context);
   const toast = useToast();
 
   const handleSignMessage = useCallback(
     async (args, method) => {
       return new Promise(async (resolve, reject) => {
         try {
-          let address = ethAddress;
-          if (!address && login) {
-            address = await login();
+          let evmAddress = address;
+          if (!evmAddress && login) {
+            evmAddress = await login();
           }
-          method(args?.[0]?.value ?? "", address, chain)
+          method(args?.[0]?.value ?? "", evmAddress, chain)
             .then(resolve)
             .catch(reject);
         } catch (error) {
@@ -32,7 +32,7 @@ const EvmEditor = (): ReactJSXElement => {
         }
       });
     },
-    [ethAddress, login, chain]
+    [address, login, chain]
   );
 
   const handleSendTransactions = useCallback(
@@ -64,12 +64,12 @@ const EvmEditor = (): ReactJSXElement => {
         }
 
         try {
-          let address = ethAddress;
-          if (!address && login) {
-            address = await login();
+          let evmAddress = address;
+          if (!evmAddress && login) {
+            evmAddress = await login();
           }
 
-          method(address, args, chain)
+          method(evmAddress, args, chain)
             .then((transaction) => {
               resolve({
                 transactionId: transaction.transactionHash,
@@ -96,7 +96,7 @@ const EvmEditor = (): ReactJSXElement => {
         }
       });
     },
-    [ethAddress, toast, login, chain]
+    [address, toast, login, chain]
   );
 
   return (

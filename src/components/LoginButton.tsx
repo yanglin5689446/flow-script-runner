@@ -1,44 +1,15 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { Button } from "@chakra-ui/react";
-import * as fcl from "@blocto/fcl";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
-import User from "../types/User";
-import { UserContext } from "../context/EvmUserConext";
+import { Context } from "../context/Context";
 import { formatAddress } from "../utils/formatAddress";
 
-const LoginButton: React.FC<{
-  chain: "flow" | "ethereum";
-}> = ({ chain }): ReactJSXElement => {
-  const { ethAddress, login } = useContext(UserContext);
-  const [user, setUser] = useState<User>();
+const LoginButton = (): ReactJSXElement => {
+  const { address, login } = useContext(Context);
 
-  useEffect(() => fcl.currentUser().subscribe(setUser), []);
-
-  const signInOrOut = async () => {
-    if (chain === "flow") {
-      if (user?.loggedIn) {
-        fcl.unauthenticate();
-      } else {
-        fcl.authenticate();
-      }
-    } else {
-      if (!ethAddress) {
-        if (login) {
-          login();
-        }
-      }
-    }
-  };
-
-  const status =
-    (chain === "flow" && !user?.loggedIn) ||
-    (chain === "ethereum" && !ethAddress)
-      ? "Connect"
-      : chain === "flow"
-      ? formatAddress(user?.addr)
-      : formatAddress(ethAddress);
+  const status = address ? formatAddress(address) : "Connect";
   return (
-    <Button colorScheme="blue" onClick={signInOrOut}>
+    <Button colorScheme="blue" onClick={login}>
       {status}
     </Button>
   );

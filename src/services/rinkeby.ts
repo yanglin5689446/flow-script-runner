@@ -6,7 +6,7 @@ export interface ExtendedEthereumProviderInterface
   enable: () => Promise<any>;
 }
 
-export interface ExtendedBloctoSDKInterface extends BloctoSDK {
+export interface ExtendedBloctoSDK extends BloctoSDK {
   ethereum: ExtendedEthereumProviderInterface;
 }
 
@@ -17,7 +17,7 @@ const bloctoSDK = new BloctoSDK({
     // (required for Ethereum) JSON RPC endpoint
     rpc: "https://rinkeby.infura.io/v3/ef5a5728e2354955b562d2ffa4ae5305",
   },
-}) as ExtendedBloctoSDKInterface;
+}) as ExtendedBloctoSDK;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

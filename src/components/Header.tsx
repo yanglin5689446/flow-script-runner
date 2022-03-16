@@ -1,14 +1,27 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { Flex, Tab, TabList, Tabs } from "@chakra-ui/react";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
+import { Context } from "../context/Context";
 import LoginButton from "./LoginButton";
+import { Chains } from "../types/ChainTypes";
 
-const TabNames = ["Flow Script Runner", "EVM Runner"];
+export const TabInfos = [
+  { name: "Flow Script Runner", chain: Chains.Flow },
+  { name: "EVM Runner", chain: Chains.Ethereum },
+  { name: "Solana Runner", chain: Chains.Solana },
+];
 
-const Header: React.FC<{
-  currentTab: number;
-  setCurrentTab: (index: number) => void;
-}> = ({ currentTab, setCurrentTab }): ReactJSXElement => {
+const Header = (): ReactJSXElement => {
+  const [currentTab, setCurrentTab] = useState(0);
+  const { switchChain } = useContext(Context);
+
+  const handleChangeTab = (tabIndex: number) => {
+    setCurrentTab(tabIndex);
+    if (switchChain) {
+      switchChain(TabInfos[tabIndex].chain);
+    }
+  };
+
   return (
     <Flex
       height={76}
@@ -17,9 +30,9 @@ const Header: React.FC<{
       boxShadow="rgb(188 188 188 / 40%) 0px -0.5px 0px inset"
       justify="space-between"
     >
-      <Tabs colorScheme="gray" onChange={setCurrentTab}>
+      <Tabs colorScheme="gray" onChange={handleChangeTab}>
         <TabList border="none">
-          {TabNames.map((name, index) => (
+          {TabInfos.map(({ name }, index) => (
             <Tab
               key={name}
               fontWeight="bold"
@@ -38,7 +51,7 @@ const Header: React.FC<{
         </TabList>
       </Tabs>
 
-      <LoginButton chain={currentTab === 0 ? "flow" : "ethereum"} />
+      <LoginButton />
     </Flex>
   );
 };
