@@ -172,7 +172,8 @@ const FlowEditor = (): ReactJSXElement => {
                       unsub();
                     }
                   });
-              });
+              })
+              .catch(reject);
           } catch (error) {
             reject(error);
             toast({

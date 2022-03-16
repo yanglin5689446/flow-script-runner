@@ -7,14 +7,13 @@ export const sendETH = {
   script: "",
   method: (
     account: string,
-    addr: string,
-    amount: string,
+    args: { receipient: string; amount: string },
     chain: EvmChain
   ): Promise<any> =>
     ChainServices[chain].web3.eth.sendTransaction({
       from: account,
-      to: addr,
-      value: amount,
+      to: args.receipient,
+      value: args.amount,
     }),
   args: [
     { type: "String", comment: "amount(wei)", name: "amount" },

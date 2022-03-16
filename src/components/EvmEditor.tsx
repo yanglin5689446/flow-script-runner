@@ -18,11 +18,19 @@ const EvmEditor = (): ReactJSXElement => {
 
   const handleSignMessage = useCallback(
     async (args, method) => {
-      let address = ethAddress;
-      if (!address && login) {
-        address = await login();
-      }
-      return method(args?.[0]?.value ?? "", address, chain);
+      return new Promise(async (resolve, reject) => {
+        try {
+          let address = ethAddress;
+          if (!address && login) {
+            address = await login();
+          }
+          method(args?.[0]?.value ?? "", address, chain)
+            .then(resolve)
+            .catch(reject);
+        } catch (error) {
+          reject(error);
+        }
+      });
     },
     [ethAddress, login, chain]
   );
@@ -36,11 +44,12 @@ const EvmEditor = (): ReactJSXElement => {
       method?: (...param: any[]) => Promise<any>
     ): Promise<{ transactionId: string; transaction: any }> => {
       return new Promise(async (resolve, reject) => {
-        if (!fclArgs) {
-          return reject("Transaction arguments are missing.");
+        const noArgsProvided = fclArgs?.every((arg) => arg.value === undefined);
+        if (noArgsProvided) {
+          return reject(new Error("Error: Transaction arguments are missing."));
         }
 
-        const { amount, receipient } = fclArgs?.reduce(
+        const args = fclArgs?.reduce(
           (initial: { [key: string]: any }, currentValue: FlowArg) => {
             if (currentValue.name) {
               initial[currentValue.name] = currentValue.value;
@@ -51,36 +60,40 @@ const EvmEditor = (): ReactJSXElement => {
         );
 
         if (!method) {
-          return reject("Transaction method is missing.");
+          return reject(new Error("Error: Transaction method is missing."));
         }
 
-        let address = ethAddress;
-        if (!address && login) {
-          address = await login();
-        }
+        try {
+          let address = ethAddress;
+          if (!address && login) {
+            address = await login();
+          }
 
-        method(address, receipient, amount, chain)
-          .then((transaction) => {
-            resolve({
-              transactionId: transaction.transactionHash,
-              transaction,
+          method(address, args, chain)
+            .then((transaction) => {
+              resolve({
+                transactionId: transaction.transactionHash,
+                transaction,
+              });
+              toast({
+                title: "Transaction is Sealed",
+                status: "success",
+                isClosable: true,
+                duration: 1000,
+              });
+            })
+            .catch((error) => {
+              reject(error);
+              toast({
+                title: "Transaction failed",
+                status: "error",
+                isClosable: true,
+                duration: 1000,
+              });
             });
-            toast({
-              title: "Transaction is Sealed",
-              status: "success",
-              isClosable: true,
-              duration: 1000,
-            });
-          })
-          .catch((error) => {
-            reject(error);
-            toast({
-              title: "Transaction failed",
-              status: "error",
-              isClosable: true,
-              duration: 1000,
-            });
-          });
+        } catch (error) {
+          reject(error);
+        }
       });
     },
     [ethAddress, toast, login, chain]

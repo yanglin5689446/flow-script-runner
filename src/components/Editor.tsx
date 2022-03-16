@@ -129,8 +129,8 @@ const Editor: React.FC<EditorProps> = ({
       if (scriptType === ScriptTypes.SCRIPT && onSendScript) {
         onSendScript(script, args, methodRef.current)
           .then(setResult)
-          .catch((error: Error) => {
-            setError(error.message);
+          .catch((error) => {
+            setError(error?.message || "Error: Running script failed.");
           });
       } else if (scriptType === ScriptTypes.SIGN) {
         onSignMessage(args, methodRef.current)
@@ -141,8 +141,8 @@ const Editor: React.FC<EditorProps> = ({
             }
             setResult(response);
           })
-          .catch((error: Error) => {
-            setError(error.message);
+          .catch((error) => {
+            setError(error?.message || "Error: Signing message failed.");
           });
       } else {
         onSendTransactions(args, shouldSign, signers, script, methodRef.current)
@@ -152,12 +152,14 @@ const Editor: React.FC<EditorProps> = ({
               setResponse(transaction);
             }
           })
-          .catch((error: Error) => {
-            setError(error.message);
+          .catch((error) => {
+            setError(error?.message || "Error: Sending transaction failed.");
           });
       }
     } catch (error) {
-      setError((error as Error).message);
+      setError(
+        error instanceof Error ? error.message : "Error: Execution failed."
+      );
     }
   }, [
     scriptType,
