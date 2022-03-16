@@ -4,6 +4,7 @@ import * as fcl from "@blocto/fcl";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import User from "../types/User";
 import { UserContext } from "../context/EvmUserConext";
+import { formatAddress } from "../utils/formatAddress";
 
 const LoginButton: React.FC<{
   chain: "flow" | "ethereum";
@@ -34,8 +35,8 @@ const LoginButton: React.FC<{
     (chain === "ethereum" && !ethAddress)
       ? "Connect"
       : chain === "flow"
-      ? user?.addr
-      : ethAddress;
+      ? formatAddress(user?.addr)
+      : formatAddress(ethAddress);
   return (
     <Button colorScheme="blue" onClick={signInOrOut}>
       {status}
