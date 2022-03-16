@@ -1,31 +1,32 @@
+import { ChainServices } from "../../services";
+import { EvmChain } from "../../types/ChainTypes";
 import ScriptTypes from "../../types/ScriptTypes";
-import { web3 } from "../../services/rinkeby";
 
 export const signMessageEth = {
   type: ScriptTypes.SIGN,
   script: "",
-  method: (message: string, account: string): Promise<any> =>
-    web3.eth.sign(message, account),
+  method: (message: string, account: string, chain: EvmChain): Promise<any> =>
+    ChainServices[chain].web3.eth.sign(message, account),
   args: [{ type: "String", comment: "message" }],
 };
 
 export const signMessagePersonal = {
   type: ScriptTypes.SIGN,
   script: "",
-  method: (message: string, account: string): Promise<any> =>
+  method: (message: string, account: string, chain: EvmChain): Promise<any> =>
     // eslint-disable-next-line
     // @ts-ignore
-    web3.eth.personal.sign(message, account),
+    ChainServices[chain].web3.eth.personal.sign(message, account),
   args: [{ type: "String", comment: "message" }],
 };
 
 export const signV3TypedData = {
   type: ScriptTypes.SIGN,
   script: "",
-  method: (message: string, account: string): Promise<any> =>
+  method: (message: string, account: string, chain: EvmChain): Promise<any> =>
     // eslint-disable-next-line
     // @ts-ignore
-    web3.currentProvider?.request({
+    ChainServices[chain].web3.currentProvider?.request({
       method: "eth_signTypedData",
       params: [account, message],
       from: account,
@@ -43,10 +44,10 @@ export const signV3TypedData = {
 export const signV4TypedData = {
   type: ScriptTypes.SIGN,
   script: "",
-  method: (message: string, account: string): Promise<any> =>
+  method: (message: string, account: string, chain: EvmChain): Promise<any> =>
     // eslint-disable-next-line
     // @ts-ignore
-    web3.currentProvider?.request({
+    ChainServices[chain].web3.currentProvider?.request({
       method: "eth_signTypedData",
       params: [account, message],
       from: account,

@@ -77,6 +77,7 @@ const Editor: React.FC<EditorProps> = ({
   onSendScript,
   onSignMessage,
   onSendTransactions,
+  children,
 }): ReactJSXElement => {
   const methodRef = useRef<(...param: any[]) => Promise<any>>();
   const [shouldSign, setShouldSign] = useState<boolean>();
@@ -197,9 +198,16 @@ const Editor: React.FC<EditorProps> = ({
             <Tab>Sign Message</Tab>
           </TabList>
         </Tabs>
+        <Flex mt={4} mx={4} mb={2}>
+          {children}
+        </Flex>
         <Flex m={4}>
           <Menu>
-            <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
+            <MenuButton
+              as={Button}
+              rightIcon={<ChevronDownIcon />}
+              width="130px"
+            >
               Templates
             </MenuButton>
             <MenuList>

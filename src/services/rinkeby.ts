@@ -1,15 +1,15 @@
 import Web3 from "web3";
 import BloctoSDK, { EthereumProviderInterface } from "@blocto/sdk";
 
-interface ExtendedEthereumProviderInterface extends EthereumProviderInterface {
+export interface ExtendedEthereumProviderInterface
+  extends EthereumProviderInterface {
   enable: () => Promise<any>;
 }
 
-interface ExtendedBloctoSDKInterface extends BloctoSDK {
+export interface ExtendedBloctoSDKInterface extends BloctoSDK {
   ethereum: ExtendedEthereumProviderInterface;
 }
 
-//{ ethereum: ExtendedEthereumProviderInterface }
 const bloctoSDK = new BloctoSDK({
   ethereum: {
     // (required) chainId to be used

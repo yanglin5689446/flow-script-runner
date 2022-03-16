@@ -5,6 +5,7 @@ import { UserContext } from "../context/EvmUserConext";
 import * as SignMessageTemplates from "../scripts/evm/SignMessage";
 import * as TransactionsTemplates from "../scripts/evm/Transactions";
 import Editor, { FlowArg } from "./Editor";
+import EvmChainSelect from "./EvmChainSelect";
 
 const MenuGroups = [
   { title: "Transactions", templates: TransactionsTemplates },
@@ -12,7 +13,7 @@ const MenuGroups = [
 ];
 
 const EvmEditor = (): ReactJSXElement => {
-  const { ethAddress, login } = useContext(UserContext);
+  const { chain, ethAddress, login } = useContext(UserContext);
   const toast = useToast();
 
   const handleSignMessage = useCallback(
@@ -21,9 +22,9 @@ const EvmEditor = (): ReactJSXElement => {
       if (!address && login) {
         address = await login();
       }
-      return method(args?.[0]?.value ?? "", address);
+      return method(args?.[0]?.value ?? "", address, chain);
     },
-    [ethAddress, login]
+    [ethAddress, login, chain]
   );
 
   const handleSendTransactions = useCallback(
@@ -58,7 +59,7 @@ const EvmEditor = (): ReactJSXElement => {
           address = await login();
         }
 
-        method(address, receipient, amount)
+        method(address, receipient, amount, chain)
           .then((transaction) => {
             resolve({
               transactionId: transaction.transactionHash,
@@ -82,7 +83,7 @@ const EvmEditor = (): ReactJSXElement => {
           });
       });
     },
-    [ethAddress, toast, login]
+    [ethAddress, toast, login, chain]
   );
 
   return (
@@ -93,7 +94,9 @@ const EvmEditor = (): ReactJSXElement => {
       isSandboxDisabled
       shouldClearScript
       isScriptTabDisabled
-    />
+    >
+      <EvmChainSelect />
+    </Editor>
   );
 };
 
