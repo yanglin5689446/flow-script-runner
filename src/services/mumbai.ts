@@ -1,13 +1,13 @@
 import Web3 from "web3";
 import BloctoSDK from "@blocto/sdk";
-import { ExtendedBloctoSDK } from "./rinkeby";
+import { ExtendedEvmBloctoSDK } from "./rinkeby";
 
 const bloctoSDK = new BloctoSDK({
   ethereum: {
     chainId: "0x13881",
     rpc: "https://rpc-mumbai.maticvigil.com/",
   },
-}) as ExtendedBloctoSDK;
+}) as ExtendedEvmBloctoSDK;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore

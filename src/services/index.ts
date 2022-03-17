@@ -1,5 +1,4 @@
 import Web3 from "web3";
-import BloctoSDK from "@blocto/sdk";
 import { Chains, ChainsType, EvmChain, OtherChain } from "../types/ChainTypes";
 import { web3 as bscWeb3, bloctoSDK as bscSDK } from "./bscTestnet";
 import { web3 as fujiWeb3, bloctoSDK as fujiSDK } from "./fuji";
@@ -7,20 +6,23 @@ import { web3 as mumbaiWeb3, bloctoSDK as mumbaiSDK } from "./mumbai";
 import {
   web3 as rinkebyWeb3,
   bloctoSDK as rinkebySDK,
-  ExtendedBloctoSDK,
+  ExtendedEvmBloctoSDK,
 } from "./rinkeby";
-import { bloctoSDK as solanaSDK } from "./solanaDevnet";
+import {
+  bloctoSDK as solanaSDK,
+  ExtendedSolaneBloctoSDK,
+} from "./solanaDevnet";
 
 interface EvmChainInterface {
   web3: Web3;
-  bloctoSDK: ExtendedBloctoSDK;
+  bloctoSDK: ExtendedEvmBloctoSDK;
   address: string | null;
 }
 
 type EvmChainsInfoType = { [key in EvmChain]: EvmChainInterface };
 
 interface OtherChainInterface {
-  bloctoSDK?: BloctoSDK;
+  bloctoSDK?: ExtendedSolaneBloctoSDK;
   address: string | null;
 }
 

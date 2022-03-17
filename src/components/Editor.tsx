@@ -35,10 +35,7 @@ export interface FlowArg {
 
 interface EditorProps {
   menuGroups: Array<{ title: string; templates: any }>;
-  onSignMessage: (
-    args?: FlowArg[],
-    method?: (...param: any[]) => Promise<any>
-  ) => Promise<any>;
+
   onSendTransactions: (
     fclArgs: FlowArg[] | undefined,
     shouldSign: boolean | undefined,
@@ -62,6 +59,10 @@ interface EditorProps {
     fclArgs?: FlowArg[],
     method?: (...param: any[]) => Promise<any>
   ) => Promise<string>;
+  onSignMessage?: (
+    args?: FlowArg[],
+    method?: (...param: any[]) => Promise<any>
+  ) => Promise<any>;
 }
 
 const Editor: React.FC<EditorProps> = ({
@@ -132,7 +133,7 @@ const Editor: React.FC<EditorProps> = ({
           .catch((error) => {
             setError(error?.message || "Error: Running script failed.");
           });
-      } else if (scriptType === ScriptTypes.SIGN) {
+      } else if (scriptType === ScriptTypes.SIGN && onSignMessage) {
         onSignMessage(args, methodRef.current)
           .then((response: any) => {
             if (response?.message) {
@@ -148,9 +149,7 @@ const Editor: React.FC<EditorProps> = ({
         onSendTransactions(args, shouldSign, signers, script, methodRef.current)
           .then(({ transactionId, transaction }) => {
             setTxHash(transactionId);
-            if (transaction != response) {
-              setResponse(transaction);
-            }
+            setResponse(transaction);
           })
           .catch((error) => {
             setError(error?.message || "Error: Sending transaction failed.");
@@ -167,7 +166,6 @@ const Editor: React.FC<EditorProps> = ({
     script,
     shouldSign,
     signers,
-    response,
     onSendScript,
     onSignMessage,
     onSendTransactions,
