@@ -22,8 +22,10 @@ const SolanaEditor = (): ReactJSXElement => {
       method?: (...param: any[]) => Promise<any>
     ): Promise<{ transactionId: string; transaction: any }> => {
       return new Promise(async (resolve, reject) => {
-        const noArgsProvided = fclArgs?.every((arg) => arg.value === undefined);
-        if (noArgsProvided) {
+        const noArgValuesProvided = fclArgs?.every(
+          (arg) => arg.value === undefined
+        );
+        if (fclArgs?.length !== 0 && noArgValuesProvided) {
           return reject(new Error("Error: Transaction arguments are missing."));
         }
 

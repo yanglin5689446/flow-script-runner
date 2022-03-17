@@ -18,6 +18,7 @@ import {
   MenuList,
   MenuItem,
   MenuGroup,
+  Text,
 } from "@chakra-ui/react";
 import { AddIcon, ChevronDownIcon, CloseIcon } from "@chakra-ui/icons";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
@@ -86,6 +87,7 @@ const Editor: React.FC<EditorProps> = ({
   const [signers, setSigners] =
     useState<{ privateKey: string; address: string }[]>();
   const [scriptType, setScriptType] = useState<ScriptTypes>(ScriptTypes.SCRIPT);
+  const [description, setDescription] = useState<string>();
   const [script, setScript] = useState<string>("");
   const [response, setResponse] = useState<any>(undefined);
   const [result, setResult] = useState<string>("");
@@ -116,6 +118,7 @@ const Editor: React.FC<EditorProps> = ({
   const importTemplate = useCallback((template) => {
     methodRef.current = template.method;
     setScriptType(template.type);
+    setDescription(template.description);
     setScript(template.script);
     setArgs(template.args);
     setShouldSign(template.shouldSign);
@@ -171,6 +174,11 @@ const Editor: React.FC<EditorProps> = ({
     onSendTransactions,
   ]);
 
+  const displayResult = result || response;
+  const formattedDisplayResult =
+    typeof displayResult === "string"
+      ? displayResult
+      : JSON.stringify(displayResult, null, 2);
   return (
     <Flex
       height="calc(100vh - 76px)"
@@ -184,10 +192,7 @@ const Editor: React.FC<EditorProps> = ({
         resultTitle={
           result || error ? "Run result:" : `Response of tx ${txHash}:`
         }
-        result={
-          error ||
-          ((result || response) && JSON.stringify(result || response, null, 2))
-        }
+        result={error || formattedDisplayResult}
       />
 
       <Flex flex={3} height="100%" direction="column">
@@ -229,6 +234,9 @@ const Editor: React.FC<EditorProps> = ({
               ))}
             </MenuList>
           </Menu>
+        </Flex>
+        <Flex mx={4} my={2} whiteSpace="pre-wrap">
+          <Text>{description}</Text>
         </Flex>
 
         <Box flex={1} px={4}>
