@@ -3,7 +3,7 @@ import { useToast } from "@chakra-ui/react";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import { Context } from "../context/Context";
 import * as TransactionsTemplates from "../scripts/solana/Transactions";
-import Editor, { FlowArg } from "./Editor";
+import Editor, { Arg } from "./Editor";
 
 const MenuGroups = [
   { title: "Transactions", templates: TransactionsTemplates },
@@ -15,22 +15,22 @@ const SolanaEditor = (): ReactJSXElement => {
 
   const handleSendTransactions = useCallback(
     async (
-      fclArgs: FlowArg[] | undefined,
+      args: Arg[] | undefined,
       shouldSign: boolean | undefined,
       signers: Array<{ privateKey: string; address: string }> | undefined,
       script: string,
       method?: (...param: any[]) => Promise<any>
     ): Promise<{ transactionId: string; transaction: any }> => {
       return new Promise(async (resolve, reject) => {
-        const noArgValuesProvided = fclArgs?.every(
+        const noArgValuesProvided = args?.every(
           (arg) => arg.value === undefined
         );
-        if (fclArgs?.length !== 0 && noArgValuesProvided) {
+        if (args?.length !== 0 && noArgValuesProvided) {
           return reject(new Error("Error: Transaction arguments are missing."));
         }
 
-        const args = fclArgs?.reduce(
-          (initial: { [key: string]: any }, currentValue: FlowArg) => {
+        const formattedArgs = args?.reduce(
+          (initial: { [key: string]: any }, currentValue: Arg) => {
             if (currentValue.name) {
               initial[currentValue.name] = currentValue.value;
             }
@@ -49,7 +49,7 @@ const SolanaEditor = (): ReactJSXElement => {
             userAddress = await login();
           }
 
-          method(userAddress, args, chain)
+          method(userAddress, formattedArgs, chain)
             .then((transaction) => {
               resolve(transaction);
               toast({

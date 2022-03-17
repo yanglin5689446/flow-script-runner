@@ -28,7 +28,7 @@ import * as FlowSignMessageTemplates from "../scripts/flow/SignMessage";
 import ScriptTypes from "../types/ScriptTypes";
 import Sandbox from "./Sandbox";
 
-export interface FlowArg {
+export interface Arg {
   value?: any;
   type: any;
   comment?: string;
@@ -37,9 +37,8 @@ export interface FlowArg {
 
 interface EditorProps {
   menuGroups: Array<{ title: string; templates: any }>;
-
   onSendTransactions: (
-    fclArgs: FlowArg[] | undefined,
+    args: Arg[] | undefined,
     shouldSign: boolean | undefined,
     signers: Array<{ privateKey: string; address: string }> | undefined,
     script: string,
@@ -53,16 +52,16 @@ interface EditorProps {
   isSandboxDisabled?: boolean;
   isScriptTabDisabled?: boolean;
   isSignMessagePreDefined?: boolean;
-  signMessageArgs?: FlowArg[];
+  signMessageArgs?: Arg[];
   isArgsAdjustable?: boolean;
   isTransactionsExtraSignersAvailable?: boolean;
   onSendScript?: (
     script: string,
-    fclArgs?: FlowArg[],
+    args?: Arg[],
     method?: (...param: any[]) => Promise<any>
   ) => Promise<string>;
   onSignMessage?: (
-    args?: FlowArg[],
+    args?: Arg[],
     method?: (...param: any[]) => Promise<any>
   ) => Promise<any>;
   faucetUrl?: string;
@@ -86,7 +85,7 @@ const Editor: React.FC<EditorProps> = ({
 }): ReactJSXElement => {
   const methodRef = useRef<(...param: any[]) => Promise<any>>();
   const [shouldSign, setShouldSign] = useState<boolean>();
-  const [args, setArgs] = useState<FlowArg[]>();
+  const [args, setArgs] = useState<Arg[]>();
   const [signers, setSigners] =
     useState<{ privateKey: string; address: string }[]>();
   const [scriptType, setScriptType] = useState<ScriptTypes>(ScriptTypes.SCRIPT);

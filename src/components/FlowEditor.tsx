@@ -8,7 +8,7 @@ import * as types from "@onflow/types";
 import * as BloctoDAOTemplates from "../scripts/flow/DAO";
 import * as SignMessageTemplates from "../scripts/flow/SignMessage";
 import * as TransactionsTemplates from "../scripts/flow/Transactions";
-import Editor, { FlowArg } from "./Editor";
+import Editor, { Arg } from "./Editor";
 
 const typeKeys = Object.keys(types);
 
@@ -81,7 +81,7 @@ function parseFlowArgTypeFromString(type: string): any {
   }
 }
 
-function parseFclArgs(args: FlowArg[] = []) {
+function parseFclArgs(args: Arg[] = []) {
   return args.map(({ value, type }): { value: any; xform: any } => {
     let fclArgType = types[type];
     if (!typeKeys.includes(type)) {
@@ -119,7 +119,7 @@ const FlowEditor = (): ReactJSXElement => {
 
   const handleSendTransactions = useCallback(
     async (
-      args: FlowArg[] | undefined,
+      args: Arg[] | undefined,
       shouldSign: boolean | undefined,
       signers: Array<{ privateKey: string; address: string }> | undefined,
       script: string
