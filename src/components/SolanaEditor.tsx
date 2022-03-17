@@ -83,6 +83,7 @@ const SolanaEditor = (): ReactJSXElement => {
       isSandboxDisabled
       shouldClearScript
       isScriptTabDisabled
+      faucetUrl="https://solfaucet.com/"
     />
   );
 };

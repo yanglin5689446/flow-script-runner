@@ -6,6 +6,14 @@ import * as SignMessageTemplates from "../scripts/evm/SignMessage";
 import * as TransactionsTemplates from "../scripts/evm/Transactions";
 import Editor, { FlowArg } from "./Editor";
 import EvmChainSelect from "./EvmChainSelect";
+import { EvmChain } from "../types/ChainTypes";
+
+const FaucetUrls = {
+  [EvmChain.Ethereum]: "https://rinkeby-faucet.com/",
+  [EvmChain.Bsc]: "https://testnet.binance.org/faucet-smart",
+  [EvmChain.Polygon]: "https://faucet.polygon.technology/",
+  [EvmChain.Avalanche]: "https://faucet.avax-test.network/",
+};
 
 const MenuGroups = [
   { title: "Transactions", templates: TransactionsTemplates },
@@ -107,6 +115,7 @@ const EvmEditor = (): ReactJSXElement => {
       isSandboxDisabled
       shouldClearScript
       isScriptTabDisabled
+      faucetUrl={(chain as EvmChain) ? FaucetUrls[chain as EvmChain] : ""}
     >
       <EvmChainSelect />
     </Editor>

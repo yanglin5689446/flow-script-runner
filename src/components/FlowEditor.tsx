@@ -200,6 +200,7 @@ const FlowEditor = (): ReactJSXElement => {
       isArgsAdjustable
       isTransactionsExtraSignersAvailable
       onSendScript={handleSendScript}
+      faucetUrl="https://testnet-faucet.onflow.org/"
     />
   );
 };

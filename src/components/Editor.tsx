@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Flex,
+  Link,
   Tab,
   TabList,
   Tabs,
@@ -64,6 +65,7 @@ interface EditorProps {
     args?: FlowArg[],
     method?: (...param: any[]) => Promise<any>
   ) => Promise<any>;
+  faucetUrl?: string;
 }
 
 const Editor: React.FC<EditorProps> = ({
@@ -79,6 +81,7 @@ const Editor: React.FC<EditorProps> = ({
   onSendScript,
   onSignMessage,
   onSendTransactions,
+  faucetUrl,
   children,
 }): ReactJSXElement => {
   const methodRef = useRef<(...param: any[]) => Promise<any>>();
@@ -388,6 +391,21 @@ const Editor: React.FC<EditorProps> = ({
               </>
             )}
         </Box>
+
+        <Flex p={3} mt="6" bg="gray.100" color="gray.500">
+          <Text>
+            Are you short of test tokens? Here comes the{" "}
+            <Link
+              href={faucetUrl}
+              isExternal
+              color="#e5c100"
+              _focus={{ boxShadow: "none" }}
+            >
+              faucet
+            </Link>{" "}
+            for you to earn some free tokens! ✨✨
+          </Text>
+        </Flex>
 
         <Flex justify="end" p={4}>
           {isTransactionsExtraSignersAvailable &&
