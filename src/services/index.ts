@@ -1,5 +1,7 @@
 import Web3 from "web3";
 import { Contract } from "web3-eth-contract";
+import { struct, u8, u32, UInt, Structure } from "@solana/buffer-layout";
+import { PublicKey } from "@solana/web3.js";
 import { ContractInfos } from "../contracts";
 import { Chains, ChainsType, EvmChain, OtherChain } from "../types/ChainTypes";
 import { web3 as bscWeb3, bloctoSDK as bscSDK } from "./bscTestnet";
@@ -30,11 +32,16 @@ interface EvmChainInterface {
 
 type EvmChainsInfoType = { [key in EvmChain]: EvmChainInterface };
 
+interface SolanaProgramInfo {
+  programId: PublicKey;
+  accountPubKey: PublicKey;
+  programLayout: Structure<UInt>;
+}
 type SolanaInfoType = {
   [OtherChain.Solana]: {
     bloctoSDK: ExtendedSolaneBloctoSDK;
     address: string | null;
-    contract: null;
+    program: SolanaProgramInfo | null;
   };
 };
 
@@ -42,6 +49,7 @@ interface ChainServicesInterface {
   getChainAddress: (chain: ChainsType) => string | null;
   setChainAddress: (chain: ChainsType, address: string) => void;
   getEvmChainContract: (chain: EvmChain) => Contract;
+  getSolanaProgramInfo: () => SolanaProgramInfo;
 }
 
 type ChainServicesType = FlowInfoType &
@@ -75,7 +83,7 @@ export const ChainServices: ChainServicesType = {
     address: null,
     contract: null,
   },
-  [Chains.Solana]: { bloctoSDK: solanaSDK, address: null, contract: null },
+  [Chains.Solana]: { bloctoSDK: solanaSDK, address: null, program: null },
 
   getChainAddress(chain) {
     return this[chain].address;
@@ -94,5 +102,22 @@ export const ChainServices: ChainServicesType = {
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this[chain].contract!;
+  },
+
+  getSolanaProgramInfo() {
+    if (this[Chains.Solana].program === null) {
+      const programId = new PublicKey(ContractInfos[Chains.Solana].programId);
+      const accountPubKey = new PublicKey(
+        ContractInfos[Chains.Solana].accountPubKey
+      );
+      const programLayout = struct<UInt>([u8("is_init"), u32("value")]);
+      this[Chains.Solana].program = {
+        programId,
+        accountPubKey,
+        programLayout,
+      };
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this[Chains.Solana].program!;
   },
 };

@@ -10,6 +10,7 @@
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@onflow/types": "^0.0.6",
+    "@solana/buffer-layout": "^4.0.0",
     "@solana/web3.js": "^1.36.0",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",

@@ -170,7 +170,10 @@ const Editor: React.FC<EditorProps> = ({
         if (onInteractWithContract) {
           onInteractWithContract(args, methodRef.current)
             .then((result) => {
-              if (typeof result === "string") {
+              if (
+                typeof result === "string" ||
+                (result && !result.transactionId)
+              ) {
                 setResult(result);
               } else {
                 setTxHash(result.transactionId);

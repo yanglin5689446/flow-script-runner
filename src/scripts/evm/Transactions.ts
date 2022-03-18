@@ -2,7 +2,7 @@ import { ChainServices } from "../../services";
 import { EvmChain } from "../../types/ChainTypes";
 import ScriptTypes from "../../types/ScriptTypes";
 
-export const sendETH = {
+export const sendTokens = {
   type: ScriptTypes.TX,
   script: "",
   method: (

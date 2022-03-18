@@ -2,23 +2,24 @@ import React, { useCallback, useContext } from "react";
 import { useToast } from "@chakra-ui/react";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import { Context } from "../context/Context";
+import * as ContractTemplates from "../scripts/solana/Contract";
 import * as TransactionsTemplates from "../scripts/solana/Transactions";
 import Editor, { Arg } from "./Editor";
+import ScriptTypes from "../types/ScriptTypes";
 
 const MenuGroups = [
   { title: "Transactions", templates: TransactionsTemplates },
+  { title: "Contract", templates: ContractTemplates },
 ];
 
 const SolanaEditor = (): ReactJSXElement => {
   const { chain, address, login } = useContext(Context);
   const toast = useToast();
 
-  const handleSendTransactions = useCallback(
+  const execute = useCallback(
     async (
+      type: ScriptTypes.TX | ScriptTypes.CONTRACT,
       args: Arg[] | undefined,
-      shouldSign: boolean | undefined,
-      signers: Array<{ privateKey: string; address: string }> | undefined,
-      script: string,
       method?: (...param: any[]) => Promise<any>
     ): Promise<{ transactionId: string; transaction: any }> => {
       return new Promise(async (resolve, reject) => {
@@ -26,7 +27,13 @@ const SolanaEditor = (): ReactJSXElement => {
           (arg) => arg.value === undefined
         );
         if (args?.length !== 0 && noArgValuesProvided) {
-          return reject(new Error("Error: Transaction arguments are missing."));
+          return reject(
+            new Error(
+              `Error: ${
+                type === ScriptTypes.TX ? "Transaction" : "Contract method"
+              } arguments are missing.`
+            )
+          );
         }
 
         const formattedArgs = args?.reduce(
@@ -40,7 +47,13 @@ const SolanaEditor = (): ReactJSXElement => {
         );
 
         if (!method) {
-          return reject(new Error("Error: Transaction method is missing."));
+          return reject(
+            new Error(
+              `Error: ${
+                type === ScriptTypes.TX ? "Transaction" : "Contract"
+              } method is not provided.`
+            )
+          );
         }
 
         try {
@@ -53,7 +66,10 @@ const SolanaEditor = (): ReactJSXElement => {
             .then((transaction) => {
               resolve(transaction);
               toast({
-                title: "Transaction is Sealed",
+                title:
+                  type === ScriptTypes.TX
+                    ? "Transaction is sealed"
+                    : "Contract method is executed",
                 status: "success",
                 isClosable: true,
                 duration: 1000,
@@ -62,7 +78,9 @@ const SolanaEditor = (): ReactJSXElement => {
             .catch((error) => {
               reject(error);
               toast({
-                title: "Transaction failed",
+                title: `${
+                  type === ScriptTypes.TX ? "Transaction" : "Contract method"
+                } failed`,
                 status: "error",
                 isClosable: true,
                 duration: 1000,
@@ -76,10 +94,34 @@ const SolanaEditor = (): ReactJSXElement => {
     [address, toast, login, chain]
   );
 
+  const handleSendTransactions = useCallback(
+    async (
+      args: Arg[] | undefined,
+      shouldSign: boolean | undefined,
+      signers: Array<{ privateKey: string; address: string }> | undefined,
+      script: string,
+      method?: (...param: any[]) => Promise<any>
+    ): Promise<{ transactionId: string; transaction: any }> => {
+      return execute(ScriptTypes.TX, args, method);
+    },
+    [execute]
+  );
+
+  const handleInteractWithContract = useCallback(
+    async (
+      args: Arg[] | undefined,
+      method?: (...param: any[]) => Promise<any>
+    ): Promise<{ transactionId: string; transaction: any }> => {
+      return execute(ScriptTypes.CONTRACT, args, method);
+    },
+    [execute]
+  );
+
   return (
     <Editor
       menuGroups={MenuGroups}
       onSendTransactions={handleSendTransactions}
+      onInteractWithContract={handleInteractWithContract}
       isSandboxDisabled
       shouldClearScript
       isScriptTabDisabled
