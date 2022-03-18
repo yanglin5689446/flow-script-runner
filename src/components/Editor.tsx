@@ -55,6 +55,7 @@ interface EditorProps {
   signMessageArgs?: Arg[];
   isArgsAdjustable?: boolean;
   isTransactionsExtraSignersAvailable?: boolean;
+  isContractTabHidden?: boolean;
   onSendScript?: (
     script: string,
     args?: Arg[],
@@ -65,6 +66,10 @@ interface EditorProps {
     method?: (...param: any[]) => Promise<any>
   ) => Promise<any>;
   faucetUrl?: string;
+  onInteractWithContract?: (
+    args: Arg[] | undefined,
+    method?: (...param: any[]) => Promise<any>
+  ) => Promise<any>;
 }
 
 const Editor: React.FC<EditorProps> = ({
@@ -77,9 +82,11 @@ const Editor: React.FC<EditorProps> = ({
   signMessageArgs,
   isArgsAdjustable,
   isTransactionsExtraSignersAvailable,
+  isContractTabHidden,
   onSendScript,
   onSignMessage,
   onSendTransactions,
+  onInteractWithContract,
   faucetUrl,
   children,
 }): ReactJSXElement => {
@@ -150,7 +157,7 @@ const Editor: React.FC<EditorProps> = ({
           .catch((error) => {
             setError(error?.message || "Error: Signing message failed.");
           });
-      } else {
+      } else if (scriptType === ScriptTypes.TX) {
         onSendTransactions(args, shouldSign, signers, script, methodRef.current)
           .then(({ transactionId, transaction }) => {
             setTxHash(transactionId);
@@ -159,6 +166,21 @@ const Editor: React.FC<EditorProps> = ({
           .catch((error) => {
             setError(error?.message || "Error: Sending transaction failed.");
           });
+      } else {
+        if (onInteractWithContract) {
+          onInteractWithContract(args, methodRef.current)
+            .then((result) => {
+              if (typeof result === "string") {
+                setResult(result);
+              } else {
+                setTxHash(result.transactionId);
+                setResponse(result.transaction);
+              }
+            })
+            .catch((error) => {
+              setError(error?.message || "Error: Function called failed.");
+            });
+        }
       }
     } catch (error) {
       setError(
@@ -174,6 +196,7 @@ const Editor: React.FC<EditorProps> = ({
     onSendScript,
     onSignMessage,
     onSendTransactions,
+    onInteractWithContract,
   ]);
 
   const displayResult = result || response;
@@ -203,6 +226,7 @@ const Editor: React.FC<EditorProps> = ({
             <Tab isDisabled={isScriptTabDisabled}>Script</Tab>
             <Tab>Transaction</Tab>
             <Tab>Sign Message</Tab>
+            {!isContractTabHidden && <Tab>Contract</Tab>}
           </TabList>
         </Tabs>
         <Flex mt={4} mx={4} mb={2}>

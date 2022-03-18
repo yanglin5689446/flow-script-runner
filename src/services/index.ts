@@ -1,4 +1,6 @@
 import Web3 from "web3";
+import { Contract } from "web3-eth-contract";
+import { ContractInfos } from "../contracts";
 import { Chains, ChainsType, EvmChain, OtherChain } from "../types/ChainTypes";
 import { web3 as bscWeb3, bloctoSDK as bscSDK } from "./bscTestnet";
 import { web3 as fujiWeb3, bloctoSDK as fujiSDK } from "./fuji";
@@ -13,39 +15,67 @@ import {
   ExtendedSolaneBloctoSDK,
 } from "./solanaDevnet";
 
+type FlowInfoType = {
+  [OtherChain.Flow]: {
+    address: string | null;
+  };
+};
+
 interface EvmChainInterface {
   web3: Web3;
   bloctoSDK: ExtendedEvmBloctoSDK;
   address: string | null;
+  contract: Contract | null;
 }
 
 type EvmChainsInfoType = { [key in EvmChain]: EvmChainInterface };
 
-interface OtherChainInterface {
-  bloctoSDK?: ExtendedSolaneBloctoSDK;
-  address: string | null;
-}
-
-type OtherChainsInfoType = { [key in OtherChain]: OtherChainInterface };
+type SolanaInfoType = {
+  [OtherChain.Solana]: {
+    bloctoSDK: ExtendedSolaneBloctoSDK;
+    address: string | null;
+    contract: null;
+  };
+};
 
 interface ChainServicesInterface {
   getChainAddress: (chain: ChainsType) => string | null;
   setChainAddress: (chain: ChainsType, address: string) => void;
+  getEvmChainContract: (chain: EvmChain) => Contract;
 }
 
-export const ChainServices: EvmChainsInfoType &
-  OtherChainsInfoType &
-  ChainServicesInterface = {
+type ChainServicesType = FlowInfoType &
+  EvmChainsInfoType &
+  SolanaInfoType &
+  ChainServicesInterface;
+
+export const ChainServices: ChainServicesType = {
   [Chains.Flow]: { address: null },
   [Chains.Ethereum]: {
     web3: rinkebyWeb3,
     bloctoSDK: rinkebySDK,
     address: null,
+    contract: null,
   },
-  [Chains.Bsc]: { web3: bscWeb3, bloctoSDK: bscSDK, address: null },
-  [Chains.Polygon]: { web3: mumbaiWeb3, bloctoSDK: mumbaiSDK, address: null },
-  [Chains.Avalanche]: { web3: fujiWeb3, bloctoSDK: fujiSDK, address: null },
-  [Chains.Solana]: { bloctoSDK: solanaSDK, address: null },
+  [Chains.Bsc]: {
+    web3: bscWeb3,
+    bloctoSDK: bscSDK,
+    address: null,
+    contract: null,
+  },
+  [Chains.Polygon]: {
+    web3: mumbaiWeb3,
+    bloctoSDK: mumbaiSDK,
+    address: null,
+    contract: null,
+  },
+  [Chains.Avalanche]: {
+    web3: fujiWeb3,
+    bloctoSDK: fujiSDK,
+    address: null,
+    contract: null,
+  },
+  [Chains.Solana]: { bloctoSDK: solanaSDK, address: null, contract: null },
 
   getChainAddress(chain) {
     return this[chain].address;
@@ -53,5 +83,16 @@ export const ChainServices: EvmChainsInfoType &
 
   setChainAddress(chain, address) {
     this[chain].address = address;
+  },
+
+  getEvmChainContract(chain) {
+    if (this[chain].contract === null) {
+      this[chain].contract = new this[chain].web3.eth.Contract(
+        ContractInfos[chain].abi,
+        ContractInfos[chain].address
+      );
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this[chain].contract!;
   },
 };

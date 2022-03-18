@@ -199,6 +199,7 @@ const FlowEditor = (): ReactJSXElement => {
       signMessageArgs={SignMessageTemplates.signMessage.args}
       isArgsAdjustable
       isTransactionsExtraSignersAvailable
+      isContractTabHidden
       onSendScript={handleSendScript}
       faucetUrl="https://testnet-faucet.onflow.org/"
     />
