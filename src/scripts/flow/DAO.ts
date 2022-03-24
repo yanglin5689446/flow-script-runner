@@ -1,5 +1,5 @@
-import ScriptTypes from "../types/ScriptTypes";
-import getAddress from "../utils/getAddress";
+import ScriptTypes from "../../types/ScriptTypes";
+import getAddress from "../../utils/getAddress";
 
 export const getTopics = {
   type: ScriptTypes.SCRIPT,
