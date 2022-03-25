@@ -202,7 +202,7 @@ const Editor: React.FC<EditorProps> = ({
     onInteractWithContract,
   ]);
 
-  const displayResult = result || response;
+  const displayResult = result !== "" ? result : response;
   const formattedDisplayResult =
     typeof displayResult === "string"
       ? displayResult
