@@ -1,14 +1,14 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Box,
   Button,
   Flex,
-  Link,
   Tab,
   TabList,
   Tabs,
   Textarea,
   Switch,
+  useToast,
   FormControl,
   FormLabel,
   IconButton,
@@ -19,115 +19,109 @@ import {
   MenuList,
   MenuItem,
   MenuGroup,
-  Text,
 } from "@chakra-ui/react";
+import * as fcl from "@blocto/fcl";
+import * as types from "@onflow/types";
 import { AddIcon, ChevronDownIcon, CloseIcon } from "@chakra-ui/icons";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
-import { startCase } from "lodash";
-import * as FlowSignMessageTemplates from "../scripts/flow/SignMessage";
 import ScriptTypes from "../types/ScriptTypes";
-import Sandbox from "./Sandbox";
+import * as BloctoDAOTemplates from "../scripts/DAO";
+import * as TransactionsTemplates from "../scripts/Transactions";
+import { startCase } from "lodash";
+import { ec as EC } from "elliptic";
+import { SHA3 } from "sha3";
 
-export interface Arg {
-  value?: any;
+const NETWORK = process.env.REACT_APP_NETWORK || "testnet";
+const ec = new EC(NETWORK === "testnet" ? "p256" : "secp256k1");
+
+const signWithKey = (privateKey: string, msgHex: string) => {
+  const key = ec.keyFromPrivate(Buffer.from(privateKey, "hex"));
+  const sig = key.sign(hashMsgHex(msgHex));
+  const n = 32; // half of signature length?
+  const r = sig.r.toArrayLike(Buffer, "be", n);
+  const s = sig.s.toArrayLike(Buffer, "be", n);
+  return Buffer.concat([r, s]).toString("hex");
+};
+
+const hashMsgHex = (msgHex: string) => {
+  const sha = new SHA3(256);
+  sha.update(Buffer.from(msgHex, "hex"));
+  return sha.digest();
+};
+
+// Will be handled by fcl.user(addr).info()
+const getAccount = async (addr: string) => {
+  const { account } = await fcl.send([fcl.getAccount(addr)]);
+  return account;
+};
+
+const authorization =
+  ({ address, privateKey }: { address: string; privateKey: string }) =>
+  async (account: {
+    role: { proposer: string };
+    signature: string;
+    roles: any[];
+  }) => {
+    const user = await getAccount(address);
+    const key = user.keys[0];
+
+    let sequenceNum;
+    if (account.role && account.role.proposer) sequenceNum = key.sequenceNumber;
+
+    const signingFunction = async (data: { message: string }) => {
+      return {
+        addr: user.address,
+        keyId: key.index,
+        signature: signWithKey(privateKey, data.message),
+      };
+    };
+
+    return {
+      ...account,
+      addr: user.address,
+      keyId: key.index,
+      sequenceNum,
+      signature: account.signature || null,
+      signingFunction,
+      resolve: null,
+      roles: account.roles,
+    };
+  };
+
+interface FlowArg {
+  value: any;
   type: any;
   comment?: string;
-  name?: string;
 }
 
-interface EditorProps {
-  menuGroups: Array<{ title: string; templates: any }>;
-  onSendTransactions: (
-    args: Arg[] | undefined,
-    shouldSign: boolean | undefined,
-    signers: Array<{ privateKey: string; address: string }> | undefined,
-    script: string,
-    method?: (...param: any[]) => Promise<any>
-  ) => Promise<{
-    transactionId: string;
-    transaction: any;
-  }>;
-  argTypes?: string[];
-  shouldClearScript?: boolean;
-  isSandboxDisabled?: boolean;
-  isScriptTabDisabled?: boolean;
-  isSignMessagePreDefined?: boolean;
-  signMessageArgs?: Arg[];
-  isArgsAdjustable?: boolean;
-  isTransactionsExtraSignersAvailable?: boolean;
-  isContractTabHidden?: boolean;
-  onSendScript?: (
-    script: string,
-    args?: Arg[],
-    method?: (...param: any[]) => Promise<any>
-  ) => Promise<string>;
-  onSignMessage?: (
-    args?: Arg[],
-    method?: (...param: any[]) => Promise<any>
-  ) => Promise<any>;
-  faucetUrl?: string;
-  onInteractWithContract?: (
-    args: Arg[] | undefined,
-    method?: (...param: any[]) => Promise<any>
-  ) => Promise<any>;
+function parseFlowArgTypeFromString(type: string): any {
+  const striped = type.replaceAll(" ", "");
+  const matched = striped.match(/(Array|Optional)(\(.*\))?$/);
+  if (matched) {
+    return types[matched[1]](
+      parseFlowArgTypeFromString(matched[2].slice(1, -1))
+    );
+  } else {
+    return types[striped];
+  }
 }
 
-const Editor: React.FC<EditorProps> = ({
-  menuGroups,
-  argTypes,
-  shouldClearScript,
-  isSandboxDisabled,
-  isScriptTabDisabled,
-  isSignMessagePreDefined,
-  signMessageArgs,
-  isArgsAdjustable,
-  isTransactionsExtraSignersAvailable,
-  isContractTabHidden,
-  onSendScript,
-  onSignMessage,
-  onSendTransactions,
-  onInteractWithContract,
-  faucetUrl,
-  children,
-}): ReactJSXElement => {
-  const methodRef = useRef<(...param: any[]) => Promise<any>>();
+const Editor = (): ReactJSXElement => {
+  const toast = useToast();
   const [shouldSign, setShouldSign] = useState<boolean>();
-  const [args, setArgs] = useState<Arg[]>();
+  const [args, setArgs] = useState<FlowArg[]>();
   const [signers, setSigners] =
     useState<{ privateKey: string; address: string }[]>();
   const [scriptType, setScriptType] = useState<ScriptTypes>(ScriptTypes.SCRIPT);
-  const [description, setDescription] = useState<string>();
   const [script, setScript] = useState<string>("");
   const [response, setResponse] = useState<any>(undefined);
   const [result, setResult] = useState<string>("");
-  const [error, setError] = useState<string>("");
   const [txHash, setTxHash] = useState<string>("");
 
-  useEffect(() => {
-    if (shouldClearScript) {
-      setScript("");
-      if (scriptType === ScriptTypes.SCRIPT) {
-        setScriptType(ScriptTypes.TX);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldClearScript]);
-
-  const handleTabChange = useCallback(
-    (index) => {
-      setScriptType(index);
-      if (isSignMessagePreDefined && index === ScriptTypes.SIGN) {
-        setScript("");
-        setArgs(FlowSignMessageTemplates.signMessage.args);
-      }
-    },
-    [isSignMessagePreDefined]
-  );
+  const typeKeys = Object.keys(types);
 
   const importTemplate = useCallback((template) => {
-    methodRef.current = template.method;
     setScriptType(template.type);
-    setDescription(template.description);
     setScript(template.script);
     setArgs(template.args);
     setShouldSign(template.shouldSign);
@@ -136,323 +130,333 @@ const Editor: React.FC<EditorProps> = ({
   const runScript = useCallback(async () => {
     setResponse("");
     setResult("");
-    setError("");
     setTxHash("");
-    try {
-      if (scriptType === ScriptTypes.SCRIPT && onSendScript) {
-        onSendScript(script, args, methodRef.current)
-          .then(setResult)
-          .catch((error) => {
-            setError(error?.message || "Error: Running script failed.");
-          });
-      } else if (scriptType === ScriptTypes.SIGN && onSignMessage) {
-        onSignMessage(args, methodRef.current)
-          .then((response: any) => {
-            if (response?.message) {
-              setError(`Error: ${response.message}`);
-              return;
-            }
-            setResult(response);
-          })
-          .catch((error) => {
-            setError(error?.message || "Error: Signing message failed.");
-          });
-      } else if (scriptType === ScriptTypes.TX) {
-        onSendTransactions(args, shouldSign, signers, script, methodRef.current)
-          .then(({ transactionId, transaction }) => {
-            setTxHash(transactionId);
-            setResponse(transaction);
-          })
-          .catch((error) => {
-            setError(error?.message || "Error: Sending transaction failed.");
-          });
-      } else {
-        if (onInteractWithContract) {
-          onInteractWithContract(args, methodRef.current)
-            .then((result) => {
-              if (
-                typeof result === "string" ||
-                (result && !result.transactionId)
-              ) {
-                setResult(result);
-              } else {
-                setTxHash(result.transactionId);
-                setResponse(result.transaction);
-              }
-            })
-            .catch((error) => {
-              setError(error?.message || "Error: Function called failed.");
-            });
-        }
+    const fclArgs = args?.map(({ value, type }) => {
+      let fclArgType = types[type];
+      if (!typeKeys.includes(type)) {
+        value = isNaN(parseFloat(value)) ? eval(value) : value;
+        fclArgType = parseFlowArgTypeFromString(type);
+      } else if (type.includes("Int")) {
+        value = parseInt(value);
+      } else if (type.includes("Fix")) {
+        value = parseFloat(value).toFixed(8);
+      } else if (type === "Boolean") {
+        value = JSON.parse(value);
       }
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Error: Execution failed."
-      );
+      return fcl.arg(value, fclArgType);
+    });
+    if (scriptType === ScriptTypes.SCRIPT) {
+      fcl
+        .send([fcl.script(script), fcl.args(fclArgs)])
+        .then(fcl.decode)
+        .then(setResult)
+        .catch((e: Error) => {
+          setResult(e.message);
+        });
+    } else {
+      const block = await fcl.send([fcl.getLatestBlock()]).then(fcl.decode);
+      try {
+        const params = [
+          fcl.args(fclArgs),
+          fcl.proposer(fcl.currentUser().authorization),
+          fcl.payer(fcl.currentUser().authorization),
+          fcl.ref(block.id),
+          fcl.limit(9999),
+        ];
+        const authorizations = [];
+        if (shouldSign) authorizations.push(fcl.currentUser().authorization);
+        if (signers?.length) {
+          signers.forEach((signer) =>
+            authorizations.push(authorization(signer))
+          );
+        }
+        if (authorizations.length)
+          params.push(fcl.authorizations(authorizations));
+
+        const { transactionId } = await fcl.send([
+          fcl.transaction(script),
+          ...params,
+        ]);
+
+        toast({
+          title: "Transaction sent, waiting for confirmation",
+          status: "success",
+          isClosable: true,
+          duration: 1000,
+        });
+
+        const unsub = fcl
+          .tx({ transactionId })
+          .subscribe((transaction: any) => {
+            setTxHash(transactionId);
+            if (transaction != response) setResponse(transaction);
+
+            if (fcl.tx.isSealed(transaction)) {
+              toast({
+                title: "Transaction is Sealed",
+                status: "success",
+                isClosable: true,
+                duration: 1000,
+              });
+              unsub();
+            }
+          });
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: "Transaction failed",
+          status: "error",
+          isClosable: true,
+          duration: 1000,
+        });
+      }
     }
   }, [
-    scriptType,
     args,
+    scriptType,
+    typeKeys,
     script,
     shouldSign,
     signers,
-    onSendScript,
-    onSignMessage,
-    onSendTransactions,
-    onInteractWithContract,
+    toast,
+    response,
   ]);
 
-  const displayResult = result || response;
-  const formattedDisplayResult =
-    typeof displayResult === "string"
-      ? displayResult
-      : JSON.stringify(displayResult, null, 2);
   return (
     <Flex
       height="calc(100vh - 76px)"
       flexDirection={{ base: "column", md: "row" }}
     >
-      <Sandbox
-        script={script}
-        onScriptChange={(event) => setScript(event.target.value)}
-        disabled={isSandboxDisabled || scriptType === ScriptTypes.SIGN}
-        hasError={!!error}
-        resultTitle={
-          result || error ? "Run result:" : `Response of tx ${txHash}:`
-        }
-        result={error || formattedDisplayResult}
-      />
+      <Flex
+        flex={{ base: 3, md: 6 }}
+        height="100%"
+        borderWidth={1}
+        flexDirection="column"
+      >
+        <Textarea
+          flex={2}
+          borderRadius="none"
+          border="none"
+          boxShadow="none"
+          onChange={(e) => setScript(e.target.value)}
+          value={script}
+          fontFamily="monospace"
+          _focus={{ border: "none", boxShadow: "none" }}
+        />
+        {((response != null && response !== "") ||
+          (result != null && result !== "")) && (
+          <Box flex={1} borderTopWidth={1} p={3}>
+            <Box fontWeight="bold" mt={3}>
+              {result ? "Run result:" : `Response of tx ${txHash}:`}
+            </Box>
+            <Box
+              borderRadius=".5em"
+              bgColor="#d1e7dd"
+              color="#0f5132"
+              mt={1}
+              p={3}
+              whiteSpace="pre-wrap"
+              maxHeight={{ base: 120, md: 240 }}
+              overflow="auto"
+            >
+              {JSON.stringify(result || response, null, 2)}
+            </Box>
+          </Box>
+        )}
+      </Flex>
 
       <Flex flex={3} height="100%" direction="column">
-        <Tabs size="md" onChange={handleTabChange} index={scriptType}>
+        <Tabs size="md" onChange={setScriptType} index={scriptType}>
           <TabList>
-            <Tab isDisabled={isScriptTabDisabled}>Script</Tab>
+            <Tab>Script</Tab>
             <Tab>Transaction</Tab>
-            <Tab>Sign Message</Tab>
-            {!isContractTabHidden && <Tab>Contract</Tab>}
           </TabList>
         </Tabs>
-        <Flex mt={4} mx={4} mb={2}>
-          {children}
-        </Flex>
         <Flex m={4}>
           <Menu>
-            <MenuButton
-              as={Button}
-              rightIcon={<ChevronDownIcon />}
-              width="130px"
-            >
+            <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
               Templates
             </MenuButton>
             <MenuList>
-              {menuGroups.map((menuGroup) => (
-                <MenuGroup key={menuGroup.title} title={menuGroup.title}>
-                  {Object.entries(menuGroup.templates).map(
-                    ([name, template]) => (
-                      <MenuItem
-                        key={name}
-                        pl={5}
-                        color="gray.700"
-                        onClick={() => importTemplate(template)}
-                      >
-                        {startCase(name)}
-                      </MenuItem>
-                    )
-                  )}
-                </MenuGroup>
-              ))}
+              <MenuGroup title="DAO">
+                {Object.entries(BloctoDAOTemplates).map(([name, template]) => (
+                  <MenuItem
+                    key={name}
+                    pl={5}
+                    color="gray.700"
+                    onClick={() => importTemplate(template)}
+                  >
+                    {startCase(name)}
+                  </MenuItem>
+                ))}
+              </MenuGroup>
+              <MenuGroup title="Transactions">
+                {Object.entries(TransactionsTemplates).map(
+                  ([name, template]) => (
+                    <MenuItem
+                      key={name}
+                      pl={5}
+                      color="gray.700"
+                      onClick={() => importTemplate(template)}
+                    >
+                      {startCase(name)}
+                    </MenuItem>
+                  )
+                )}
+              </MenuGroup>
             </MenuList>
           </Menu>
-        </Flex>
-        <Flex mx={4} my={2} whiteSpace="pre-wrap">
-          <Text>{description}</Text>
         </Flex>
 
         <Box flex={1} px={4}>
           <Flex align="center" mt={3} ml={1}>
             <Box fontWeight="bold">Args</Box>
-            {isArgsAdjustable && (
-              <IconButton
-                ml={2}
-                aria-label="Add Args"
-                isRound
-                icon={<AddIcon />}
-                size="xs"
-                colorScheme="blue"
-                onClick={() => {
-                  const newArgs =
-                    isSignMessagePreDefined && scriptType === ScriptTypes.SIGN
-                      ? signMessageArgs
-                      : (args ?? []).concat({ value: "", type: "" });
-                  setArgs(newArgs);
-                }}
-              />
-            )}
+            <IconButton
+              ml={2}
+              aria-label="Add Args"
+              isRound
+              icon={<AddIcon />}
+              size="xs"
+              colorScheme="blue"
+              onClick={() =>
+                setArgs((args ?? []).concat({ value: "", type: "" }))
+              }
+            />
           </Flex>
           <Box mt={2}>
-            {args?.map(({ value, type, comment, name }, index) => (
+            {args?.map(({ value, type, comment }, index) => (
               <Flex key={index} align="center" mt={2}>
                 <Textarea
                   rows={1}
                   value={value || ""}
                   onChange={(e) => {
                     const updated = args.slice();
-                    updated.splice(index, 1, {
-                      type,
-                      comment,
-                      name,
-                      value: e.target.value,
-                    });
+                    updated.splice(index, 1, { type, value: e.target.value });
                     setArgs(updated);
                   }}
                   placeholder={comment}
                 />
-                {isArgsAdjustable && argTypes && (
-                  <>
-                    <Select
-                      value={type}
+                <Select
+                  value={type}
+                  onChange={(e) => {
+                    const updated = args.slice();
+                    updated.splice(index, 1, { value, type: e.target.value });
+                    setArgs(updated);
+                  }}
+                  ml={2}
+                >
+                  <option value="">--</option>
+                  {typeKeys.map((key) => (
+                    <option value={key} key={key}>
+                      {key}
+                    </option>
+                  ))}
+                  {!typeKeys.includes(type) && (
+                    <option value={type}>{type}</option>
+                  )}
+                </Select>
+                <IconButton
+                  ml={2}
+                  aria-label="Delete Arg"
+                  isRound
+                  icon={<CloseIcon />}
+                  size="xs"
+                  colorScheme="red"
+                  onClick={() => {
+                    const updated = args.slice();
+                    updated.splice(index, 1);
+                    setArgs(updated);
+                  }}
+                />
+              </Flex>
+            ))}
+          </Box>
+          {scriptType === ScriptTypes.TX && (
+            <>
+              <Flex align="center" mt={3} ml={1}>
+                <Box fontWeight="bold">Extra Signers</Box>
+                <IconButton
+                  ml={2}
+                  aria-label="Add Signers"
+                  isRound
+                  icon={<AddIcon />}
+                  size="xs"
+                  colorScheme="blue"
+                  onClick={() =>
+                    setSigners(
+                      (signers ?? []).concat({ privateKey: "", address: "" })
+                    )
+                  }
+                />
+              </Flex>
+              <Box mt={2}>
+                {signers?.map(({ privateKey, address }, index) => (
+                  <Flex key={index} align="center" mt={2}>
+                    <Input
+                      value={privateKey || ""}
                       onChange={(e) => {
-                        const updated = args.slice();
+                        const updated = signers.slice();
                         updated.splice(index, 1, {
-                          value,
-                          type: e.target.value,
+                          address,
+                          privateKey: e.target.value,
                         });
-                        setArgs(updated);
+                        setSigners(updated);
                       }}
+                      placeholder="private key"
+                      type="password"
+                    />
+                    <Input
                       ml={2}
-                      isDisabled={scriptType === ScriptTypes.SIGN}
-                    >
-                      <option value="">--</option>
-                      {argTypes.map((key) => (
-                        <option value={key} key={key}>
-                          {key}
-                        </option>
-                      ))}
-                      {!argTypes.includes(type) && (
-                        <option value={type}>{type}</option>
-                      )}
-                    </Select>
+                      value={address || ""}
+                      onChange={(e) => {
+                        const updated = signers.slice();
+                        updated.splice(index, 1, {
+                          privateKey,
+                          address: e.target.value,
+                        });
+                        setSigners(updated);
+                      }}
+                      placeholder="public key"
+                    />
                     <IconButton
                       ml={2}
-                      aria-label="Delete Arg"
+                      aria-label="Delete signers"
                       isRound
                       icon={<CloseIcon />}
                       size="xs"
                       colorScheme="red"
                       onClick={() => {
-                        const updated = args.slice();
+                        const updated = signers.slice();
                         updated.splice(index, 1);
-                        setArgs(updated);
+                        setSigners(updated);
                       }}
                     />
-                  </>
-                )}
-              </Flex>
-            ))}
-          </Box>
-          {isTransactionsExtraSignersAvailable &&
-            scriptType === ScriptTypes.TX && (
-              <>
-                <Flex align="center" mt={3} ml={1}>
-                  <Box fontWeight="bold">Extra Signers</Box>
-                  <IconButton
-                    ml={2}
-                    aria-label="Add Signers"
-                    isRound
-                    icon={<AddIcon />}
-                    size="xs"
-                    colorScheme="blue"
-                    onClick={() =>
-                      setSigners(
-                        (signers ?? []).concat({ privateKey: "", address: "" })
-                      )
-                    }
-                  />
-                </Flex>
-                <Box mt={2}>
-                  {signers?.map(({ privateKey, address }, index) => (
-                    <Flex key={index} align="center" mt={2}>
-                      <Input
-                        value={privateKey || ""}
-                        onChange={(e) => {
-                          const updated = signers.slice();
-                          updated.splice(index, 1, {
-                            address,
-                            privateKey: e.target.value,
-                          });
-                          setSigners(updated);
-                        }}
-                        placeholder="private key"
-                        type="password"
-                      />
-                      <Input
-                        ml={2}
-                        value={address || ""}
-                        onChange={(e) => {
-                          const updated = signers.slice();
-                          updated.splice(index, 1, {
-                            privateKey,
-                            address: e.target.value,
-                          });
-                          setSigners(updated);
-                        }}
-                        placeholder="public key"
-                      />
-                      <IconButton
-                        ml={2}
-                        aria-label="Delete signers"
-                        isRound
-                        icon={<CloseIcon />}
-                        size="xs"
-                        colorScheme="red"
-                        onClick={() => {
-                          const updated = signers.slice();
-                          updated.splice(index, 1);
-                          setSigners(updated);
-                        }}
-                      />
-                    </Flex>
-                  ))}
-                </Box>
-              </>
-            )}
+                  </Flex>
+                ))}
+              </Box>
+            </>
+          )}
         </Box>
 
-        <Flex p={3} mt="6" bg="gray.100" color="gray.500">
-          <Text>
-            Are you short of test tokens? Here comes the{" "}
-            <Link
-              href={faucetUrl}
-              isExternal
-              color="#e5c100"
-              _focus={{ boxShadow: "none" }}
-            >
-              faucet
-            </Link>{" "}
-            for you to earn some free tokens! ✨✨
-          </Text>
-        </Flex>
-
         <Flex justify="end" p={4}>
-          {isTransactionsExtraSignersAvailable &&
-            scriptType === ScriptTypes.TX && (
-              <FormControl
-                display="flex"
-                justifyContent="end"
-                alignItems="center"
-                mt={2}
-                mx={3}
-              >
-                <FormLabel htmlFor="shouldSign" mb="0">
-                  Authorize
-                </FormLabel>
-                <Switch
-                  id="shouldSign"
-                  isChecked={shouldSign}
-                  onChange={(e) => setShouldSign(e.target.checked)}
-                />
-              </FormControl>
-            )}
+          {scriptType === ScriptTypes.TX && (
+            <FormControl
+              display="flex"
+              justifyContent="end"
+              alignItems="center"
+              mt={2}
+              mx={3}
+            >
+              <FormLabel htmlFor="shouldSign" mb="0">
+                Authorize
+              </FormLabel>
+              <Switch
+                id="shouldSign"
+                isChecked={shouldSign}
+                onChange={(e) => setShouldSign(e.target.checked)}
+              />
+            </FormControl>
+          )}
           <Button onClick={runScript} mt={2}>
             Run
           </Button>
