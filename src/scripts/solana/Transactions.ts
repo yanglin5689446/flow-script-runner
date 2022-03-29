@@ -3,6 +3,7 @@ import {
   Transaction,
   PublicKey,
   SystemProgram,
+  TransactionInstruction,
 } from "@solana/web3.js";
 import { ChainServices } from "../../services";
 import { Chains } from "../../types/ChainTypes";
@@ -53,11 +54,10 @@ export const sendSOL = {
   ],
 };
 
-export const createAccountAndTransfer = {
+export const testPartialSign = {
   type: ScriptTypes.TX,
   script: "",
-  description:
-    "Create a new account and transfer 100 lamports to it.\nThis is a kind of transaction involving dApp side signing.",
+  description: "Test Partial Sign",
   method: async (account: string): Promise<any> => {
     return new Promise(async (resolve, reject) => {
       try {
@@ -72,31 +72,19 @@ export const createAccountAndTransfer = {
         const newKeypair = new Keypair();
         const newAccountKey = newKeypair.publicKey;
 
-        const rent = await ChainServices[
-          Chains.Solana
-        ].bloctoSDK?.solana?.request({
-          method: "getMinimumBalanceForRentExemption",
-          params: [10],
+        const memoInstruction = new TransactionInstruction({
+          keys: [
+            { pubkey: publicKey, isSigner: false, isWritable: true },
+            { pubkey: newAccountKey, isSigner: true, isWritable: true },
+          ],
+          data: Buffer.from("Data to send in transaction", "utf-8"),
+          programId: new PublicKey(
+            "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+          ),
         });
-
-        const createAccountInstruction = SystemProgram.createAccount({
-          fromPubkey: publicKey,
-          newAccountPubkey: newAccountKey,
-          lamports: rent,
-          // create an account with newly-generated key, and assign it to system program
-          programId: SystemProgram.programId,
-          space: 10,
-        });
-        transaction.add(createAccountInstruction);
+        transaction.add(memoInstruction);
 
         const createdPublicKey = newAccountKey.toBase58();
-
-        const transferInstruction = SystemProgram.transfer({
-          fromPubkey: publicKey,
-          toPubkey: newAccountKey,
-          lamports: 100,
-        });
-        transaction.add(transferInstruction);
 
         transaction.feePayer = publicKey;
         transaction.recentBlockhash = blockhash;
@@ -123,7 +111,7 @@ export const createAccountAndTransfer = {
   args: [],
 };
 
-export const createAccount = {
+export const testPartialSignAndWrap = {
   type: ScriptTypes.TX,
   script: "",
   method: async (account: string): Promise<any> => {
@@ -140,22 +128,19 @@ export const createAccount = {
         const newKeypair = new Keypair();
         const newAccountKey = newKeypair.publicKey;
 
-        const rent = await ChainServices[
-          Chains.Solana
-        ].bloctoSDK?.solana?.request({
-          method: "getMinimumBalanceForRentExemption",
-          params: [10],
+        const memoInstruction = new TransactionInstruction({
+          keys: [
+            { pubkey: publicKey, isSigner: false, isWritable: true },
+            { pubkey: newAccountKey, isSigner: true, isWritable: true },
+          ],
+          data: Buffer.from("Data to send in transaction", "utf-8"),
+          programId: new PublicKey(
+            "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+          ),
         });
-
-        const createAccountInstruction = SystemProgram.createAccount({
-          fromPubkey: publicKey,
-          newAccountPubkey: newAccountKey,
-          lamports: rent,
-          // create an account with newly-generated key, and assign it to system program
-          programId: SystemProgram.programId,
-          space: 10,
-        });
-        transaction.add(createAccountInstruction);
+        // at least 2 instructions to make them wrapped by backend
+        transaction.add(memoInstruction);
+        transaction.add(memoInstruction);
 
         const createdPublicKey = newAccountKey.toBase58();
 
