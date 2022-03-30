@@ -205,7 +205,7 @@ const FlowEditor = (): ReactJSXElement => {
       disabledTabs={[ScriptTypes.CONTRACT]}
       tabsShouldLoadDefaultTemplate={[ScriptTypes.SIGN]}
       onSendScript={handleSendScript}
-      faucetUrl="https://testnet-faucet.onflow.org/"
+      faucetUrl="https://testnet-faucet.onflow.org/fund-account"
     />
   );
 };
