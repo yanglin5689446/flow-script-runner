@@ -127,65 +127,70 @@ const FlowEditor = (): ReactJSXElement => {
     ) => {
       const fclArgs = parseFclArgs(args);
       const block = await fcl.send([fcl.getLatestBlock()]).then(fcl.decode);
-      return new Promise<{ transactionId: string; transaction: any }>(
-        (resolve, reject) => {
-          try {
-            const params = [
-              fcl.args(fclArgs),
-              fcl.proposer(fcl.currentUser().authorization),
-              fcl.payer(fcl.currentUser().authorization),
-              fcl.ref(block.id),
-              fcl.limit(9999),
-            ];
-            const authorizations = [];
-            if (shouldSign)
-              authorizations.push(fcl.currentUser().authorization);
-            if (signers?.length) {
-              signers.forEach((signer) =>
-                authorizations.push(authorization(signer))
-              );
-            }
-            if (authorizations.length)
-              params.push(fcl.authorizations(authorizations));
-
-            fcl
-              .send([fcl.transaction(script), ...params])
-              .then(({ transactionId }: { transactionId: string }) => {
-                toast({
-                  title: "Transaction sent, waiting for confirmation",
-                  status: "success",
-                  isClosable: true,
-                  duration: 1000,
-                });
-
-                const unsub = fcl
-                  .tx({ transactionId })
-                  .subscribe((transaction: any) => {
-                    resolve({ transactionId, transaction });
-
-                    if (fcl.tx.isSealed(transaction)) {
-                      toast({
-                        title: "Transaction is Sealed",
-                        status: "success",
-                        isClosable: true,
-                        duration: 1000,
-                      });
-                      unsub();
-                    }
-                  });
-              })
-              .catch(reject);
-          } catch (error) {
-            reject(error);
-            toast({
-              title: "Transaction failed",
-              status: "error",
-              isClosable: true,
-              duration: 1000,
-            });
+      return new Promise<{
+        transactionId: string;
+        subscribeFunc: (callback: (transaction: any) => void) => () => void;
+        isSealed: (transaction: any) => boolean;
+      }>((resolve, reject) => {
+        try {
+          const params = [
+            fcl.args(fclArgs),
+            fcl.proposer(fcl.currentUser().authorization),
+            fcl.payer(fcl.currentUser().authorization),
+            fcl.ref(block.id),
+            fcl.limit(9999),
+          ];
+          const authorizations = [];
+          if (shouldSign) authorizations.push(fcl.currentUser().authorization);
+          if (signers?.length) {
+            signers.forEach((signer) =>
+              authorizations.push(authorization(signer))
+            );
           }
+          if (authorizations.length)
+            params.push(fcl.authorizations(authorizations));
+
+          fcl
+            .send([fcl.transaction(script), ...params])
+            .then(({ transactionId }: { transactionId: string }) => {
+              toast({
+                title: "Transaction sent, waiting for confirmation",
+                status: "success",
+                isClosable: true,
+                duration: 1000,
+              });
+
+              resolve({
+                transactionId,
+                subscribeFunc: fcl.tx({ transactionId }).subscribe,
+                isSealed: fcl.tx.isSealed,
+              });
+
+              const unsub = fcl
+                .tx({ transactionId })
+                .subscribe((transaction: any) => {
+                  if (fcl.tx.isSealed(transaction)) {
+                    toast({
+                      title: "Transaction is Sealed",
+                      status: "success",
+                      isClosable: true,
+                      duration: 1000,
+                    });
+                    unsub();
+                  }
+                });
+            })
+            .catch(reject);
+        } catch (error) {
+          reject(error);
+          toast({
+            title: "Transaction failed",
+            status: "error",
+            isClosable: true,
+            duration: 1000,
+          });
         }
-      );
+      });
     },
     [toast]
   );

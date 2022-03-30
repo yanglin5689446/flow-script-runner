@@ -46,7 +46,9 @@ interface EditorProps {
     method?: (...param: any[]) => Promise<any>
   ) => Promise<{
     transactionId: string;
-    transaction: any;
+    transaction?: any;
+    subscribeFunc?: (callback: (transaction: any) => void) => () => void;
+    isSealed?: (transaction: any) => boolean;
   }>;
   argTypes?: string[];
   shouldClearScript?: boolean;
@@ -169,9 +171,18 @@ const Editor: React.FC<EditorProps> = ({
           });
       } else if (scriptType === ScriptTypes.TX) {
         onSendTransactions(args, shouldSign, signers, script, methodRef.current)
-          .then(({ transactionId, transaction }) => {
+          .then(({ transactionId, transaction, subscribeFunc, isSealed }) => {
             setTxHash(transactionId);
             setResponse(transaction);
+
+            if (subscribeFunc && isSealed) {
+              const unsub = subscribeFunc((transaction: any) => {
+                setResponse(transaction);
+                if (isSealed(transaction)) {
+                  unsub();
+                }
+              });
+            }
           })
           .catch((error) => {
             setError(error?.message || "Error: Sending transaction failed.");
