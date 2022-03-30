@@ -7,7 +7,7 @@ import {
 } from "@solana/web3.js";
 import { ChainServices } from "../../services";
 import { Chains } from "../../types/ChainTypes";
-import ScriptTypes from "../../types/ScriptTypes";
+import ScriptTypes, { ArgTypes } from "../../types/ScriptTypes";
 
 export const sendSOL = {
   type: ScriptTypes.TX,
@@ -49,9 +49,10 @@ export const sendSOL = {
     });
   },
   args: [
-    { type: "String", comment: "amount(lamports)", name: "amount" },
-    { type: "String", comment: "receipient", name: "receipient" },
+    { type: ArgTypes.String, comment: "amount(lamports)", name: "amount" },
+    { type: ArgTypes.String, comment: "receipient", name: "receipient" },
   ],
+  isArgsAdjustable: false,
 };
 
 export const testPartialSign = {
@@ -109,6 +110,7 @@ export const testPartialSign = {
     });
   },
   args: [],
+  isArgsAdjustable: false,
 };
 
 export const testPartialSignAndWrap = {
@@ -167,4 +169,5 @@ export const testPartialSignAndWrap = {
     });
   },
   args: [],
+  isArgsAdjustable: false,
 };

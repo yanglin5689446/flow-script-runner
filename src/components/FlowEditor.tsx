@@ -8,7 +8,8 @@ import * as types from "@onflow/types";
 import * as BloctoDAOTemplates from "../scripts/flow/DAO";
 import * as SignMessageTemplates from "../scripts/flow/SignMessage";
 import * as TransactionsTemplates from "../scripts/flow/Transactions";
-import Editor, { Arg } from "./Editor";
+import ScriptTypes, { Arg } from "../types/ScriptTypes";
+import Editor from "./Editor";
 
 const typeKeys = Object.keys(types);
 
@@ -195,11 +196,9 @@ const FlowEditor = (): ReactJSXElement => {
       onSignMessage={handleSignMessage}
       onSendTransactions={handleSendTransactions}
       argTypes={typeKeys}
-      isSignMessagePreDefined
-      signMessageArgs={SignMessageTemplates.signMessage.args}
-      isArgsAdjustable
       isTransactionsExtraSignersAvailable
-      isContractTabHidden
+      disabledTabs={[ScriptTypes.CONTRACT]}
+      tabsShouldLoadDefaultTemplate={[ScriptTypes.SIGN]}
       onSendScript={handleSendScript}
       faucetUrl="https://testnet-faucet.onflow.org/"
     />

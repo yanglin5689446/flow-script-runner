@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Box,
   Button,
@@ -24,16 +30,11 @@ import {
 import { AddIcon, ChevronDownIcon, CloseIcon } from "@chakra-ui/icons";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import { startCase } from "lodash";
-import * as FlowSignMessageTemplates from "../scripts/flow/SignMessage";
-import ScriptTypes from "../types/ScriptTypes";
+import { Context } from "../context/Context";
+import ScriptTypes, { Arg, PerContractInfo } from "../types/ScriptTypes";
 import Sandbox from "./Sandbox";
 
-export interface Arg {
-  value?: any;
-  type: any;
-  comment?: string;
-  name?: string;
-}
+const TabNames = ["Script", "Transaction", "Sign Message", "Contract"];
 
 interface EditorProps {
   menuGroups: Array<{ title: string; templates: any }>;
@@ -50,12 +51,9 @@ interface EditorProps {
   argTypes?: string[];
   shouldClearScript?: boolean;
   isSandboxDisabled?: boolean;
-  isScriptTabDisabled?: boolean;
-  isSignMessagePreDefined?: boolean;
-  signMessageArgs?: Arg[];
-  isArgsAdjustable?: boolean;
+  disabledTabs?: ScriptTypes[];
+  tabsShouldLoadDefaultTemplate?: ScriptTypes[];
   isTransactionsExtraSignersAvailable?: boolean;
-  isContractTabHidden?: boolean;
   onSendScript?: (
     script: string,
     args?: Arg[],
@@ -67,6 +65,7 @@ interface EditorProps {
   ) => Promise<any>;
   faucetUrl?: string;
   onInteractWithContract?: (
+    contractInfo: Record<string, PerContractInfo>,
     args: Arg[] | undefined,
     method?: (...param: any[]) => Promise<any>
   ) => Promise<any>;
@@ -77,12 +76,9 @@ const Editor: React.FC<EditorProps> = ({
   argTypes,
   shouldClearScript,
   isSandboxDisabled,
-  isScriptTabDisabled,
-  isSignMessagePreDefined,
-  signMessageArgs,
-  isArgsAdjustable,
+  disabledTabs,
+  tabsShouldLoadDefaultTemplate,
   isTransactionsExtraSignersAvailable,
-  isContractTabHidden,
   onSendScript,
   onSignMessage,
   onSendTransactions,
@@ -90,8 +86,12 @@ const Editor: React.FC<EditorProps> = ({
   faucetUrl,
   children,
 }): ReactJSXElement => {
+  const { chain } = useContext(Context);
   const methodRef = useRef<(...param: any[]) => Promise<any>>();
   const [shouldSign, setShouldSign] = useState<boolean>();
+  const [isArgsAdjustable, setIsArgsAdjustable] = useState<boolean>(true);
+  const [contractInfo, setContractInfo] =
+    useState<Record<string, PerContractInfo>>();
   const [args, setArgs] = useState<Arg[]>();
   const [signers, setSigners] =
     useState<{ privateKey: string; address: string }[]>();
@@ -113,25 +113,35 @@ const Editor: React.FC<EditorProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldClearScript]);
 
+  const importTemplate = useCallback(
+    (template) => {
+      methodRef.current = template.method;
+      setScriptType(template.type);
+      setDescription(template.description);
+      setScript(template.script);
+      setContractInfo(template.contractInfo?.(chain));
+      setArgs(template.args);
+      setShouldSign(template.shouldSign);
+      setIsArgsAdjustable(template.isArgsAdjustable ?? true);
+    },
+    [chain]
+  );
+
   const handleTabChange = useCallback(
     (index) => {
       setScriptType(index);
-      if (isSignMessagePreDefined && index === ScriptTypes.SIGN) {
-        setScript("");
-        setArgs(FlowSignMessageTemplates.signMessage.args);
+      if (tabsShouldLoadDefaultTemplate?.includes(index)) {
+        const currentGroup = menuGroups.find(
+          (group) => group.title === TabNames[index]
+        )?.templates;
+        if (currentGroup) {
+          const templates = Object.values(currentGroup);
+          importTemplate(templates[0]);
+        }
       }
     },
-    [isSignMessagePreDefined]
+    [tabsShouldLoadDefaultTemplate, menuGroups, importTemplate]
   );
-
-  const importTemplate = useCallback((template) => {
-    methodRef.current = template.method;
-    setScriptType(template.type);
-    setDescription(template.description);
-    setScript(template.script);
-    setArgs(template.args);
-    setShouldSign(template.shouldSign);
-  }, []);
 
   const runScript = useCallback(async () => {
     setResponse("");
@@ -167,8 +177,8 @@ const Editor: React.FC<EditorProps> = ({
             setError(error?.message || "Error: Sending transaction failed.");
           });
       } else {
-        if (onInteractWithContract) {
-          onInteractWithContract(args, methodRef.current)
+        if (onInteractWithContract && contractInfo) {
+          onInteractWithContract(contractInfo, args, methodRef.current)
             .then((result) => {
               if (
                 typeof result === "string" ||
@@ -192,6 +202,7 @@ const Editor: React.FC<EditorProps> = ({
     }
   }, [
     scriptType,
+    contractInfo,
     args,
     script,
     shouldSign,
@@ -226,10 +237,11 @@ const Editor: React.FC<EditorProps> = ({
       <Flex flex={3} height="100%" direction="column">
         <Tabs size="md" onChange={handleTabChange} index={scriptType}>
           <TabList>
-            <Tab isDisabled={isScriptTabDisabled}>Script</Tab>
-            <Tab>Transaction</Tab>
-            <Tab>Sign Message</Tab>
-            {!isContractTabHidden && <Tab>Contract</Tab>}
+            {TabNames.map((tab, index) => (
+              <Tab key={tab} isDisabled={disabledTabs?.includes(index)}>
+                {tab}
+              </Tab>
+            ))}
           </TabList>
         </Tabs>
         <Flex mt={4} mx={4} mb={2}>
@@ -268,6 +280,43 @@ const Editor: React.FC<EditorProps> = ({
           <Text>{description}</Text>
         </Flex>
 
+        {scriptType === ScriptTypes.CONTRACT && (
+          <Box px={4} mb="6">
+            <Flex align="center" mt={3} ml={1}>
+              <Box fontWeight="bold">Contract info</Box>
+            </Flex>
+            <Box mt={2} ml={1}>
+              {contractInfo &&
+                Object.keys(contractInfo)?.map((key, index) => {
+                  const { value, comment } = contractInfo[key];
+                  return (
+                    <Flex key={index} align="center" mt={2}>
+                      <Text width="130px" marginRight={2}>
+                        {startCase(comment)}
+                      </Text>
+                      <Textarea
+                        flex="1"
+                        rows={1}
+                        value={value || ""}
+                        onChange={(e) => {
+                          const updated = {
+                            ...contractInfo,
+                            [key]: {
+                              ...contractInfo[key],
+                              value: e.target.value,
+                            },
+                          };
+                          setContractInfo(updated);
+                        }}
+                        placeholder={comment}
+                      />
+                    </Flex>
+                  );
+                })}
+            </Box>
+          </Box>
+        )}
+
         <Box flex={1} px={4}>
           <Flex align="center" mt={3} ml={1}>
             <Box fontWeight="bold">Args</Box>
@@ -279,13 +328,9 @@ const Editor: React.FC<EditorProps> = ({
                 icon={<AddIcon />}
                 size="xs"
                 colorScheme="blue"
-                onClick={() => {
-                  const newArgs =
-                    isSignMessagePreDefined && scriptType === ScriptTypes.SIGN
-                      ? signMessageArgs
-                      : (args ?? []).concat({ value: "", type: "" });
-                  setArgs(newArgs);
-                }}
+                onClick={() =>
+                  setArgs((args ?? []).concat({ value: "", type: "" }))
+                }
               />
             )}
           </Flex>
@@ -307,45 +352,46 @@ const Editor: React.FC<EditorProps> = ({
                   }}
                   placeholder={comment}
                 />
-                {isArgsAdjustable && argTypes && (
-                  <>
-                    <Select
-                      value={type}
-                      onChange={(e) => {
-                        const updated = args.slice();
-                        updated.splice(index, 1, {
-                          value,
-                          type: e.target.value,
-                        });
-                        setArgs(updated);
-                      }}
-                      ml={2}
-                      isDisabled={scriptType === ScriptTypes.SIGN}
-                    >
-                      <option value="">--</option>
-                      {argTypes.map((key) => (
-                        <option value={key} key={key}>
-                          {key}
-                        </option>
-                      ))}
-                      {!argTypes.includes(type) && (
-                        <option value={type}>{type}</option>
-                      )}
-                    </Select>
-                    <IconButton
-                      ml={2}
-                      aria-label="Delete Arg"
-                      isRound
-                      icon={<CloseIcon />}
-                      size="xs"
-                      colorScheme="red"
-                      onClick={() => {
-                        const updated = args.slice();
-                        updated.splice(index, 1);
-                        setArgs(updated);
-                      }}
-                    />
-                  </>
+                {argTypes && (
+                  <Select
+                    value={type}
+                    onChange={(e) => {
+                      const updated = args.slice();
+                      updated.splice(index, 1, {
+                        ...updated[index],
+                        value,
+                        type: e.target.value,
+                      });
+                      setArgs(updated);
+                    }}
+                    ml={2}
+                    isDisabled={!isArgsAdjustable}
+                  >
+                    <option value="">--</option>
+                    {argTypes.map((key) => (
+                      <option value={key} key={key}>
+                        {key}
+                      </option>
+                    ))}
+                    {!argTypes.includes(type) && type && (
+                      <option value={type}>{type}</option>
+                    )}
+                  </Select>
+                )}
+                {isArgsAdjustable && (
+                  <IconButton
+                    ml={2}
+                    aria-label="Delete Arg"
+                    isRound
+                    icon={<CloseIcon />}
+                    size="xs"
+                    colorScheme="red"
+                    onClick={() => {
+                      const updated = args.slice();
+                      updated.splice(index, 1);
+                      setArgs(updated);
+                    }}
+                  />
                 )}
               </Flex>
             ))}

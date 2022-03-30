@@ -1,6 +1,6 @@
 import { ChainServices } from "../../services";
 import { EvmChain } from "../../types/ChainTypes";
-import ScriptTypes from "../../types/ScriptTypes";
+import ScriptTypes, { ArgTypes } from "../../types/ScriptTypes";
 
 export const sendTokens = {
   type: ScriptTypes.TX,
@@ -16,8 +16,9 @@ export const sendTokens = {
       value: args.amount,
     }),
   args: [
-    { type: "String", comment: "amount(wei)", name: "amount" },
-    { type: "String", comment: "receipient", name: "receipient" },
+    { type: ArgTypes.String, comment: "amount(wei)", name: "amount" },
+    { type: ArgTypes.String, comment: "receipient", name: "receipient" },
   ],
   shouldSign: true,
+  isArgsAdjustable: false,
 };

@@ -4,8 +4,14 @@ import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import { Context } from "../context/Context";
 import * as ContractTemplates from "../scripts/solana/Contract";
 import * as TransactionsTemplates from "../scripts/solana/Transactions";
-import Editor, { Arg } from "./Editor";
-import ScriptTypes from "../types/ScriptTypes";
+import ScriptTypes, {
+  Arg,
+  ArgTypes,
+  PerContractInfo,
+} from "../types/ScriptTypes";
+import Editor from "./Editor";
+
+const typeKeys = Object.values(ArgTypes);
 
 const MenuGroups = [
   { title: "Transactions", templates: TransactionsTemplates },
@@ -13,14 +19,15 @@ const MenuGroups = [
 ];
 
 const SolanaEditor = (): ReactJSXElement => {
-  const { chain, address, login } = useContext(Context);
+  const { address, login } = useContext(Context);
   const toast = useToast();
 
   const execute = useCallback(
     async (
       type: ScriptTypes.TX | ScriptTypes.CONTRACT,
       args: Arg[] | undefined,
-      method?: (...param: any[]) => Promise<any>
+      method?: (...param: any[]) => Promise<any>,
+      contractInfo?: Record<string, PerContractInfo>
     ): Promise<{ transactionId: string; transaction: any }> => {
       return new Promise(async (resolve, reject) => {
         const noArgValuesProvided = args?.every(
@@ -39,7 +46,10 @@ const SolanaEditor = (): ReactJSXElement => {
         const formattedArgs = args?.reduce(
           (initial: { [key: string]: any }, currentValue: Arg) => {
             if (currentValue.name) {
-              initial[currentValue.name] = currentValue.value;
+              initial[currentValue.name] =
+                currentValue.type === ArgTypes.Number
+                  ? +currentValue.value
+                  : currentValue.value;
             }
             return initial;
           },
@@ -62,7 +72,13 @@ const SolanaEditor = (): ReactJSXElement => {
             userAddress = await login();
           }
 
-          method(userAddress, formattedArgs, chain)
+          const info = contractInfo && {
+            programId: contractInfo.programId.value,
+            accountPubKey: contractInfo.accountPubKey.value,
+            struct: contractInfo.struct.value,
+            methodIndex: contractInfo.methodIndex?.value,
+          };
+          method(userAddress, formattedArgs, info)
             .then((transaction) => {
               resolve(transaction);
               toast({
@@ -91,7 +107,7 @@ const SolanaEditor = (): ReactJSXElement => {
         }
       });
     },
-    [address, toast, login, chain]
+    [address, toast, login]
   );
 
   const handleSendTransactions = useCallback(
@@ -109,10 +125,11 @@ const SolanaEditor = (): ReactJSXElement => {
 
   const handleInteractWithContract = useCallback(
     async (
+      contractInfo: Record<string, PerContractInfo>,
       args: Arg[] | undefined,
       method?: (...param: any[]) => Promise<any>
     ): Promise<{ transactionId: string; transaction: any }> => {
-      return execute(ScriptTypes.CONTRACT, args, method);
+      return execute(ScriptTypes.CONTRACT, args, method, contractInfo);
     },
     [execute]
   );
@@ -121,10 +138,12 @@ const SolanaEditor = (): ReactJSXElement => {
     <Editor
       menuGroups={MenuGroups}
       onSendTransactions={handleSendTransactions}
+      argTypes={typeKeys}
       onInteractWithContract={handleInteractWithContract}
       isSandboxDisabled
       shouldClearScript
-      isScriptTabDisabled
+      disabledTabs={[ScriptTypes.SCRIPT, ScriptTypes.SIGN]}
+      tabsShouldLoadDefaultTemplate={[ScriptTypes.CONTRACT]}
       faucetUrl="https://solfaucet.com/"
     />
   );

@@ -5,9 +5,16 @@ import { Context } from "../context/Context";
 import * as ContractTemplates from "../scripts/evm/Contract";
 import * as SignMessageTemplates from "../scripts/evm/SignMessage";
 import * as TransactionsTemplates from "../scripts/evm/Transactions";
-import Editor, { Arg } from "./Editor";
-import EvmChainSelect from "./EvmChainSelect";
 import { EvmChain } from "../types/ChainTypes";
+import ScriptTypes, {
+  Arg,
+  ArgTypes,
+  PerContractInfo,
+} from "../types/ScriptTypes";
+import Editor from "./Editor";
+import EvmChainSelect from "./EvmChainSelect";
+
+const typeKeys = Object.values(ArgTypes);
 
 const FaucetUrls = {
   [EvmChain.Ethereum]: "https://rinkeby-faucet.com/",
@@ -19,8 +26,28 @@ const FaucetUrls = {
 const MenuGroups = [
   { title: "Transactions", templates: TransactionsTemplates },
   { title: "Sign Message", templates: SignMessageTemplates },
-  { title: "Interact With Contract", templates: ContractTemplates },
+  { title: "Contract", templates: ContractTemplates },
 ];
+
+const formatTransactionArgs = (args: Arg[] | undefined) => {
+  return args?.reduce((initial: { [key: string]: any }, currentValue: Arg) => {
+    if (currentValue.name) {
+      initial[currentValue.name] =
+        currentValue.type === ArgTypes.Number
+          ? +currentValue.value
+          : currentValue.value;
+    }
+    return initial;
+  }, {});
+};
+
+const formatContractArgs = (args: Arg[] | undefined) => {
+  return args
+    ?.map((arg) => {
+      return arg.type === ArgTypes.Number ? +arg.value : arg.value;
+    })
+    .filter((arg): arg is string | number => arg);
+};
 
 const EvmEditor = (): ReactJSXElement => {
   const { chain, address, login } = useContext(Context);
@@ -45,57 +72,27 @@ const EvmEditor = (): ReactJSXElement => {
     [address, login, chain]
   );
 
-  const checkArguments = useCallback(
+  const checkArgumentsAndAddress = useCallback(
     async (args: Arg[] | undefined) => {
-      const noArgsProvided = args?.every((arg) => arg.value === undefined);
-      if (args?.length !== 0 && noArgsProvided) {
-        throw new Error("Error: Transaction arguments are missing.");
-      }
-      const formattedArgs = args?.reduce(
-        (initial: { [key: string]: any }, currentValue: Arg) => {
-          if (currentValue.name) {
-            initial[currentValue.name] = currentValue.value;
-          }
-          return initial;
-        },
-        {}
-      );
-
-      try {
-        let evmAddress = address;
-        if (!evmAddress && login) {
-          evmAddress = await login();
-        }
-        return { address, formattedArgs };
-      } catch (error) {
-        throw error;
-      }
-    },
-    [address, login]
-  );
-
-  const execute = useCallback(
-    async (
-      args: Arg[] | undefined,
-      method?: (...param: any[]) => Promise<any>
-    ): Promise<any> => {
       return new Promise(async (resolve, reject) => {
-        if (!method) {
-          return reject(new Error("Error: Transaction method is missing."));
+        const noArgsProvided = args?.every((arg) => arg.value === undefined);
+        if (args?.length !== 0 && noArgsProvided) {
+          throw new Error("Error: Transaction arguments are missing.");
         }
 
         try {
-          const { address: evmAddress, formattedArgs } = await checkArguments(
-            args
-          );
+          let evmAddress = address;
+          if (!evmAddress && login) {
+            evmAddress = await login();
+          }
 
-          method(evmAddress, formattedArgs, chain).then(resolve).catch(reject);
+          resolve(evmAddress);
         } catch (error) {
           reject(error);
         }
       });
     },
-    [chain, checkArguments]
+    [address, login]
   );
 
   const handleSendTransactions = useCallback(
@@ -107,7 +104,14 @@ const EvmEditor = (): ReactJSXElement => {
       method?: (...param: any[]) => Promise<any>
     ): Promise<{ transactionId: string; transaction: any }> => {
       return new Promise(async (resolve, reject) => {
-        execute(args, method)
+        if (!method) {
+          return reject(new Error("Error: Transaction method is missing."));
+        }
+
+        const address = await checkArgumentsAndAddress(args);
+        const formattedArgs = formatTransactionArgs(args);
+
+        method(address, formattedArgs, chain)
           .then((transaction) => {
             resolve({
               transactionId: transaction.transactionHash,
@@ -131,16 +135,31 @@ const EvmEditor = (): ReactJSXElement => {
           });
       });
     },
-    [toast, execute]
+    [toast, checkArgumentsAndAddress, chain]
   );
 
   const handleInteractWithContract = useCallback(
     async (
+      contractInfo: Record<string, PerContractInfo>,
       args: Arg[] | undefined,
       method?: (...param: any[]) => Promise<any>
     ): Promise<string | { transactionId: string; transaction: any }> => {
       return new Promise(async (resolve, reject) => {
-        execute(args, method)
+        if (!method) {
+          return reject(new Error("Error: Transaction method is missing."));
+        }
+
+        const address = await checkArgumentsAndAddress(args);
+        const formattedArgs = formatContractArgs(args);
+
+        method({
+          account: address,
+          args: formattedArgs,
+          chain,
+          contractAbi: contractInfo?.contractAbi?.value,
+          contractAddress: contractInfo?.contractAddress?.value,
+          methodName: contractInfo?.methodName?.value,
+        })
           .then((result) => {
             resolve(
               typeof result === "string"
@@ -168,7 +187,7 @@ const EvmEditor = (): ReactJSXElement => {
           });
       });
     },
-    [toast, execute]
+    [toast, checkArgumentsAndAddress, chain]
   );
 
   return (
@@ -176,10 +195,12 @@ const EvmEditor = (): ReactJSXElement => {
       menuGroups={MenuGroups}
       onSignMessage={handleSignMessage}
       onSendTransactions={handleSendTransactions}
+      argTypes={typeKeys}
       onInteractWithContract={handleInteractWithContract}
       isSandboxDisabled
       shouldClearScript
-      isScriptTabDisabled
+      disabledTabs={[ScriptTypes.SCRIPT]}
+      tabsShouldLoadDefaultTemplate={[ScriptTypes.SIGN, ScriptTypes.CONTRACT]}
       faucetUrl={(chain as EvmChain) ? FaucetUrls[chain as EvmChain] : ""}
     >
       <EvmChainSelect />
