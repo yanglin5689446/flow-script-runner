@@ -6,9 +6,9 @@ import LoginButton from "./LoginButton";
 import { Chains } from "../types/ChainTypes";
 
 export const TabInfos = [
-  { name: "Flow Script Runner", chain: Chains.Flow },
-  { name: "EVM Runner", chain: Chains.Ethereum },
-  { name: "Solana Runner", chain: Chains.Solana },
+  { name: "Flow", chain: Chains.Flow },
+  { name: "EVM", chain: Chains.Ethereum },
+  { name: "Solana", chain: Chains.Solana },
 ];
 
 const Header = (): ReactJSXElement => {
@@ -36,9 +36,9 @@ const Header = (): ReactJSXElement => {
             <Tab
               key={name}
               fontWeight="bold"
-              fontSize="1.5em"
+              fontSize={["1em", "1.5em"]}
               border="none"
-              marginLeft="2em"
+              marginLeft={[".5em", "1em"]}
               opacity={index === currentTab ? "1" : "0.4"}
               transform={index === currentTab ? "none" : "scale(0.95)"}
               _first={{ marginLeft: "0" }}

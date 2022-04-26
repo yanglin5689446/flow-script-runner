@@ -9,13 +9,16 @@ export interface ExtendedEthereumProviderInterface
 export interface ExtendedEvmBloctoSDK extends BloctoSDK {
   ethereum: ExtendedEthereumProviderInterface;
 }
+const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 
 const bloctoSDK = new BloctoSDK({
   ethereum: {
     // (required) chainId to be used
-    chainId: "0x4",
+    chainId: isMainnet ? "0x1" : "0x4",
     // (required for Ethereum) JSON RPC endpoint
-    rpc: "https://rinkeby.infura.io/v3/ef5a5728e2354955b562d2ffa4ae5305",
+    rpc: `https://${
+      isMainnet ? "mainnet" : "rinkeby"
+    }.infura.io/v3/ef5a5728e2354955b562d2ffa4ae5305`,
   },
 }) as ExtendedEvmBloctoSDK;
 

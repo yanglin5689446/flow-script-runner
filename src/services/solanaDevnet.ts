@@ -9,9 +9,11 @@ export interface ExtendedSolaneBloctoSDK extends BloctoSDK {
   solana: ExtendedSolanaProviderInterface;
 }
 
+const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
+
 const bloctoSDK = new BloctoSDK({
   solana: {
-    net: "devnet",
+    net: isMainnet ? "mainnet-beta" : "devnet",
   },
 }) as ExtendedSolaneBloctoSDK;
 

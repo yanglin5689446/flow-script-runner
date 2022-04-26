@@ -2,10 +2,14 @@ import Web3 from "web3";
 import BloctoSDK from "@blocto/sdk";
 import { ExtendedEvmBloctoSDK } from "./rinkeby";
 
+const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
+
 const bloctoSDK = new BloctoSDK({
   ethereum: {
-    chainId: "0xa869", // 97: BSC Testnet,
-    rpc: "https://api.avax-test.network/ext/bc/C/rpc",
+    chainId: isMainnet ? "0xa86a" : "0xa869",
+    rpc: isMainnet
+      ? "https://rpc.ankr.com/avalanche"
+      : "https://api.avax-test.network/ext/bc/C/rpc",
   },
 }) as ExtendedEvmBloctoSDK;
 

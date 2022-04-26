@@ -36,6 +36,7 @@ import Sandbox from "./Sandbox";
 
 const TabNames = ["Script", "Transaction", "Sign Message", "Contract"];
 
+const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 interface EditorProps {
   menuGroups: Array<{ title: string; templates: any }>;
   onSendTransactions: (
@@ -234,22 +235,24 @@ const Editor: React.FC<EditorProps> = ({
       height="calc(100vh - 76px)"
       flexDirection={{ base: "column", md: "row" }}
     >
-      <Sandbox
-        script={script}
-        onScriptChange={(event) => setScript(event.target.value)}
-        disabled={isSandboxDisabled || scriptType === ScriptTypes.SIGN}
-        hasError={!!error}
-        resultTitle={
-          result || error ? "Run result:" : `Response of tx ${txHash}:`
-        }
-        result={error || formattedDisplayResult}
-      />
+      {!isSandboxDisabled && (
+        <Sandbox
+          script={script}
+          onScriptChange={(event) => setScript(event.target.value)}
+          disabled={scriptType === ScriptTypes.SIGN}
+          hasError={!!error}
+          resultTitle={
+            result || error ? "Run result:" : `Response of tx ${txHash}:`
+          }
+          result={error || formattedDisplayResult}
+        />
+      )}
 
       <Flex flex={3} height="100%" direction="column">
         <Tabs size="md" onChange={handleTabChange} index={scriptType}>
           <TabList>
             {TabNames.map((tab, index) => (
-              <Tab key={tab} isDisabled={disabledTabs?.includes(index)}>
+              <Tab key={tab} hidden={!!disabledTabs?.includes(index)}>
                 {tab}
               </Tab>
             ))}
@@ -475,20 +478,22 @@ const Editor: React.FC<EditorProps> = ({
             )}
         </Box>
 
-        <Flex p={3} mt="6" bg="gray.100" color="gray.500">
-          <Text>
-            Are you short of test tokens? Here comes the{" "}
-            <Link
-              href={faucetUrl}
-              isExternal
-              color="#e5c100"
-              _focus={{ boxShadow: "none" }}
-            >
-              faucet
-            </Link>{" "}
-            for you to earn some free tokens! ✨✨
-          </Text>
-        </Flex>
+        {!isMainnet && (
+          <Flex p={3} mt="6" bg="gray.100" color="gray.500">
+            <Text>
+              Are you short of test tokens? Here comes the{" "}
+              <Link
+                href={faucetUrl}
+                isExternal
+                color="#e5c100"
+                _focus={{ boxShadow: "none" }}
+              >
+                faucet
+              </Link>{" "}
+              for you to earn some free tokens! ✨✨
+            </Text>
+          </Flex>
+        )}
 
         <Flex justify="end" p={4}>
           {isTransactionsExtraSignersAvailable &&
