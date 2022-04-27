@@ -63,7 +63,7 @@ pub fun main (address: Address): UFix64 {
 
 export const sendFUSD = {
   type: ScriptTypes.TX,
-  script: `
+  script: `\
 import FungibleToken from ${getAddress("FungibleToken")}
 import FUSD from ${getAddress("FUSD")}
 
@@ -81,8 +81,7 @@ transaction(amount: UFix64, to: Address) {
 			?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
     }
-}
-`,
+}`,
   args: [
     { type: "UFix64", comment: "amount" },
     { type: "Address", comment: "receipient" },
@@ -92,7 +91,7 @@ transaction(amount: UFix64, to: Address) {
 
 export const sendBLT = {
   type: ScriptTypes.TX,
-  script: `
+  script: `\
 import FungibleToken from ${getAddress("FungibleToken")}
 import BloctoToken from ${getAddress("BloctoToken")}
 
@@ -110,8 +109,7 @@ transaction(amount: UFix64, to: Address) {
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
         receiverRef.deposit(from: <-self.sentVault)
     }
-}
-  `,
+}`,
   args: [
     { type: "UFix64", comment: "amount" },
     { type: "Address", comment: "receipient" },
@@ -121,26 +119,39 @@ transaction(amount: UFix64, to: Address) {
 
 export const sendTUSDT = {
   type: ScriptTypes.TX,
-  script: `
+  script: `\
 import FungibleToken from ${getAddress("FungibleToken")}
 import TeleportedTetherToken from ${getAddress("TeleportedTetherToken")}
 
 transaction(amount: UFix64, to: Address) {
+
+    // The Vault resource that holds the tokens that are being transferred
     let sentVault: @FungibleToken.Vault
+
     prepare(signer: AuthAccount) {
+
+        // Get a reference to the signer's stored vault
         let vaultRef = signer.borrow<&TeleportedTetherToken.Vault>(from: TeleportedTetherToken.TokenStoragePath)
             ?? panic("Could not borrow reference to the owner's Vault!")
+
+        // Withdraw tokens from the signer's stored vault
         self.sentVault <- vaultRef.withdraw(amount: amount)
     }
 
     execute {
+
+        // Get the recipient's public account object
         let recipient = getAccount(to)
-        let receiverRef = recipient.getCapability(TeleportedTetherToken.TokenPublicReceiverPath)!.borrow<&{FungibleToken.Receiver}>()
+
+        // Get a reference to the recipient's Receiver
+        let receiverRef = recipient.getCapability(TeleportedTetherToken.TokenPublicReceiverPath)
+            .borrow<&{FungibleToken.Receiver}>()
             ?? panic("Could not borrow receiver reference to the recipient's Vault")
+
+        // Deposit the withdrawn tokens in the recipient's receiver
         receiverRef.deposit(from: <-self.sentVault)
     }
-}
-    `,
+}`,
   args: [
     { type: "UFix64", comment: "amount" },
     { type: "Address", comment: "receipient" },
@@ -150,7 +161,7 @@ transaction(amount: UFix64, to: Address) {
 
 export const sendFlow = {
   type: ScriptTypes.TX,
-  script: `
+  script: `\
 import FungibleToken from ${getAddress("FungibleToken")}
 import FlowToken from ${getAddress("FlowToken")}
 
@@ -182,8 +193,7 @@ transaction(amount: UFix64, to: Address) {
         // Deposit the withdrawn tokens in the recipient's receiver
         receiverRef.deposit(from: <-self.sentVault)
     }
-}
-    `,
+}`,
   args: [
     { type: "UFix64", comment: "amount" },
     { type: "Address", comment: "receipient" },
