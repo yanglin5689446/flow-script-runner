@@ -10,6 +10,7 @@ export const Context: React.Context<{
   switchChain?: (chain: ChainsType) => void;
   address?: string;
   login?: () => Promise<string>;
+  logout?: () => void;
 }> = React.createContext({});
 
 const ContextProvider: React.FC = ({ children }) => {
@@ -33,9 +34,7 @@ const ContextProvider: React.FC = ({ children }) => {
 
   const login = useCallback(async () => {
     if (chain === Chains.Flow) {
-      if (ChainServices.getChainAddress(Chains.Flow)) {
-        fcl.unauthenticate();
-      } else {
+      if (!ChainServices.getChainAddress(Chains.Flow)) {
         fcl.authenticate();
       }
       return;
@@ -55,8 +54,21 @@ const ContextProvider: React.FC = ({ children }) => {
     return accounts[0];
   }, [chain]);
 
+  const logout = useCallback(async () => {
+    if (chain === Chains.Flow) {
+      if (ChainServices.getChainAddress(Chains.Flow)) {
+        fcl.unauthenticate();
+      }
+      return;
+    }
+
+    localStorage.removeItem("sdk.session");
+
+    setAddress("");
+  }, [chain]);
+
   return (
-    <Context.Provider value={{ chain, switchChain, address, login }}>
+    <Context.Provider value={{ chain, switchChain, address, login, logout }}>
       {children}
     </Context.Provider>
   );
