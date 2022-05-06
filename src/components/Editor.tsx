@@ -230,6 +230,8 @@ const Editor: React.FC<EditorProps> = ({
     typeof displayResult === "string"
       ? displayResult
       : JSON.stringify(displayResult, null, 2);
+  const resultTitle =
+    result || error ? "Run result:" : `Response of tx ${txHash}:`;
   return (
     <Flex
       height="calc(100vh - 76px)"
@@ -241,9 +243,7 @@ const Editor: React.FC<EditorProps> = ({
           onScriptChange={(event) => setScript(event.target.value)}
           disabled={scriptType === ScriptTypes.SIGN}
           hasError={!!error}
-          resultTitle={
-            result || error ? "Run result:" : `Response of tx ${txHash}:`
-          }
+          resultTitle={resultTitle}
           result={error || formattedDisplayResult}
         />
       )}
@@ -493,6 +493,26 @@ const Editor: React.FC<EditorProps> = ({
               for you to earn some free tokens! ✨✨
             </Text>
           </Flex>
+        )}
+
+        {isSandboxDisabled && (error || formattedDisplayResult) && (
+          <Box flex={1} borderTopWidth={1} p={3} width="100vw">
+            <Box fontWeight="bold" mt={3}>
+              {resultTitle}
+            </Box>
+            <Box
+              borderRadius=".5em"
+              bgColor={!!error ? "#f8d7da" : "#d1e7dd"}
+              color={!!error ? "#842029" : "#0f5132"}
+              mt={1}
+              p={3}
+              whiteSpace="pre-wrap"
+              maxHeight={{ base: 100, md: 200 }}
+              overflow="auto"
+            >
+              {error || formattedDisplayResult}
+            </Box>
+          </Box>
         )}
 
         <Flex justify="end" p={4}>
