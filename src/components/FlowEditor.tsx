@@ -5,6 +5,7 @@ import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import { ec as EC } from "elliptic";
 import { SHA3 } from "sha3";
 import * as types from "@onflow/types";
+import * as Campaign from "../scripts/flow/Campaign";
 import * as BloctoDAOTemplates from "../scripts/flow/DAO";
 import * as SignMessageTemplates from "../scripts/flow/SignMessage";
 import * as TransactionsTemplates from "../scripts/flow/Transactions";
@@ -106,6 +107,7 @@ function parseFclArgs(args: Arg[] = []) {
 }
 
 const MenuGroups = [
+  { title: "Campaign", templates: Campaign },
   { title: "DAO", templates: BloctoDAOTemplates },
   { title: "Transactions", templates: TransactionsTemplates },
   { title: "Sign Message", templates: SignMessageTemplates },

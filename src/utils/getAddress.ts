@@ -13,6 +13,8 @@ export default function getAddress(key: string): string {
         return "0x0f9df91c9121c460";
       case "TeleportedTetherToken":
         return "0x78fea665a361cf0e";
+      case "BloctoPrize":
+        return "0xa9ea962dd3e75ee5";
       default:
         return "";
     }
@@ -30,6 +32,8 @@ export default function getAddress(key: string): string {
         return "0x6e0797ac987005f5";
       case "TeleportedTetherToken":
         return "0xab26e0a07d770ec1";
+      case "BloctoPrize":
+        return "0xc52330593c1d935f";
       default:
         return "";
     }
