@@ -270,7 +270,7 @@ const Editor: React.FC<EditorProps> = ({
             >
               Templates
             </MenuButton>
-            <MenuList>
+            <MenuList maxHeight={400} overflow="auto">
               {menuGroups.map((menuGroup) => (
                 <MenuGroup key={menuGroup.title} title={menuGroup.title}>
                   {Object.entries(menuGroup.templates).map(
