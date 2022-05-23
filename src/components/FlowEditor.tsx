@@ -86,7 +86,13 @@ function parseFclArgs(args: Arg[] = []) {
   return args.map(({ value, type }): { value: any; xform: any } => {
     let fclArgType = types[type];
     if (!typeKeys.includes(type)) {
-      value = isNaN(parseFloat(value)) ? eval(value) : value;
+      if (
+        value == null ||
+        value === "true" ||
+        value === "false" ||
+        (value.startsWith("[") && value.endsWith("]"))
+      )
+        value = eval(value);
       fclArgType = parseFlowArgTypeFromString(type);
     } else if (type.includes("Int")) {
       value = parseInt(value);
