@@ -2563,10 +2563,15 @@
   resolved "https://registry.yarnpkg.com/@onflow/rlp/-/rlp-0.0.3.tgz#42e10944309732bfd9acca79710c8210b9aabd4c"
   integrity sha512-oAf0VEiMjX8eC6Vd66j1BdGYTHOM6UBaS/sLSScnc7bKX5gICqe2gtEsCeJVE9rUzRk3GD3JqXRnPAW6YFWd/Q==
 
-"@onflow/types@0.0.6", "@onflow/types@^0.0.6":
+"@onflow/types@0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@onflow/types/-/types-0.0.6.tgz#4fb20754565da4995a1b0b71b01210947f899841"
   integrity sha512-2eBrmqiFO37EUOJvzksygP8Wu6lL/m9az36AF0qYdGQW/79KGCHBCchUsIzxyGt8UDXl/dgnIcMkiTH7tWZqXg==
+
+"@onflow/types@^1.0.0":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@onflow/types/-/types-1.0.1.tgz#2b9a5332d55e2526432304cac7f7a51870865357"
+  integrity sha512-1fmNUIqi6shXs0OCt0nouXgg0y/PtZoQp8128sOtB5zGdzaTwiluoYZMNtashdTQbqY4ZssTMJjSObPWhyIzAA==
 
 "@onflow/util-actor@0.0.2":
   version "0.0.2"
