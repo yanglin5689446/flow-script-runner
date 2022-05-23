@@ -92,7 +92,7 @@ function parseFclArgs(args: Arg[] = []) {
       value = parseInt(value);
     } else if (type.includes("Fix")) {
       value = parseFloat(value).toFixed(8);
-    } else if (type === "Boolean") {
+    } else if (type === "Bool") {
       value = JSON.parse(value);
     }
     return fcl.arg(value, fclArgType);
