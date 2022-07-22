@@ -8,7 +8,7 @@ import FungibleToken from ${getAddress("FungibleToken")}
 import FUSD from ${getAddress("FUSD")}
 
 pub fun main (address: Address): UFix64 {
-    let vaultRef = getAccount(address).getCapability(/public/fusdBalance)!.borrow<&FungibleToken.Vault{FungibleToken.Balance}>()
+    let vaultRef = getAccount(address).getCapability(/public/fusdBalance)!.borrow<&AnyResource{FungibleToken.Balance}>()
         ?? panic("Could not borrow reference to the owner's Vault!")
     return vaultRef.balance
 }
@@ -23,7 +23,7 @@ export const getBLTBalance = {
   import BloctoToken from ${getAddress("BloctoToken")}
   
   pub fun main (address: Address): UFix64 {
-      let vaultRef = getAccount(address).getCapability(/public/bloctoTokenBalance)!.borrow<&FungibleToken.Vault{FungibleToken.Balance}>()
+      let vaultRef = getAccount(address).getCapability(/public/bloctoTokenBalance)!.borrow<&AnyResource{FungibleToken.Balance}>()
           ?? panic("Could not borrow reference to the owner's Vault!")
       return vaultRef.balance
   }
@@ -38,7 +38,7 @@ import FungibleToken from ${getAddress("FungibleToken")}
 import TeleportedTetherToken from ${getAddress("TeleportedTetherToken")}
 
 pub fun main (address: Address): UFix64 {
-    let vaultRef = getAccount(address).getCapability(TeleportedTetherToken.TokenPublicBalancePath)!.borrow<&FungibleToken.Vault{FungibleToken.Balance}>()
+    let vaultRef = getAccount(address).getCapability(TeleportedTetherToken.TokenPublicBalancePath)!.borrow<&AnyResource{FungibleToken.Balance}>()
         ?? panic("Could not borrow reference to the owner's Vault!")
     return vaultRef.balance
 }
@@ -53,7 +53,7 @@ import FungibleToken from ${getAddress("FungibleToken")}
 import FlowToken from ${getAddress("FlowToken")}
 
 pub fun main (address: Address): UFix64 {
-    let vaultRef = getAccount(address).getCapability(/public/flowTokenBalance)!.borrow<&FungibleToken.Vault{FungibleToken.Balance}>()
+    let vaultRef = getAccount(address).getCapability(/public/flowTokenBalance)!.borrow<&AnyResource{FungibleToken.Balance}>()
         ?? panic("Could not borrow reference to the owner's Vault!")
     return vaultRef.balance
 }
