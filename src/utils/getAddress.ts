@@ -23,7 +23,7 @@ export default function getAddress(key: string): string {
       case "FlowToken":
         return "0x7e60df042a9c0868";
       case "BloctoDAO":
-        return "0x18cce040948c8c91";
+        return "0x7deafdfc288e422d";
       case "FungibleToken":
         return "0x9a0766d93b6608b7";
       case "FUSD":
