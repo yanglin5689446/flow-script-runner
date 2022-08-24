@@ -1,6 +1,7 @@
 export enum OtherChain {
   Flow = "flow",
   Solana = "solana",
+  Aptos = "aptos",
 }
 
 export enum EvmChain {

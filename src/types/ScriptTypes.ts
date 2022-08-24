@@ -1,8 +1,8 @@
 enum ScriptTypes {
   SCRIPT,
   TX,
-  SIGN,
   CONTRACT,
+  SIGN,
 }
 
 export default ScriptTypes;
@@ -15,6 +15,8 @@ export interface Arg {
 }
 
 export enum ArgTypes {
+  TypeArg = "type_arg",
+  Address = "address",
   String = "string",
   Number = "number",
 }

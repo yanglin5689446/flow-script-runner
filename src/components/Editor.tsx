@@ -34,7 +34,7 @@ import { Context } from "../context/Context";
 import ScriptTypes, { Arg, PerContractInfo } from "../types/ScriptTypes";
 import Sandbox from "./Sandbox";
 
-const TabNames = ["Script", "Transaction", "Sign Message", "Contract"];
+const TabNames = ["Script", "Transaction", "Contract", "Sign Message"];
 
 const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 interface EditorProps {
@@ -55,6 +55,7 @@ interface EditorProps {
   shouldClearScript?: boolean;
   isSandboxDisabled?: boolean;
   disabledTabs?: ScriptTypes[];
+  defaultTab?: ScriptTypes;
   tabsShouldLoadDefaultTemplate?: ScriptTypes[];
   isTransactionsExtraSignersAvailable?: boolean;
   onSendScript?: (
@@ -82,6 +83,7 @@ const Editor: React.FC<EditorProps> = ({
   disabledTabs,
   tabsShouldLoadDefaultTemplate,
   isTransactionsExtraSignersAvailable,
+  defaultTab,
   onSendScript,
   onSignMessage,
   onSendTransactions,
@@ -110,11 +112,17 @@ const Editor: React.FC<EditorProps> = ({
     if (shouldClearScript) {
       setScript("");
       if (scriptType === ScriptTypes.SCRIPT) {
-        setScriptType(ScriptTypes.TX);
+        setScriptType(defaultTab || ScriptTypes.TX);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldClearScript]);
+
+  useEffect(() => {
+    if (defaultTab) {
+      setScriptType(defaultTab);
+    }
+  }, [defaultTab]);
 
   const importTemplate = useCallback(
     (template) => {

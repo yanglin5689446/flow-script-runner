@@ -16,10 +16,12 @@ import {
   contractAddress as rinkebyContractAddress,
 } from "./rinkeby";
 import { programId, accountPubKey } from "./solanaDevnet";
+import { moduleName } from "./aptosDevnet";
 import { EvmChain, OtherChain } from "../types/ChainTypes";
 
 type ContractInfosType = {
   [OtherChain.Solana]: { programId: string; accountPubKey: string };
+  [OtherChain.Aptos]: { moduleName: string };
 } & {
   [key in EvmChain]: { abi: AbiItem[] | AbiItem; address: string };
 };
@@ -44,5 +46,8 @@ export const ContractInfos: ContractInfosType = {
   [OtherChain.Solana]: {
     programId,
     accountPubKey,
+  },
+  [OtherChain.Aptos]: {
+    moduleName,
   },
 };

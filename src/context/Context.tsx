@@ -69,6 +69,10 @@ const ContextProvider: React.FC = ({ children }) => {
     if (chain === Chains.Solana) {
       const { bloctoSDK } = ChainServices[chain];
       accounts = await bloctoSDK?.solana?.request({ method: "connect" });
+    } else if (chain === Chains.Aptos) {
+      const { bloctoSDK } = ChainServices[chain];
+      const result = await bloctoSDK?.aptos?.connect();
+      accounts = [result.address];
     } else {
       const { bloctoSDK } = ChainServices[chain];
       accounts = await bloctoSDK?.ethereum?.enable();
