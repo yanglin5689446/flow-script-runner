@@ -34,7 +34,13 @@ import { Context } from "../context/Context";
 import ScriptTypes, { Arg, PerContractInfo } from "../types/ScriptTypes";
 import Sandbox from "./Sandbox";
 
-const TabNames = ["Script", "Transaction", "Contract", "Sign Message"];
+const TabNames = [
+  "Script",
+  "Transaction",
+  "Contract",
+  "Sign Message",
+  "Resource",
+];
 
 const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 interface EditorProps {
@@ -70,7 +76,11 @@ interface EditorProps {
   faucetUrl?: string;
   onInteractWithContract?: (
     contractInfo: Record<string, PerContractInfo>,
-    args: Arg[] | undefined,
+    args?: Arg[],
+    method?: (...param: any[]) => Promise<any>
+  ) => Promise<any>;
+  onGetResource?: (
+    args?: Arg[],
     method?: (...param: any[]) => Promise<any>
   ) => Promise<any>;
 }
@@ -88,6 +98,7 @@ const Editor: React.FC<EditorProps> = ({
   onSignMessage,
   onSendTransactions,
   onInteractWithContract,
+  onGetResource,
   faucetUrl,
   children,
 }): ReactJSXElement => {
@@ -107,22 +118,6 @@ const Editor: React.FC<EditorProps> = ({
   const [result, setResult] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [txHash, setTxHash] = useState<string>("");
-
-  useEffect(() => {
-    if (shouldClearScript) {
-      setScript("");
-      if (scriptType === ScriptTypes.SCRIPT) {
-        setScriptType(defaultTab || ScriptTypes.TX);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldClearScript]);
-
-  useEffect(() => {
-    if (defaultTab) {
-      setScriptType(defaultTab);
-    }
-  }, [defaultTab]);
 
   const importTemplate = useCallback(
     (template) => {
@@ -148,6 +143,8 @@ const Editor: React.FC<EditorProps> = ({
         if (currentGroup) {
           const templates = Object.values(currentGroup);
           importTemplate(templates[0]);
+        } else {
+          setArgs([]);
         }
       }
     },
@@ -196,7 +193,7 @@ const Editor: React.FC<EditorProps> = ({
           .catch((error) => {
             setError(error?.message || "Error: Sending transaction failed.");
           });
-      } else {
+      } else if (scriptType === ScriptTypes.CONTRACT) {
         if (onInteractWithContract && contractInfo) {
           onInteractWithContract(contractInfo, args, methodRef.current)
             .then((result) => {
@@ -212,6 +209,20 @@ const Editor: React.FC<EditorProps> = ({
             })
             .catch((error) => {
               setError(error?.message || "Error: Function called failed.");
+            });
+        }
+      } else {
+        if (onGetResource) {
+          onGetResource(args, methodRef.current)
+            .then((response: any) => {
+              if (response?.message) {
+                setError(`Error: ${response.message}`);
+                return;
+              }
+              setResult(response);
+            })
+            .catch((error) => {
+              setError(error?.message || "Error: Signing message failed.");
             });
         }
       }
@@ -231,7 +242,25 @@ const Editor: React.FC<EditorProps> = ({
     onSignMessage,
     onSendTransactions,
     onInteractWithContract,
+    onGetResource,
   ]);
+
+  useEffect(() => {
+    if (shouldClearScript) {
+      setScript("");
+      if (scriptType === ScriptTypes.SCRIPT) {
+        setScriptType(defaultTab || ScriptTypes.TX);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldClearScript]);
+
+  useEffect(() => {
+    if (defaultTab) {
+      setScriptType(defaultTab);
+      handleTabChange(defaultTab);
+    }
+  }, [defaultTab, handleTabChange]);
 
   const displayResult = result !== "" ? result : response;
   const formattedDisplayResult =

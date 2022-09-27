@@ -3,6 +3,7 @@ enum ScriptTypes {
   TX,
   CONTRACT,
   SIGN,
+  RESOURCE,
 }
 
 export default ScriptTypes;

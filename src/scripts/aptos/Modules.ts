@@ -11,17 +11,38 @@ export const transferAptosCoin = {
   script: "",
   description: "Transfer Aptos coin to other address",
   method: (
-    account: string,
     args: Record<string, any>,
     contractInfo: {
-      moduleName: string;
-      address: string;
+      moduleName: {
+        comment: string;
+        value: string;
+      };
+      method: {
+        comment: string;
+        value: string;
+      };
     }
   ): Promise<any | { is_init: number; number: number }> => {
     return new Promise(async (resolve, reject) => {
-      const { address } = contractInfo;
+      const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
+      const typeArgs = args
+        .filter((arg: any) => arg.type === "type_arg")
+        .map((arg: any) => arg.value);
+      const normalArgs = args
+        .filter((arg: any) => arg.type !== "type_arg")
+        .map((arg: any) => arg.value);
+      const { moduleName, method } = contractInfo;
+      const funcName = `${moduleName.value}::${method.value}`;
+      const transaction = {
+        arguments: normalArgs,
+        function: funcName,
+        type: "entry_function_payload",
+        type_arguments: typeArgs,
+      };
+
       try {
-        resolve(address);
+        const result = await aptos.signAndSubmitTransaction(transaction);
+        resolve(result.hash);
       } catch (error) {
         reject(error);
       }
@@ -35,13 +56,6 @@ export const transferAptosCoin = {
     method: {
       comment: "method",
       value: "transfer",
-    },
-    struct: {
-      comment: "types",
-      value: JSON.stringify([
-        { name: "receipient", type: "address" },
-        { name: "value", type: "u64" },
-      ]),
     },
   }),
   args: [

@@ -199,7 +199,7 @@ const EvmEditor = (): ReactJSXElement => {
       onInteractWithContract={handleInteractWithContract}
       isSandboxDisabled
       shouldClearScript
-      disabledTabs={[ScriptTypes.SCRIPT]}
+      disabledTabs={[ScriptTypes.SCRIPT, ScriptTypes.RESOURCE]}
       tabsShouldLoadDefaultTemplate={[ScriptTypes.SIGN, ScriptTypes.CONTRACT]}
       faucetUrl={(chain as EvmChain) ? FaucetUrls[chain as EvmChain] : ""}
     >
