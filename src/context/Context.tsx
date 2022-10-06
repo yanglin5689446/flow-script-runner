@@ -61,6 +61,7 @@ const ContextProvider: React.FC = ({ children }) => {
       }
       return;
     }
+    // TODO: remove connect by web3js https://github.com/ethereum/EIPs/issues/2319
 
     localStorage.removeItem("sdk.session");
 
