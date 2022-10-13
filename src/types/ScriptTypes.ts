@@ -16,10 +16,16 @@ export interface Arg {
 }
 
 export enum ArgTypes {
+  String = "string",
+  Number = "number",
+}
+
+export enum AptosArgTypes {
   TypeArg = "type_arg",
   Address = "address",
   String = "string",
   Number = "number",
+  Bool = "boolean",
 }
 
 export interface PerContractInfo {

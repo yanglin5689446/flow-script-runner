@@ -1,18 +1,39 @@
 import React, { useCallback } from "react";
 import { useToast } from "@chakra-ui/react";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
-import * as types from "@onflow/types";
 import * as AptosModulesTemplate from "../scripts/aptos/Modules";
 import * as AptosResourceTemplate from "../scripts/aptos/Resource";
-import ScriptTypes, { Arg, PerContractInfo } from "../types/ScriptTypes";
+import * as SignMessageTemplates from "../scripts/aptos/SignMessage";
+import { ChainServices } from "../services";
+import { Chains } from "../types/ChainTypes";
+import ScriptTypes, {
+  Arg,
+  AptosArgTypes,
+  PerContractInfo,
+} from "../types/ScriptTypes";
 import Editor from "./Editor";
 
-const typeKeys = Object.keys(types);
+const typeKeys = Object.values(AptosArgTypes);
 
 const MenuGroups = [
   { title: "Contract", templates: AptosModulesTemplate },
+  { title: "Sign Message", templates: SignMessageTemplates },
   { title: "Resource", templates: AptosResourceTemplate },
 ];
+
+const formatTransactionArgs = (args: Arg[] | undefined) => {
+  return args?.reduce((initial: { [key: string]: any }, currentValue: Arg) => {
+    if (currentValue.name) {
+      initial[currentValue.name] =
+        currentValue.type === AptosArgTypes.Number
+          ? +currentValue.value
+          : currentValue.type === AptosArgTypes.Bool && currentValue.value
+          ? JSON.parse(currentValue.value.toLowerCase())
+          : currentValue.value;
+    }
+    return initial;
+  }, {});
+};
 
 const AptosEditor = (): ReactJSXElement => {
   const toast = useToast();
@@ -26,6 +47,13 @@ const AptosEditor = (): ReactJSXElement => {
       } catch (error) {
         reject(error);
       }
+    });
+  }, []);
+
+  const handleSignMessage = useCallback((args) => {
+    return new Promise<void>((resolve) => {
+      const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
+      resolve(aptos.signMessage(formatTransactionArgs(args)));
     });
   }, []);
 
@@ -59,15 +87,17 @@ const AptosEditor = (): ReactJSXElement => {
       menuGroups={MenuGroups}
       onGetResource={handleGetResource}
       onInteractWithContract={handleInteractWithContract}
+      onSignMessage={handleSignMessage}
       onSendTransactions={() => Promise.resolve({ transactionId: "" })}
       argTypes={typeKeys}
       shouldClearScript
       isTransactionsExtraSignersAvailable
       isSandboxDisabled
       defaultTab={ScriptTypes.CONTRACT}
-      disabledTabs={[ScriptTypes.SCRIPT, ScriptTypes.SIGN, ScriptTypes.TX]}
+      disabledTabs={[ScriptTypes.SCRIPT, ScriptTypes.TX]}
       tabsShouldLoadDefaultTemplate={[
         ScriptTypes.CONTRACT,
+        ScriptTypes.SIGN,
         ScriptTypes.RESOURCE,
       ]}
       faucetUrl="https://aptos-faucet.blocto.app/"

@@ -166,7 +166,7 @@ const Editor: React.FC<EditorProps> = ({
       } else if (scriptType === ScriptTypes.SIGN && onSignMessage) {
         onSignMessage(args, methodRef.current)
           .then((response: any) => {
-            if (response?.message) {
+            if (response instanceof Error) {
               setError(`Error: ${response.message}`);
               return;
             }

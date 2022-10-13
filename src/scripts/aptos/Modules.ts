@@ -2,7 +2,7 @@ import { ContractInfos } from "../../contracts";
 import { ChainServices } from "../../services";
 import { Chains, ChainsType, OtherChain } from "../../types/ChainTypes";
 import ScriptTypes, {
-  ArgTypes,
+  AptosArgTypes,
   PerContractInfo,
 } from "../../types/ScriptTypes";
 
@@ -60,11 +60,11 @@ export const transferAptosCoin = {
   }),
   args: [
     {
-      type: ArgTypes.TypeArg,
+      type: AptosArgTypes.TypeArg,
       comment: "coin type",
       value: "0x1::aptos_coin::AptosCoin",
     },
-    { type: ArgTypes.Address, comment: "receipient", name: "receipient" },
-    { type: ArgTypes.Number, comment: "value", name: "value" },
+    { type: AptosArgTypes.Address, comment: "receipient", name: "receipient" },
+    { type: AptosArgTypes.Number, comment: "value", name: "value" },
   ],
 };
