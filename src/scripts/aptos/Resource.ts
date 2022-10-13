@@ -1,4 +1,4 @@
-import ScriptTypes, { ArgTypes } from "../../types/ScriptTypes";
+import ScriptTypes, { AptosArgTypes } from "../../types/ScriptTypes";
 
 // @todo: use different endpoint according to env and move this elsewhere
 const APTOS_NODE_URL = "https://fullnode.devnet.aptoslabs.com/v1";
@@ -15,11 +15,11 @@ export const getAptosBalance = {
   },
   args: [
     {
-      type: ArgTypes.String,
+      type: AptosArgTypes.String,
       comment: "address",
     },
     {
-      type: ArgTypes.String,
+      type: AptosArgTypes.String,
       comment: "resource key",
       value: "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>",
     },
