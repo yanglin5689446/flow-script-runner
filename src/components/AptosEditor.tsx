@@ -66,17 +66,17 @@ const AptosEditor = (): ReactJSXElement => {
       return new Promise<{
         transactionId: string;
       }>((resolve, reject) => {
-        try {
-          method?.(args, contractInfo).then((hash) => resolve(hash));
-        } catch (error) {
-          reject(error);
-          toast({
-            title: "Transaction failed",
-            status: "error",
-            isClosable: true,
-            duration: 1000,
+        method?.(args, contractInfo)
+          .then((hash) => resolve(hash))
+          .catch((error) => {
+            reject(error);
+            toast({
+              title: "Transaction failed",
+              status: "error",
+              isClosable: true,
+              duration: 1000,
+            });
           });
-        }
       });
     },
     [toast]
