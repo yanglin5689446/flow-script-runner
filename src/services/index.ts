@@ -16,6 +16,7 @@ import {
   bloctoSDK as solanaSDK,
   ExtendedSolaneBloctoSDK,
 } from "./solanaDevnet";
+import { bloctoSDK as aptosSDK, ExtendedAptosBloctoSDK } from "./aptosTestnet";
 
 type FlowInfoType = {
   [OtherChain.Flow]: {
@@ -29,6 +30,13 @@ interface EvmChainInterface {
   address: string | null;
   contract: Contract | null;
 }
+
+type AptosInfoType = {
+  [OtherChain.Aptos]: {
+    bloctoSDK: ExtendedAptosBloctoSDK;
+    address: string | null;
+  };
+};
 
 type EvmChainsInfoType = { [key in EvmChain]: EvmChainInterface };
 
@@ -55,6 +63,7 @@ interface ChainServicesInterface {
 type ChainServicesType = FlowInfoType &
   EvmChainsInfoType &
   SolanaInfoType &
+  AptosInfoType &
   ChainServicesInterface;
 
 export const ChainServices: ChainServicesType = {
@@ -84,6 +93,7 @@ export const ChainServices: ChainServicesType = {
     contract: null,
   },
   [Chains.Solana]: { bloctoSDK: solanaSDK, address: null, program: null },
+  [Chains.Aptos]: { bloctoSDK: aptosSDK, address: null },
 
   getChainAddress(chain) {
     return this[chain].address;

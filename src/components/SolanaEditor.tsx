@@ -142,7 +142,11 @@ const SolanaEditor = (): ReactJSXElement => {
       onInteractWithContract={handleInteractWithContract}
       isSandboxDisabled
       shouldClearScript
-      disabledTabs={[ScriptTypes.SCRIPT, ScriptTypes.SIGN]}
+      disabledTabs={[
+        ScriptTypes.SCRIPT,
+        ScriptTypes.SIGN,
+        ScriptTypes.RESOURCE,
+      ]}
       tabsShouldLoadDefaultTemplate={[ScriptTypes.CONTRACT]}
       faucetUrl="https://solfaucet.com/"
     />
