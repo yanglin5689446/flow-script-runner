@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useToast } from "@chakra-ui/react";
 import * as fcl from "@blocto/fcl";
 import { ChainServices } from "../services";
-import { Chains, ChainsType } from "../types/ChainTypes";
+import { Chains, ChainsType, EvmChain } from "../types/ChainTypes";
 import User from "../types/User";
 import { TabInfos } from "../components/Header";
 import { verifyAccountProofSignature } from "../utils/verifyAccountProofSignature";
@@ -52,8 +52,16 @@ const ContextProvider: React.FC = ({ children }) => {
       return;
     }
 
-    localStorage.removeItem("sdk.session");
+    if (chain in EvmChain) {
+      const { bloctoSDK } = ChainServices[chain];
+      await bloctoSDK?.ethereum?.request({ method: "eth_disconnect" });
+    }
+    if (chain === Chains.Solana) {
+      const { bloctoSDK } = ChainServices[chain];
+      await bloctoSDK?.solana?.request({ method: "disconnect" });
+    }
 
+    localStorage.removeItem("sdk.session");
     setAddress("");
   }, [chain]);
 

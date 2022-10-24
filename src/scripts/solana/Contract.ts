@@ -12,7 +12,6 @@ import ScriptTypes, {
   ArgTypes,
   PerContractInfo,
 } from "../../types/ScriptTypes";
-import { base64ToUint8Array } from "../../utils/base64ToUint8Array";
 
 const formatProgramStruct = (data: Array<{ name: string; type: string }>) => {
   const withBufferLayout = data.map((attribute) =>
@@ -60,11 +59,10 @@ export const getValue = {
           reject(new Error("Error: Program not found."));
         }
 
-        const dataInUint8Array = base64ToUint8Array(accountInfo.value.data[0]);
         const layout = struct
           ? formatProgramStruct(JSON.parse(struct))
           : ChainServices.getSolanaProgramInfo().programLayout;
-        const info = layout.decode(dataInUint8Array);
+        const info = layout.decode(accountInfo?.data);
         resolve(info);
       } catch (error) {
         reject(error);
