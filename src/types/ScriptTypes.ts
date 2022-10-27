@@ -31,4 +31,13 @@ export enum AptosArgTypes {
 export interface PerContractInfo {
   value?: string;
   comment?: string;
+  format?: (value: any) => any;
 }
+
+export type AptosContractAbiKeys =
+  | "name"
+  | "visibility"
+  | "is_entry"
+  | "generic_type_params"
+  | "params"
+  | "return";

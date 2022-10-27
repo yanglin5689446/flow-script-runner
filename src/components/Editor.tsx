@@ -6,6 +6,10 @@ import React, {
   useState,
 } from "react";
 import {
+  Accordion,
+  AccordionButton,
+  AccordionItem,
+  AccordionPanel,
   Box,
   Button,
   Flex,
@@ -27,11 +31,20 @@ import {
   MenuGroup,
   Text,
 } from "@chakra-ui/react";
-import { AddIcon, ChevronDownIcon, CloseIcon } from "@chakra-ui/icons";
+import {
+  AddIcon,
+  ChevronDownIcon,
+  CloseIcon,
+  MinusIcon,
+} from "@chakra-ui/icons";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import { startCase } from "lodash";
 import { Context } from "../context/Context";
-import ScriptTypes, { Arg, PerContractInfo } from "../types/ScriptTypes";
+import ScriptTypes, {
+  AptosContractAbiKeys,
+  Arg,
+  PerContractInfo,
+} from "../types/ScriptTypes";
 import Sandbox from "./Sandbox";
 
 const TabNames = [
@@ -77,7 +90,8 @@ interface EditorProps {
   onInteractWithContract?: (
     contractInfo: Record<string, PerContractInfo>,
     args?: Arg[],
-    method?: (...param: any[]) => Promise<any>
+    method?: (...param: any[]) => Promise<any>,
+    contractAbi?: Record<AptosContractAbiKeys, PerContractInfo>
   ) => Promise<any>;
   onGetResource?: (
     args?: Arg[],
@@ -108,6 +122,8 @@ const Editor: React.FC<EditorProps> = ({
   const [isArgsAdjustable, setIsArgsAdjustable] = useState<boolean>(true);
   const [contractInfo, setContractInfo] =
     useState<Record<string, PerContractInfo>>();
+  const [contractAbi, setContractAbi] =
+    useState<Record<AptosContractAbiKeys, PerContractInfo>>();
   const [args, setArgs] = useState<Arg[]>();
   const [signers, setSigners] =
     useState<{ privateKey: string; address: string }[]>();
@@ -126,6 +142,7 @@ const Editor: React.FC<EditorProps> = ({
       setDescription(template.description);
       setScript(template.script);
       setContractInfo(template.contractInfo?.(chain));
+      setContractAbi(template.contractAbi);
       setArgs(template.args);
       setShouldSign(template.shouldSign);
       setIsArgsAdjustable(template.isArgsAdjustable ?? true);
@@ -195,7 +212,12 @@ const Editor: React.FC<EditorProps> = ({
           });
       } else if (scriptType === ScriptTypes.CONTRACT) {
         if (onInteractWithContract && contractInfo) {
-          onInteractWithContract(contractInfo, args, methodRef.current)
+          onInteractWithContract(
+            contractInfo,
+            args,
+            methodRef.current,
+            contractAbi
+          )
             .then((result) => {
               if (
                 typeof result === "string" ||
@@ -238,6 +260,7 @@ const Editor: React.FC<EditorProps> = ({
     script,
     shouldSign,
     signers,
+    contractAbi,
     onSendScript,
     onSignMessage,
     onSendTransactions,
@@ -343,7 +366,7 @@ const Editor: React.FC<EditorProps> = ({
                   return (
                     <Flex key={index} align="center" mt={2}>
                       <Text width="130px" marginRight={2}>
-                        {startCase(comment)}
+                        {startCase(key)}
                       </Text>
                       <Textarea
                         flex="1"
@@ -366,6 +389,60 @@ const Editor: React.FC<EditorProps> = ({
                 })}
             </Box>
           </Box>
+        )}
+
+        {scriptType === ScriptTypes.CONTRACT && contractAbi && (
+          <Accordion allowToggle>
+            <AccordionItem>
+              {({ isExpanded }) => (
+                <>
+                  <AccordionButton
+                    justifyContent="space-between"
+                    _focus={{ boxShadow: "none" }}
+                  >
+                    <Box fontWeight="bold">Contract abi (Optional)</Box>
+
+                    {isExpanded ? (
+                      <MinusIcon fontSize="12px" />
+                    ) : (
+                      <AddIcon fontSize="12px" />
+                    )}
+                  </AccordionButton>
+                  <AccordionPanel pb={4}>
+                    <Box mt={2} ml={1}>
+                      {Object.keys(contractAbi)?.map((key, index) => {
+                        const abiKey = key as AptosContractAbiKeys;
+                        const { value, comment } = contractAbi[abiKey];
+                        return (
+                          <Flex key={index} align="center" mt={2}>
+                            <Text width="130px" marginRight={2}>
+                              {startCase(key)}
+                            </Text>
+                            <Textarea
+                              flex="1"
+                              rows={1}
+                              value={value || ""}
+                              onChange={(e) => {
+                                const updated = {
+                                  ...contractAbi,
+                                  [key]: {
+                                    ...contractAbi[abiKey],
+                                    value: e.target.value,
+                                  },
+                                };
+                                setContractAbi(updated);
+                              }}
+                              placeholder={comment}
+                            />
+                          </Flex>
+                        );
+                      })}
+                    </Box>
+                  </AccordionPanel>
+                </>
+              )}
+            </AccordionItem>
+          </Accordion>
         )}
 
         <Box flex={1} px={4}>

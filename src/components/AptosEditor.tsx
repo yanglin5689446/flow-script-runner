@@ -9,6 +9,7 @@ import { Chains } from "../types/ChainTypes";
 import ScriptTypes, {
   Arg,
   AptosArgTypes,
+  AptosContractAbiKeys,
   PerContractInfo,
 } from "../types/ScriptTypes";
 import Editor from "./Editor";
@@ -60,13 +61,14 @@ const AptosEditor = (): ReactJSXElement => {
   const handleInteractWithContract = useCallback(
     async (
       contractInfo: Record<string, PerContractInfo>,
-      args: Arg[] | undefined,
-      method?: (...param: any[]) => Promise<any>
+      args?: Arg[],
+      method?: (...param: any[]) => Promise<any>,
+      contractAbi?: Record<AptosContractAbiKeys, PerContractInfo>
     ) => {
       return new Promise<{
         transactionId: string;
       }>((resolve, reject) => {
-        method?.(args, contractInfo)
+        method?.(contractInfo, args, contractAbi)
           .then((hash) => resolve(hash))
           .catch((error) => {
             reject(error);
