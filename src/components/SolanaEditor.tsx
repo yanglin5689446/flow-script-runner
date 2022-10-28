@@ -4,11 +4,7 @@ import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import { Context } from "../context/Context";
 import * as ContractTemplates from "../scripts/solana/Contract";
 import * as TransactionsTemplates from "../scripts/solana/Transactions";
-import ScriptTypes, {
-  Arg,
-  ArgTypes,
-  PerContractInfo,
-} from "../types/ScriptTypes";
+import ScriptTypes, { Arg, ArgTypes, PerInfo } from "../types/ScriptTypes";
 import Editor from "./Editor";
 
 const typeKeys = Object.values(ArgTypes);
@@ -27,7 +23,7 @@ const SolanaEditor = (): ReactJSXElement => {
       type: ScriptTypes.TX | ScriptTypes.CONTRACT,
       args: Arg[] | undefined,
       method?: (...param: any[]) => Promise<any>,
-      contractInfo?: Record<string, PerContractInfo>
+      contractInfo?: Record<string, PerInfo>
     ): Promise<{ transactionId: string; transaction: any }> => {
       return new Promise(async (resolve, reject) => {
         const noArgValuesProvided = args?.every(
@@ -125,7 +121,7 @@ const SolanaEditor = (): ReactJSXElement => {
 
   const handleInteractWithContract = useCallback(
     async (
-      contractInfo: Record<string, PerContractInfo>,
+      contractInfo: Record<string, PerInfo>,
       args: Arg[] | undefined,
       method?: (...param: any[]) => Promise<any>
     ): Promise<{ transactionId: string; transaction: any }> => {

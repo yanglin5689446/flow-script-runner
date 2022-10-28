@@ -1,10 +1,7 @@
 import { ContractInfos } from "../../contracts";
 import { ChainServices } from "../../services";
 import { Chains, ChainsType, OtherChain } from "../../types/ChainTypes";
-import ScriptTypes, {
-  AptosArgTypes,
-  PerContractInfo,
-} from "../../types/ScriptTypes";
+import ScriptTypes, { AptosArgTypes, PerInfo } from "../../types/ScriptTypes";
 
 export const transferAptosCoin = {
   type: ScriptTypes.CONTRACT,
@@ -48,7 +45,7 @@ export const transferAptosCoin = {
       }
     });
   },
-  contractInfo: (chain: ChainsType): Record<string, PerContractInfo> => ({
+  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
     moduleName: {
       comment: "module name",
       value: ContractInfos[chain as OtherChain.Aptos].moduleName,

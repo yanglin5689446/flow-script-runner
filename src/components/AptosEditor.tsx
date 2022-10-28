@@ -10,8 +10,9 @@ import { Chains } from "../types/ChainTypes";
 import ScriptTypes, {
   Arg,
   AptosArgTypes,
-  AptosContractAbiKeys,
-  PerContractInfo,
+  AptosScriptAbiKeys,
+  PerInfo,
+  PerScriptAbi,
 } from "../types/ScriptTypes";
 import Editor from "./Editor";
 
@@ -62,13 +63,12 @@ const AptosEditor = (): ReactJSXElement => {
 
   const handleInteractWithContract = useCallback(
     async (
-      contractInfo: Record<string, PerContractInfo>,
+      contractInfo: Record<string, PerInfo>,
       args?: Arg[],
-      method?: (...param: any[]) => Promise<any>,
-      contractAbi?: Record<AptosContractAbiKeys, PerContractInfo>
+      method?: (...param: any[]) => Promise<any>
     ) => {
       return new Promise<string>((resolve, reject) => {
-        method?.(contractInfo, args, contractAbi)
+        method?.(contractInfo, args)
           .then((hash) => resolve(hash))
           .catch((error) => {
             reject(error);
@@ -89,11 +89,11 @@ const AptosEditor = (): ReactJSXElement => {
       script: string,
       args?: Arg[],
       method?: (...param: any[]) => Promise<any>,
-      contractInfo?: Record<string, PerContractInfo>,
-      contractAbi?: Record<AptosContractAbiKeys, PerContractInfo>
+      scriptInfo?: Record<string, PerInfo>,
+      scriptAbi?: Record<AptosScriptAbiKeys, PerScriptAbi>
     ) => {
       return new Promise<string>((resolve, reject) => {
-        method?.(contractInfo, args, contractAbi)
+        method?.(scriptInfo, args, scriptAbi)
           .then((hash) => resolve(hash))
           .catch((error) => {
             reject(error);

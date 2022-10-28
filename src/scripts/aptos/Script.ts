@@ -1,20 +1,21 @@
 import { ChainServices } from "../../services";
-import { Chains, ChainsType } from "../../types/ChainTypes";
+import { Chains } from "../../types/ChainTypes";
 import ScriptTypes, {
   AptosArgTypes,
-  AptosContractAbiKeys,
+  AptosScriptAbiKeys,
   Arg,
-  PerContractInfo,
+  PerInfo,
+  PerScriptAbi,
 } from "../../types/ScriptTypes";
 
-export const scriptPayload = {
+export const transferTokenScript = {
   type: ScriptTypes.SCRIPT,
   script: "",
   description: "Transfer token by sending a script payload transaction",
   method: (
-    contractInfo: { bytecode: PerContractInfo },
+    scriptInfo: { bytecode: PerInfo },
     args: Arg[],
-    contractAbi: Record<AptosContractAbiKeys, PerContractInfo>
+    scriptAbi: Record<AptosScriptAbiKeys, PerScriptAbi>
   ): Promise<any | { is_init: number; number: number }> => {
     return new Promise(async (resolve, reject) => {
       const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
@@ -24,16 +25,14 @@ export const scriptPayload = {
       const normalArgs = args
         .filter((arg: any) => arg.type !== "type_arg")
         .map((arg: any) => arg.value);
-      const { bytecode } = contractInfo;
-      const abi = Object.keys(contractAbi).reduce<Record<string, any>>(
+      const { bytecode } = scriptInfo;
+      const abi = Object.keys(scriptAbi).reduce<Record<string, any>>(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        (initial, currentValue: AptosContractAbiKeys) => {
-          initial[currentValue] = contractAbi[currentValue].format
-            ? contractAbi[currentValue].format?.(
-                contractAbi[currentValue].value
-              )
-            : contractAbi[currentValue].value;
+        (initial, currentValue: AptosScriptAbiKeys) => {
+          initial[currentValue] = scriptAbi[currentValue].format
+            ? scriptAbi[currentValue].format?.(scriptAbi[currentValue].value)
+            : scriptAbi[currentValue].value;
           return initial;
         },
         {}
@@ -52,15 +51,14 @@ export const scriptPayload = {
       }
     });
   },
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  contractInfo: (chain: ChainsType): Record<string, PerContractInfo> => ({
+  scriptInfo: {
     bytecode: {
       comment: "Move script bytecode",
       value:
         "0xa11ceb0b0500000005010002030205050706070d170824200000000100010003060c0503000d6170746f735f6163636f756e74087472616e736665720000000000000000000000000000000000000000000000000000000000000001000001050b000b010b02110002",
     },
-  }),
-  contractAbi: {
+  },
+  scriptAbi: {
     name: {
       comment: "Move function name",
       value: "main",
