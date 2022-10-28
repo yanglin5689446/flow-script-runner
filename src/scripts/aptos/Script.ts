@@ -8,7 +8,7 @@ import ScriptTypes, {
 } from "../../types/ScriptTypes";
 
 export const scriptPayload = {
-  type: ScriptTypes.CONTRACT,
+  type: ScriptTypes.SCRIPT,
   script: "",
   description: "Transfer token by sending a script payload transaction",
   method: (

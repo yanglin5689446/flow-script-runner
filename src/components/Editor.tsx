@@ -354,7 +354,7 @@ const Editor: React.FC<EditorProps> = ({
           <Text>{description}</Text>
         </Flex>
 
-        {scriptType === ScriptTypes.CONTRACT && (
+        {contractInfo && (
           <Box px={4} mb="6">
             <Flex align="center" mt={3} ml={1}>
               <Box fontWeight="bold">Contract info</Box>
@@ -391,7 +391,7 @@ const Editor: React.FC<EditorProps> = ({
           </Box>
         )}
 
-        {scriptType === ScriptTypes.CONTRACT && contractAbi && (
+        {contractAbi && (
           <Accordion allowToggle>
             <AccordionItem>
               {({ isExpanded }) => (
