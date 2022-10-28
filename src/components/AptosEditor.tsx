@@ -3,6 +3,7 @@ import { useToast } from "@chakra-ui/react";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import * as AptosModulesTemplate from "../scripts/aptos/Modules";
 import * as AptosResourceTemplate from "../scripts/aptos/Resource";
+import * as ScriptTemplates from "../scripts/aptos/Script";
 import * as SignMessageTemplates from "../scripts/aptos/SignMessage";
 import { ChainServices } from "../services";
 import { Chains } from "../types/ChainTypes";
@@ -17,6 +18,7 @@ import Editor from "./Editor";
 const typeKeys = Object.values(AptosArgTypes);
 
 const MenuGroups = [
+  { title: "Script", templates: ScriptTemplates },
   { title: "Contract", templates: AptosModulesTemplate },
   { title: "Sign Message", templates: SignMessageTemplates },
   { title: "Resource", templates: AptosResourceTemplate },
@@ -96,8 +98,9 @@ const AptosEditor = (): ReactJSXElement => {
       isTransactionsExtraSignersAvailable
       isSandboxDisabled
       defaultTab={ScriptTypes.CONTRACT}
-      disabledTabs={[ScriptTypes.SCRIPT, ScriptTypes.TX]}
+      disabledTabs={[ScriptTypes.TX]}
       tabsShouldLoadDefaultTemplate={[
+        ScriptTypes.SCRIPT,
         ScriptTypes.CONTRACT,
         ScriptTypes.SIGN,
         ScriptTypes.RESOURCE,
