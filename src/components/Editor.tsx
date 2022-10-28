@@ -80,7 +80,9 @@ interface EditorProps {
   onSendScript?: (
     script: string,
     args?: Arg[],
-    method?: (...param: any[]) => Promise<any>
+    method?: (...param: any[]) => Promise<any>,
+    contractInfo?: Record<string, PerContractInfo>,
+    contractAbi?: Record<AptosContractAbiKeys, PerContractInfo>
   ) => Promise<string>;
   onSignMessage?: (
     args?: Arg[],
@@ -175,7 +177,7 @@ const Editor: React.FC<EditorProps> = ({
     setTxHash("");
     try {
       if (scriptType === ScriptTypes.SCRIPT && onSendScript) {
-        onSendScript(script, args, methodRef.current)
+        onSendScript(script, args, methodRef.current, contractInfo, contractAbi)
           .then(setResult)
           .catch((error) => {
             setError(error?.message || "Error: Running script failed.");

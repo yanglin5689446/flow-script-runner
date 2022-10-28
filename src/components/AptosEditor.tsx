@@ -67,9 +67,32 @@ const AptosEditor = (): ReactJSXElement => {
       method?: (...param: any[]) => Promise<any>,
       contractAbi?: Record<AptosContractAbiKeys, PerContractInfo>
     ) => {
-      return new Promise<{
-        transactionId: string;
-      }>((resolve, reject) => {
+      return new Promise<string>((resolve, reject) => {
+        method?.(contractInfo, args, contractAbi)
+          .then((hash) => resolve(hash))
+          .catch((error) => {
+            reject(error);
+            toast({
+              title: "Transaction failed",
+              status: "error",
+              isClosable: true,
+              duration: 1000,
+            });
+          });
+      });
+    },
+    [toast]
+  );
+
+  const handleSendScript = useCallback(
+    async (
+      script: string,
+      args?: Arg[],
+      method?: (...param: any[]) => Promise<any>,
+      contractInfo?: Record<string, PerContractInfo>,
+      contractAbi?: Record<AptosContractAbiKeys, PerContractInfo>
+    ) => {
+      return new Promise<string>((resolve, reject) => {
         method?.(contractInfo, args, contractAbi)
           .then((hash) => resolve(hash))
           .catch((error) => {
@@ -93,6 +116,7 @@ const AptosEditor = (): ReactJSXElement => {
       onInteractWithContract={handleInteractWithContract}
       onSignMessage={handleSignMessage}
       onSendTransactions={() => Promise.resolve({ transactionId: "" })}
+      onSendScript={handleSendScript}
       argTypes={typeKeys}
       shouldClearScript
       isTransactionsExtraSignersAvailable
