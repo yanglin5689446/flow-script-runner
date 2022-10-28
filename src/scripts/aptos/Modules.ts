@@ -1,17 +1,13 @@
 import { ContractInfos } from "../../contracts";
 import { ChainServices } from "../../services";
 import { Chains, ChainsType, OtherChain } from "../../types/ChainTypes";
-import ScriptTypes, {
-  AptosArgTypes,
-  PerContractInfo,
-} from "../../types/ScriptTypes";
+import ScriptTypes, { AptosArgTypes, PerInfo } from "../../types/ScriptTypes";
 
 export const transferAptosCoin = {
   type: ScriptTypes.CONTRACT,
   script: "",
   description: "Transfer Aptos coin to other address",
   method: (
-    args: Record<string, any>,
     contractInfo: {
       moduleName: {
         comment: string;
@@ -21,7 +17,8 @@ export const transferAptosCoin = {
         comment: string;
         value: string;
       };
-    }
+    },
+    args: Record<string, any>
   ): Promise<any | { is_init: number; number: number }> => {
     return new Promise(async (resolve, reject) => {
       const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
@@ -48,7 +45,7 @@ export const transferAptosCoin = {
       }
     });
   },
-  contractInfo: (chain: ChainsType): Record<string, PerContractInfo> => ({
+  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
     moduleName: {
       comment: "module name",
       value: ContractInfos[chain as OtherChain.Aptos].moduleName,

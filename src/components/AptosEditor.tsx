@@ -3,19 +3,23 @@ import { useToast } from "@chakra-ui/react";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import * as AptosModulesTemplate from "../scripts/aptos/Modules";
 import * as AptosResourceTemplate from "../scripts/aptos/Resource";
+import * as ScriptTemplates from "../scripts/aptos/Script";
 import * as SignMessageTemplates from "../scripts/aptos/SignMessage";
 import { ChainServices } from "../services";
 import { Chains } from "../types/ChainTypes";
 import ScriptTypes, {
   Arg,
   AptosArgTypes,
-  PerContractInfo,
+  AptosScriptAbiKeys,
+  PerInfo,
+  PerScriptAbi,
 } from "../types/ScriptTypes";
 import Editor from "./Editor";
 
 const typeKeys = Object.values(AptosArgTypes);
 
 const MenuGroups = [
+  { title: "Script", templates: ScriptTemplates },
   { title: "Contract", templates: AptosModulesTemplate },
   { title: "Sign Message", templates: SignMessageTemplates },
   { title: "Resource", templates: AptosResourceTemplate },
@@ -59,14 +63,37 @@ const AptosEditor = (): ReactJSXElement => {
 
   const handleInteractWithContract = useCallback(
     async (
-      contractInfo: Record<string, PerContractInfo>,
-      args: Arg[] | undefined,
+      contractInfo: Record<string, PerInfo>,
+      args?: Arg[],
       method?: (...param: any[]) => Promise<any>
     ) => {
-      return new Promise<{
-        transactionId: string;
-      }>((resolve, reject) => {
-        method?.(args, contractInfo)
+      return new Promise<string>((resolve, reject) => {
+        method?.(contractInfo, args)
+          .then((hash) => resolve(hash))
+          .catch((error) => {
+            reject(error);
+            toast({
+              title: "Transaction failed",
+              status: "error",
+              isClosable: true,
+              duration: 1000,
+            });
+          });
+      });
+    },
+    [toast]
+  );
+
+  const handleSendScript = useCallback(
+    async (
+      script: string,
+      args?: Arg[],
+      method?: (...param: any[]) => Promise<any>,
+      scriptInfo?: Record<string, PerInfo>,
+      scriptAbi?: Record<AptosScriptAbiKeys, PerScriptAbi>
+    ) => {
+      return new Promise<string>((resolve, reject) => {
+        method?.(scriptInfo, args, scriptAbi)
           .then((hash) => resolve(hash))
           .catch((error) => {
             reject(error);
@@ -89,13 +116,15 @@ const AptosEditor = (): ReactJSXElement => {
       onInteractWithContract={handleInteractWithContract}
       onSignMessage={handleSignMessage}
       onSendTransactions={() => Promise.resolve({ transactionId: "" })}
+      onSendScript={handleSendScript}
       argTypes={typeKeys}
       shouldClearScript
       isTransactionsExtraSignersAvailable
       isSandboxDisabled
       defaultTab={ScriptTypes.CONTRACT}
-      disabledTabs={[ScriptTypes.SCRIPT, ScriptTypes.TX]}
+      disabledTabs={[ScriptTypes.TX]}
       tabsShouldLoadDefaultTemplate={[
+        ScriptTypes.SCRIPT,
         ScriptTypes.CONTRACT,
         ScriptTypes.SIGN,
         ScriptTypes.RESOURCE,

@@ -1,10 +1,7 @@
 import { ContractInfos } from "../../contracts";
 import { ChainServices } from "../../services";
 import { ChainsType, EvmChain } from "../../types/ChainTypes";
-import ScriptTypes, {
-  ArgTypes,
-  PerContractInfo,
-} from "../../types/ScriptTypes";
+import ScriptTypes, { ArgTypes, PerInfo } from "../../types/ScriptTypes";
 
 interface Params {
   account: string;
@@ -34,7 +31,7 @@ export const getValue = {
     }
     return contract.methods[methodName || "value"]().call();
   },
-  contractInfo: (chain: ChainsType): Record<string, PerContractInfo> => ({
+  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
       value: ContractInfos[chain as EvmChain].address,
@@ -70,7 +67,7 @@ export const getValue2 = {
     }
     return contract.methods[methodName || "value2"]().call();
   },
-  contractInfo: (chain: ChainsType): Record<string, PerContractInfo> => ({
+  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
       value: ContractInfos[chain as EvmChain].address,
@@ -110,7 +107,7 @@ export const setValue = {
       from: account,
     });
   },
-  contractInfo: (chain: ChainsType): Record<string, PerContractInfo> => ({
+  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
       value: ContractInfos[chain as EvmChain].address,
@@ -150,7 +147,7 @@ export const setValue2 = {
       from: account,
     });
   },
-  contractInfo: (chain: ChainsType): Record<string, PerContractInfo> => ({
+  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
       value: ContractInfos[chain as EvmChain].address,

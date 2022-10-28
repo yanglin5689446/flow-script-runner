@@ -8,10 +8,7 @@ import { Buffer } from "buffer";
 import { ContractInfos } from "../../contracts";
 import { ChainServices } from "../../services";
 import { Chains, ChainsType, OtherChain } from "../../types/ChainTypes";
-import ScriptTypes, {
-  ArgTypes,
-  PerContractInfo,
-} from "../../types/ScriptTypes";
+import ScriptTypes, { ArgTypes, PerInfo } from "../../types/ScriptTypes";
 
 const formatProgramStruct = (data: Array<{ name: string; type: string }>) => {
   const withBufferLayout = data.map((attribute) =>
@@ -69,7 +66,7 @@ export const getValue = {
       }
     });
   },
-  contractInfo: (chain: ChainsType): Record<string, PerContractInfo> => ({
+  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
     programId: {
       comment: "program id",
       value: ContractInfos[chain as OtherChain.Solana].programId,
@@ -177,7 +174,7 @@ export const setValue = {
       }
     });
   },
-  contractInfo: (chain: ChainsType): Record<string, PerContractInfo> => ({
+  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
     programId: {
       comment: "program id",
       value: ContractInfos[chain as OtherChain.Solana].programId,

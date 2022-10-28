@@ -6,11 +6,7 @@ import * as ContractTemplates from "../scripts/evm/Contract";
 import * as SignMessageTemplates from "../scripts/evm/SignMessage";
 import * as TransactionsTemplates from "../scripts/evm/Transactions";
 import { EvmChain } from "../types/ChainTypes";
-import ScriptTypes, {
-  Arg,
-  ArgTypes,
-  PerContractInfo,
-} from "../types/ScriptTypes";
+import ScriptTypes, { Arg, ArgTypes, PerInfo } from "../types/ScriptTypes";
 import Editor from "./Editor";
 import EvmChainSelect from "./EvmChainSelect";
 
@@ -140,7 +136,7 @@ const EvmEditor = (): ReactJSXElement => {
 
   const handleInteractWithContract = useCallback(
     async (
-      contractInfo: Record<string, PerContractInfo>,
+      contractInfo: Record<string, PerInfo>,
       args: Arg[] | undefined,
       method?: (...param: any[]) => Promise<any>
     ): Promise<string | { transactionId: string; transaction: any }> => {

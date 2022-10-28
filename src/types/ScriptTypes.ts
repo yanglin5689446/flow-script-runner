@@ -28,7 +28,21 @@ export enum AptosArgTypes {
   Bool = "boolean",
 }
 
-export interface PerContractInfo {
+export interface PerInfo {
   value?: string;
   comment?: string;
 }
+
+export interface PerScriptAbi {
+  value?: string;
+  comment?: string;
+  format?: (value: any) => any;
+}
+
+export type AptosScriptAbiKeys =
+  | "name"
+  | "visibility"
+  | "is_entry"
+  | "generic_type_params"
+  | "params"
+  | "return";
