@@ -1,7 +1,12 @@
 import { AbiItem } from "web3-utils";
 
-const contractAddress = "0x247954ec015C4E641c99C47Cb8766b35cdb1Eb53";
+const contractAddress = "0xDC5Fd9220511A7211719dD8206Ec2D686054bCC0";
 const contractAbi: AbiItem[] = [
+  {
+    inputs: [],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
   {
     anonymous: false,
     inputs: [
@@ -29,41 +34,82 @@ const contractAbi: AbiItem[] = [
     type: "event",
   },
   {
-    constant: false,
-    inputs: [{ internalType: "uint256", name: "newValue", type: "uint256" }],
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "a",
+        type: "uint256",
+      },
+    ],
+    name: "arithmeticError",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "pure",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "customError",
+    outputs: [],
+    stateMutability: "pure",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "newValue",
+        type: "uint256",
+      },
+    ],
     name: "setValue",
     outputs: [],
-    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    constant: false,
-    inputs: [{ internalType: "uint256", name: "newValue", type: "uint256" }],
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "newValue",
+        type: "uint256",
+      },
+    ],
     name: "setValue2",
     outputs: [],
-    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    constant: true,
     inputs: [],
     name: "value",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    payable: false,
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
     stateMutability: "view",
     type: "function",
   },
   {
-    constant: true,
     inputs: [],
     name: "value2",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    payable: false,
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
     stateMutability: "view",
     type: "function",
   },
 ];
-
 export { contractAddress, contractAbi };

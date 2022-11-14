@@ -164,3 +164,44 @@ export const setValue2 = {
   }),
   args: [{ type: ArgTypes.Number, comment: "value2(number)", name: "value" }],
 };
+
+export const triggerError = {
+  type: ScriptTypes.CONTRACT,
+  script: "",
+  description: "Trigger an error with the contract method",
+  method: ({
+    account,
+    contractAddress,
+    contractAbi,
+    methodName,
+    args,
+    chain,
+  }: Params): Promise<any> => {
+    let contract = ChainServices.getEvmChainContract(chain);
+    if (contractAddress && contractAbi) {
+      contract = new ChainServices[chain].web3.eth.Contract(
+        JSON.parse(contractAbi),
+        contractAddress
+      );
+    }
+    return contract.methods[methodName || "arithmeticError"](...args).send({
+      from: account,
+    });
+  },
+  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
+    contractAddress: {
+      comment: "contract address",
+      value: ContractInfos[chain as EvmChain].address,
+    },
+    contractAbi: {
+      comment: "contract abi",
+      value: JSON.stringify(ContractInfos[chain as EvmChain].abi),
+    },
+    methodName: {
+      comment: "method name",
+
+      value: "arithmeticError",
+    },
+  }),
+  args: [{ type: ArgTypes.Number, comment: "a(number)", name: "a" }],
+};
