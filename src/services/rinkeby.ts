@@ -16,9 +16,9 @@ const bloctoSDK = new BloctoSDK({
     // (required) chainId to be used
     chainId: isMainnet ? "0x1" : "0x4",
     // (required for Ethereum) JSON RPC endpoint
-    rpc: `https://${
-      isMainnet ? "mainnet" : "rinkeby"
-    }.infura.io/v3/ef5a5728e2354955b562d2ffa4ae5305`,
+    rpc: isMainnet
+      ? "https://mainnet.infura.io/v3/ef5a5728e2354955b562d2ffa4ae5305"
+      : "https://rinkeby.blocto.app/",
   },
 }) as ExtendedEvmBloctoSDK;
 
