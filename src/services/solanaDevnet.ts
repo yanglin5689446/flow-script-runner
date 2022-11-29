@@ -15,6 +15,7 @@ const bloctoSDK = new BloctoSDK({
   solana: {
     net: isMainnet ? "mainnet-beta" : "devnet",
   },
+  appId: process.env.REACT_APP_DAPP_ID,
 }) as ExtendedSolaneBloctoSDK;
 
 export { bloctoSDK };

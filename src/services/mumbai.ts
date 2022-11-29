@@ -11,6 +11,7 @@ const bloctoSDK = new BloctoSDK({
       ? "https://rpc-mainnet.matic.network	"
       : "https://rpc-mumbai.maticvigil.com/",
   },
+  appId: process.env.REACT_APP_DAPP_ID,
 }) as ExtendedEvmBloctoSDK;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment

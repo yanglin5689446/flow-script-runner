@@ -20,6 +20,7 @@ const bloctoSDK = new BloctoSDK({
       ? "https://mainnet.infura.io/v3/ef5a5728e2354955b562d2ffa4ae5305"
       : "https://rinkeby.blocto.app/",
   },
+  appId: process.env.REACT_APP_DAPP_ID,
 }) as ExtendedEvmBloctoSDK;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment

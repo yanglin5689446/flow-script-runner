@@ -11,6 +11,7 @@ const bloctoSDK = new BloctoSDK({
       ? "https://bsc-dataseed.binance.org/"
       : "https://data-seed-prebsc-1-s1.binance.org:8545/",
   },
+  appId: process.env.REACT_APP_DAPP_ID,
 }) as ExtendedEvmBloctoSDK;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment

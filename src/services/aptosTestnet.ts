@@ -14,6 +14,7 @@ const bloctoSDK = new BloctoSDK({
   aptos: {
     chainId: isMainnet ? 1 : 2,
   },
+  appId: process.env.REACT_APP_DAPP_ID,
 }) as ExtendedAptosBloctoSDK;
 
 export { bloctoSDK };
