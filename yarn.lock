@@ -1307,10 +1307,10 @@
     "@improbable-eng/grpc-web" "^0.12.0"
     elliptic "^6.5.4"
 
-"@blocto/sdk@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@blocto/sdk/-/sdk-0.3.3.tgz#c247ea022bda977a21846d342876b8efc950e033"
-  integrity sha512-PHiti69t0e8VW4/vD2RB8p66MUtwaL/CUWY8j2HWBNJ/KuoKmazDATrymXd6Mgn0hVI/rl7K5EUrD8xDPSPPoA==
+"@blocto/sdk@0.4.0-beta.1":
+  version "0.4.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@blocto/sdk/-/sdk-0.4.0-beta.1.tgz#568ac3fdb455cf6475bf077afb5f1123e637314d"
+  integrity sha512-AYk25TuEUS+WNiOjewOZSIEDO2JnZKtgLDNadHag9LZXN37u5LnmpRbr90dHZm1wQyKfKk9cV3KWT7rIZ3FBeA==
   dependencies:
     bs58 "^4.0.1"
     buffer "^6.0.3"

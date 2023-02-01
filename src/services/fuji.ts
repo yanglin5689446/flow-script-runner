@@ -6,6 +6,7 @@ const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 
 const bloctoSDK = new BloctoSDK({
   ethereum: {
+    server: "https://wallet-v2.blocto.app",
     chainId: isMainnet ? "0xa86a" : "0xa869",
     rpc: isMainnet
       ? "https://rpc.ankr.com/avalanche"
