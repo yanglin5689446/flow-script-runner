@@ -10,7 +10,7 @@ const NODE_URL = isMainnet
   : "https://access-testnet.onflow.org";
 const WALLET_URL = isMainnet
   ? "https://flow-wallet.blocto.app/api/flow/authn"
-  : "https://flow-wallet-testnet.blocto.app/api/flow/authn";
+  : "https://wallet-v2.blocto.app/api/flow/authn";
 
 fcl
   .config()
