@@ -7,7 +7,7 @@ import * as fcl from "@blocto/fcl";
 const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 const NODE_URL = isMainnet
   ? "https://access-mainnet-beta.onflow.org"
-  : "https://access-testnet.onflow.org";
+  : "https://rest-testnet.onflow.org";
 const WALLET_URL = isMainnet
   ? "https://flow-wallet.blocto.app/api/flow/authn"
   : "https://wallet-v2.blocto.app/api/flow/authn";

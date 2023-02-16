@@ -134,7 +134,7 @@ const FlowEditor = (): ReactJSXElement => {
       script: string
     ) => {
       const fclArgs = parseFclArgs(args);
-      const block = await fcl.send([fcl.getLatestBlock()]).then(fcl.decode);
+      const block = await fcl.send([fcl.getBlock()]).then(fcl.decode);
       return new Promise<{
         transactionId: string;
         subscribeFunc: (callback: (transaction: any) => void) => () => void;
