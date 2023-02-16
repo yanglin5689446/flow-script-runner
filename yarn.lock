@@ -1301,10 +1301,10 @@
     "@onflow/util-template" "^1.0.1"
     "@onflow/util-uid" "^1.0.1"
 
-"@blocto/sdk@0.4.0-beta.3":
-  version "0.4.0-beta.3"
-  resolved "https://registry.yarnpkg.com/@blocto/sdk/-/sdk-0.4.0-beta.3.tgz#1e45f8098b884267c3eeb4d81d05de47289fb2b3"
-  integrity sha512-faQQDc13US8zg5aR9n3ahiJKfIZ3m4FNH+4H4I6M8LggSV5auP4mUlFPd+2yV/G3cRSDFJT1daRBZc8gZwwD5g==
+"@blocto/sdk@0.4.0-beta.4":
+  version "0.4.0-beta.4"
+  resolved "https://registry.yarnpkg.com/@blocto/sdk/-/sdk-0.4.0-beta.4.tgz#edfb4552b0733bc1f028cc0eb305426d4e7e2695"
+  integrity sha512-PAZfro8HU8OThipLUYCm65uULYUKf/p1yb2vW4h7x7ze6NOtF0AaVjwkTcw9QziyGlOpj6Y037oRrmsdHSrrKQ==
   dependencies:
     bs58 "^4.0.1"
     buffer "^6.0.3"
