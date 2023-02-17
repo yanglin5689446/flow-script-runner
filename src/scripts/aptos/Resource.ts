@@ -1,7 +1,10 @@
 import ScriptTypes, { AptosArgTypes } from "../../types/ScriptTypes";
 
-// @todo: use different endpoint according to env and move this elsewhere
-const APTOS_NODE_URL = "https://fullnode.devnet.aptoslabs.com/v1";
+const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
+
+const APTOS_NODE_URL = `https://fullnode.${
+  isMainnet ? "mainnet" : "testnet"
+}.aptoslabs.com/v1`;
 
 export const getAptosBalance = {
   type: ScriptTypes.RESOURCE,

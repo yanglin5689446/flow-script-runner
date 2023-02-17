@@ -45,9 +45,10 @@ import ScriptTypes, {
   Arg,
   PerInfo,
   PerScriptAbi,
+  AptosArgTypes,
 } from "../types/ScriptTypes";
 import Sandbox from "./Sandbox";
-
+import hexToBytes from "../utils/hexToBytes";
 const TabNames = [
   "Script",
   "Transaction",
@@ -177,6 +178,18 @@ const Editor: React.FC<EditorProps> = ({
     setError("");
     setTxHash("");
     try {
+      if (args) {
+        const findArgBypeType = args.findIndex(
+          (item) => item.type === AptosArgTypes.Bytes
+        );
+        if (findArgBypeType !== -1) {
+          args[findArgBypeType] = {
+            ...args[findArgBypeType],
+            value: hexToBytes(args[findArgBypeType].value),
+          };
+        }
+      }
+
       if (scriptType === ScriptTypes.SCRIPT && onSendScript) {
         onSendScript(script, args, methodRef.current, scriptInfo, scriptAbi)
           .then(setResult)

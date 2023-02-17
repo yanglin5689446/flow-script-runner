@@ -26,6 +26,7 @@ export enum AptosArgTypes {
   String = "string",
   Number = "number",
   Bool = "boolean",
+  Bytes = "bytes",
 }
 
 export interface PerInfo {
