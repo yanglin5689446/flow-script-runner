@@ -27,7 +27,7 @@ const DEFAULT_METHOD_VALUE = METHODS[0].value;
 
 const LoginModal: React.FC = () => {
   const [method, setMethod] = useState(DEFAULT_METHOD_VALUE);
-  const [appDomainTag, setAppDomainTag] = useState("");
+  const [appDomainTag, setAppDomainTag] = useState(window.location.host);
   const [isTagInvalid, setIsTagInvalid] = useState(false);
   const { confirmFlowLogin, isLoginModalOpen, closeLoginModal } =
     useContext(Context);
@@ -93,7 +93,7 @@ const LoginModal: React.FC = () => {
                   <Box width={4} height={4} />
                   <Flex flexDirection="column" ml={2}>
                     <Text fontSize="sm" color="slategrey">
-                      Custom app domain tag (Optional)
+                      Custom appIdentifier
                     </Text>
                     <Tooltip
                       label="Please keep the string less than or equal to 32 bytes"
@@ -110,7 +110,7 @@ const LoginModal: React.FC = () => {
                             : undefined
                         }
                         focusBorderColor={isTagInvalid ? "red.300" : undefined}
-                        placeholder="AWESOME-APP-V0.0-user"
+                        placeholder="Awesome App (v0.0)"
                         size="sm"
                         width="300px"
                         borderRadius="lg"

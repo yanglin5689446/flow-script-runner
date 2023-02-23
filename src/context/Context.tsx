@@ -12,6 +12,14 @@ export enum LoginMethod {
   ProvableAuthn,
 }
 
+const generate32BytesNonce = () => {
+  let nonce = "";
+  Array.from({ length: 64 }).forEach(
+    () => (nonce += ((Math.random() * 0xf) << 0).toString(16))
+  );
+  return nonce;
+};
+
 export const Context: React.Context<{
   chain?: ChainsType;
   switchChain?: (chain: ChainsType) => void;
@@ -92,9 +100,15 @@ const ContextProvider: React.FC = ({ children }) => {
   }, [chain]);
 
   const confirmFlowLogin = useCallback(
-    async (loginMethod: LoginMethod, appDomainTag = "") => {
-      if (loginMethod === LoginMethod.ProvableAuthn && appDomainTag) {
-        fcl.config().put("fcl.appDomainTag", appDomainTag);
+    async (loginMethod: LoginMethod, appIdentifier = "") => {
+      if (loginMethod === LoginMethod.ProvableAuthn && appIdentifier) {
+        fcl.config().put(
+          "fcl.accountProof.resolver",
+          () =>
+            new Promise((resolve) => {
+              resolve({ appIdentifier, nonce: generate32BytesNonce() });
+            })
+        );
       }
 
       if (!ChainServices.getChainAddress(Chains.Flow)) {
@@ -109,16 +123,10 @@ const ContextProvider: React.FC = ({ children }) => {
             (service: any) => service.type === "account-proof"
           );
           if (accountProofService) {
-            const {
-              data: { address, appDomainTag, timestamp, signatures },
-            } = accountProofService;
-
-            verifyAccountProofSignature({
-              address,
-              timestamp,
-              appDomainTag,
-              signatures,
-            }).then((isValid: boolean) => {
+            verifyAccountProofSignature(
+              appIdentifier,
+              accountProofService.data
+            ).then((isValid: boolean) => {
               if (!isValid) {
                 toast({
                   title:

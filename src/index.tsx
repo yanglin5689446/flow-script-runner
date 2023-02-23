@@ -18,7 +18,8 @@ fcl
   .put("accessNode.api", NODE_URL)
   .put("discovery.wallet", WALLET_URL) // Blocto testnet wallet
   .put("discovery.wallet.method", "HTTP/POST")
-  .put("service.OpenID.scopes", "email!");
+  .put("service.OpenID.scopes", "email!")
+  .put("flow.network", process.env.REACT_APP_NETWORK || "testnet");
 
 ReactDOM.render(
   <React.StrictMode>

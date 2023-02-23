@@ -1,29 +1,19 @@
 import * as fcl from "@blocto/fcl";
 
-interface Params {
+interface Data {
   address: string;
-  timestamp: number;
-  appDomainTag?: string;
-  signatures: Array<{
-    f_type: "CompositeSignature";
-    f_vsn: string;
-    addr: string;
-    signature: string;
-    keyId: number;
-  }>;
+  nonce: string;
+  signatures: Array<Record<string, any>>;
 }
 
-export const verifyAccountProofSignature = ({
-  address,
-  timestamp,
-  appDomainTag,
-  signatures,
-}: Params): Promise<boolean> => {
-  const provableMessage =
-    fcl.WalletUtils.encodeMessageForProvableAuthnVerifying(
-      address,
-      timestamp,
-      appDomainTag
-    );
-  return fcl.verifyUserSignatures(provableMessage, signatures);
+export const verifyAccountProofSignature = (
+  appIdentifier: string,
+  accountProofData: Data
+): Promise<boolean> => {
+  const { address, nonce, signatures } = accountProofData;
+  return fcl.AppUtils.verifyAccountProof(appIdentifier, {
+    address,
+    nonce,
+    signatures,
+  });
 };
