@@ -12,13 +12,10 @@ export enum LoginMethod {
   ProvableAuthn,
 }
 
-const generate32BytesNonce = () => {
-  let nonce = "";
-  Array.from({ length: 64 }).forEach(
-    () => (nonce += ((Math.random() * 0xf) << 0).toString(16))
-  );
-  return nonce;
-};
+const generate32BytesNonce = () =>
+  Array.from({ length: 64 })
+    .map(() => Math.floor(Math.random() * 0xf).toString(16))
+    .join("");
 
 export const Context: React.Context<{
   chain?: ChainsType;
