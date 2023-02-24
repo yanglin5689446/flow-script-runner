@@ -52,15 +52,20 @@ const ContextProvider: React.FC = ({ children }) => {
       return;
     }
 
-    if (chain in EvmChain) {
+    if (Object.values(EvmChain).includes(chain as any)) {
       const { bloctoSDK } = ChainServices[chain];
-      await bloctoSDK?.ethereum?.request({ method: "eth_disconnect" });
+      await bloctoSDK?.ethereum?.request({ method: "wallet_disconnect" });
     }
     if (chain === Chains.Solana) {
       const { bloctoSDK } = ChainServices[chain];
       await bloctoSDK?.solana?.request({ method: "disconnect" });
     }
+    if (chain === Chains.Aptos) {
+      const { bloctoSDK } = ChainServices[chain];
+      await bloctoSDK?.aptos.disconnect();
+    }
 
+    ChainServices.setChainAddress(chain, "");
     localStorage.removeItem("sdk.session");
     setAddress("");
   }, [chain]);
