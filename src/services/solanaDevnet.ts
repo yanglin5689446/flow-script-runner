@@ -13,7 +13,6 @@ const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 
 const bloctoSDK = new BloctoSDK({
   solana: {
-    server: "https://wallet-v2.blocto.app",
     net: isMainnet ? "mainnet-beta" : "devnet",
   },
   appId: process.env.REACT_APP_DAPP_ID,
