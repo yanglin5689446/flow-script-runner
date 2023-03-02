@@ -143,8 +143,9 @@ const EvmEditor = (): ReactJSXElement => {
           justifyContent="space-between"
           flexWrap="wrap"
           flexShrink={1}
+          gap="10px"
         >
-          <Stat mx="10px" maxWidth="200px">
+          <Stat maxWidth="200px">
             <StatLabel>Current ChainId</StatLabel>
             <StatNumber>
               {chainId}
