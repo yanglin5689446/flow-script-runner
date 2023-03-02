@@ -12,7 +12,6 @@ const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 
 const bloctoSDK = new BloctoSDK({
   aptos: {
-    server: "https://wallet-v2.blocto.app",
     chainId: isMainnet ? 1 : 2,
   },
   appId: process.env.REACT_APP_DAPP_ID,
