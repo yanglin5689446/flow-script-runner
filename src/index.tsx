@@ -9,15 +9,14 @@ const NODE_URL = isMainnet
   ? "https://rest-mainnet.onflow.org"
   : "https://rest-testnet.onflow.org";
 const WALLET_URL = isMainnet
-  ? "https://wallet-v2.blocto.app/api/flow/authn"
-  : "https://wallet-v2-dev.blocto.app/api/flow/authn";
+  ? `https://wallet-v2.blocto.app/${process.env.REACT_APP_DAPP_ID}/flow/authn`
+  : `https://wallet-v2-dev.blocto.app/${process.env.REACT_APP_DAPP_ID}/flow/authn`;
 
 fcl
   .config()
   .put("challenge.scope", "email") // request for Email
   .put("accessNode.api", NODE_URL)
   .put("discovery.wallet", WALLET_URL) // Blocto testnet wallet
-  .put("discovery.wallet.method", "HTTP/POST")
   .put("service.OpenID.scopes", "email!")
   .put("flow.network", process.env.REACT_APP_NETWORK || "testnet");
 
