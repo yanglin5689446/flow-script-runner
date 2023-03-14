@@ -7,7 +7,7 @@ export const signMessageEth = {
   script: "",
   method: (message: string, account: string, chain: EvmChain): Promise<any> =>
     ChainServices[chain].web3.eth.sign(message, account),
-  args: [{ type: ArgTypes.String, comment: "message" }],
+  args: [{ type: ArgTypes.String, comment: "message", required: true }],
   isArgsAdjustable: false,
 };
 
@@ -18,7 +18,7 @@ export const signMessagePersonal = {
     // eslint-disable-next-line
     // @ts-ignore
     ChainServices[chain].web3.eth.personal.sign(message, account),
-  args: [{ type: ArgTypes.String, comment: "message" }],
+  args: [{ type: ArgTypes.String, comment: "message", required: true }],
   isArgsAdjustable: false,
 };
 
