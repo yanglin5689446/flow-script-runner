@@ -8,7 +8,7 @@ const bloctoSDK = new BloctoSDK({
   ethereum: {
     chainId: isMainnet ? "0x89" : "0x13881",
     rpc: isMainnet
-      ? "https://rpc-mainnet.matic.network	"
+      ? "https://polygon-rpc.com"
       : "https://rpc-mumbai.maticvigil.com/",
   },
   appId: process.env.REACT_APP_DAPP_ID,
