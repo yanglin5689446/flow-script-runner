@@ -71,7 +71,7 @@ const SolanaEditor = (): ReactJSXElement => {
           const info = contractInfo && {
             programId: contractInfo.programId.value,
             accountPubKey: contractInfo.accountPubKey.value,
-            struct: contractInfo.struct.value,
+            struct: contractInfo.struct?.value,
             methodIndex: contractInfo.methodIndex?.value,
           };
           method(userAddress, formattedArgs, info)
