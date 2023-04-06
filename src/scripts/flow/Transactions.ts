@@ -200,3 +200,10 @@ transaction(amount: UFix64, to: Address) {
   ],
   shouldSign: true,
 };
+
+export const triggerError = {
+  type: ScriptTypes.TX,
+  script: ``,
+  args: [],
+  shouldSign: true,
+};
