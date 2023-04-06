@@ -203,7 +203,7 @@ transaction(amount: UFix64, to: Address) {
 
 export const triggerError = {
   type: ScriptTypes.TX,
-  script: ``,
+  script: "",
   args: [],
   shouldSign: true,
 };
