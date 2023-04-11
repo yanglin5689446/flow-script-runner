@@ -203,5 +203,11 @@ export const triggerError = {
       value: "arithmeticError",
     },
   }),
-  args: [{ type: ArgTypes.Number, comment: "a(number)", name: "a" }],
+  args: [
+    {
+      type: ArgTypes.Number,
+      comment: "Input below 100 can trigger an error",
+      name: "a",
+    },
+  ],
 };
