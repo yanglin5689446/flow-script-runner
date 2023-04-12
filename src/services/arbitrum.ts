@@ -6,11 +6,10 @@ const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 
 const bloctoSDK = new BloctoSDK({
   ethereum: {
-    server: "http://localhost:3000",
     chainId: isMainnet ? "0xa4b1" : "0x66eed",
     rpc: isMainnet
-      ? "https://endpoints.omniatech.io/v1/arbitrum/one/public"
-      : "https://endpoints.omniatech.io/v1/arbitrum/goerli/public",
+      ? "https://arb1.arbitrum.io/rpc"
+      : "https://goerli-rollup.arbitrum.io/rpc",
   },
   appId: process.env.REACT_APP_DAPP_ID,
 }) as ExtendedEvmBloctoSDK;

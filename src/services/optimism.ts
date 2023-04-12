@@ -6,7 +6,6 @@ const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 
 const bloctoSDK = new BloctoSDK({
   ethereum: {
-    server: "http://localhost:3000",
     chainId: isMainnet ? "0x000a" : "0x01A4",
     rpc: isMainnet
       ? "https://mainnet.optimism.io"
