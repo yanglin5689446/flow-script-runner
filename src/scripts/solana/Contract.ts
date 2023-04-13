@@ -194,3 +194,89 @@ export const setValue = {
   }),
   args: [{ type: ArgTypes.Number, comment: "value(number)", name: "value" }],
 };
+
+export const triggerError = {
+  type: ScriptTypes.CONTRACT,
+  script: "",
+  description: "Trigger an error with the contract method",
+  method: (
+    account: string,
+    args: Record<string, any>,
+    contractInfo: {
+      programId: string;
+      accountPubKey: string;
+    }
+  ): Promise<any> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const { programId: contractProgramInfo, accountPubKey } = contractInfo;
+        const {
+          value: { blockhash },
+        } = await ChainServices[Chains.Solana].bloctoSDK?.solana?.request({
+          method: "getRecentBlockhash",
+        });
+
+        const data = Buffer.alloc(16).fill(0);
+        data[15] = args.value;
+        const transaction = new Transaction();
+        const publicKey = new PublicKey(account);
+        const pubkey =
+          new PublicKey(accountPubKey) ??
+          ChainServices.getSolanaProgramInfo().accountPubKey;
+        const programId =
+          new PublicKey(contractProgramInfo) ??
+          ChainServices.getSolanaProgramInfo().programId;
+
+        transaction.add(
+          new TransactionInstruction({
+            keys: [
+              {
+                pubkey,
+                isSigner: false,
+                isWritable: true,
+              },
+              {
+                pubkey: publicKey,
+                isSigner: false,
+                isWritable: false,
+              },
+            ],
+            programId,
+            data,
+          })
+        );
+
+        transaction.feePayer = publicKey;
+        transaction.recentBlockhash = blockhash;
+
+        const transactionId = await ChainServices[
+          Chains.Solana
+        ].bloctoSDK?.solana?.signAndSendTransaction(transaction);
+
+        resolve({
+          transactionId,
+          transaction: transactionId,
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
+    programId: {
+      comment: "program id",
+      value: "4EorMcRZ8FKZtNQwFgBw7UULAvxpoAN1bgkfpCE1je1Y",
+    },
+    accountPubKey: {
+      comment: "account PubKey",
+      value: ContractInfos[chain as OtherChain.Solana].accountPubKey,
+    },
+  }),
+  args: [
+    {
+      type: ArgTypes.Number,
+      comment: "Input below 100 can trigger an error",
+      name: "value",
+    },
+  ],
+};
