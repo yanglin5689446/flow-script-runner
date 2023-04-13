@@ -1301,10 +1301,10 @@
     "@onflow/util-template" "^1.0.1"
     "@onflow/util-uid" "^1.0.1"
 
-"@blocto/sdk@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@blocto/sdk/-/sdk-0.4.0.tgz#5f11b3c22a90e8c68b08c09898f21ce8690411b2"
-  integrity sha512-ohDaIw5gdDDWoudu7/Zl+//XB+5SafpIPa6bmaTfUzbaq7iD/ad3ZY9PnyirBj2QxKFeJV7+DzNRdZ+XN6EgcA==
+"@blocto/sdk@0.4.2-beta.1":
+  version "0.4.2-beta.1"
+  resolved "https://registry.yarnpkg.com/@blocto/sdk/-/sdk-0.4.2-beta.1.tgz#8ff58f8bfa88919938cef43a70db90a18b5cbd19"
+  integrity sha512-E8TthQ0+RbdrfzXomr6YHQP4xtq08pCbOi5p7PPymJapBZP/qhAQ91Nq/bS1wTA94hX7h65AhKAC16LbzLzmfw==
   dependencies:
     bs58 "^4.0.1"
     buffer "^6.0.3"
@@ -11599,7 +11599,7 @@ react-dom@^17.0.2:
     object-assign "^4.1.1"
     scheduler "^0.20.2"
 
-react-error-overlay@^6.0.9:
+react-error-overlay@6.0.9, react-error-overlay@^6.0.9:
   version "6.0.9"
   resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-6.0.9.tgz#3c743010c9359608c375ecd6bc76f35d93995b0a"
   integrity sha512-nQTTcUu+ATDbrSD1BZHr5kgSD4oF8OFjxun8uAaL8RwPBacGBNPf/yAuVVdx17N8XNzRDMrZ9XcKZHCjPW+9ew==

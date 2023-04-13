@@ -17,6 +17,8 @@ const FaucetUrls = {
   [EvmChain.Bsc]: "https://testnet.binance.org/faucet-smart",
   [EvmChain.Polygon]: "https://faucet.polygon.technology/",
   [EvmChain.Avalanche]: "https://faucet.avax-test.network/",
+  [EvmChain.Arbitrum]: "https://faucet.triangleplatform.com/arbitrum/goerli",
+  [EvmChain.Optimism]: "https://faucet.paradigm.xyz/",
 };
 
 const MenuGroups = [
