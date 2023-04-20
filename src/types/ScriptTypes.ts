@@ -13,6 +13,7 @@ export interface Arg {
   type: any;
   comment?: string;
   name?: string;
+  required?: boolean;
 }
 
 export enum ArgTypes {

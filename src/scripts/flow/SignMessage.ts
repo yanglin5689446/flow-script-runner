@@ -3,6 +3,6 @@ import ScriptTypes from "../../types/ScriptTypes";
 export const signMessage = {
   type: ScriptTypes.SIGN,
   script: "",
-  args: [{ type: "String", comment: "message" }],
+  args: [{ type: "String", comment: "message", required: true }],
   isArgsAdjustable: false,
 };

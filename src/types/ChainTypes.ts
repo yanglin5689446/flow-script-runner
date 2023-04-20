@@ -9,6 +9,8 @@ export enum EvmChain {
   Bsc = "bsc",
   Polygon = "polygon",
   Avalanche = "avalance",
+  Arbitrum = "arbitrum",
+  Optimism = "optimism",
 }
 
 export type ChainsType = OtherChain | EvmChain;

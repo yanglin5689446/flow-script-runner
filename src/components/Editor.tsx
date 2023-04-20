@@ -172,83 +172,40 @@ const Editor: React.FC<EditorProps> = ({
     [tabsShouldLoadDefaultTemplate, menuGroups, importTemplate]
   );
 
-  const runScript = useCallback(async () => {
-    setResponse("");
-    setResult("");
-    setError("");
-    setTxHash("");
-    try {
-      if (args) {
-        const findArgBypeType = args.findIndex(
-          (item) => item.type === AptosArgTypes.Bytes
-        );
-        if (findArgBypeType !== -1) {
-          args[findArgBypeType] = {
-            ...args[findArgBypeType],
-            value: hexToBytes(args[findArgBypeType].value),
-          };
-        }
+  const execute = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (!e.target.checkValidity()) {
+        e.target.reportValidity();
+        return false;
       }
-
-      if (scriptType === ScriptTypes.SCRIPT && onSendScript) {
-        onSendScript(script, args, methodRef.current, scriptInfo, scriptAbi)
-          .then(setResult)
-          .catch((error) => {
-            setError(error?.message || "Error: Running script failed.");
-          });
-      } else if (scriptType === ScriptTypes.SIGN && onSignMessage) {
-        onSignMessage(args, methodRef.current)
-          .then((response: any) => {
-            if (response instanceof Error) {
-              setError(`Error: ${response.message}`);
-              return;
-            }
-            setResult(response);
-          })
-          .catch((error) => {
-            setError(error?.message || "Error: Signing message failed.");
-          });
-      } else if (scriptType === ScriptTypes.TX) {
-        onSendTransactions(args, shouldSign, signers, script, methodRef.current)
-          .then(({ transactionId, transaction, subscribeFunc, isSealed }) => {
-            setTxHash(transactionId);
-            setResponse(transaction);
-
-            if (subscribeFunc && isSealed) {
-              const unsub = subscribeFunc((transaction: any) => {
-                setResponse(transaction);
-                if (isSealed(transaction)) {
-                  unsub();
-                }
-              });
-            }
-          })
-          .catch((error) => {
-            setError(error?.message || "Error: Sending transaction failed.");
-          });
-      } else if (scriptType === ScriptTypes.CONTRACT) {
-        if (onInteractWithContract && contractInfo) {
-          onInteractWithContract(contractInfo, args, methodRef.current)
-            .then((result) => {
-              if (
-                typeof result === "string" ||
-                (result && !result.transactionId)
-              ) {
-                setResult(result);
-              } else {
-                setTxHash(result.transactionId);
-                setResponse(result.transaction);
-              }
-            })
-            .catch((error) => {
-              setError(error?.message || "Error: Function called failed.");
-            });
+      setResponse("");
+      setResult("");
+      setError("");
+      setTxHash("");
+      try {
+        if (args) {
+          const findArgBypeType = args.findIndex(
+            (item) => item.type === AptosArgTypes.Bytes
+          );
+          if (findArgBypeType !== -1) {
+            args[findArgBypeType] = {
+              ...args[findArgBypeType],
+              value: hexToBytes(args[findArgBypeType].value),
+            };
+          }
         }
-      } else {
-        if (onGetResource) {
-          onGetResource(args, methodRef.current)
+
+        if (scriptType === ScriptTypes.SCRIPT && onSendScript) {
+          onSendScript(script, args, methodRef.current, scriptInfo, scriptAbi)
+            .then(setResult)
+            .catch((error) => {
+              setError(error?.message || "Error: Running script failed.");
+            });
+        } else if (scriptType === ScriptTypes.SIGN && onSignMessage) {
+          onSignMessage(args, methodRef.current)
             .then((response: any) => {
-              if (response?.message) {
+              if (response instanceof Error) {
                 setError(`Error: ${response.message}`);
                 return;
               }
@@ -257,28 +214,85 @@ const Editor: React.FC<EditorProps> = ({
             .catch((error) => {
               setError(error?.message || "Error: Signing message failed.");
             });
+        } else if (scriptType === ScriptTypes.TX) {
+          onSendTransactions(
+            args,
+            shouldSign,
+            signers,
+            script,
+            methodRef.current
+          )
+            .then(({ transactionId, transaction, subscribeFunc, isSealed }) => {
+              setTxHash(transactionId);
+              setResponse(transaction);
+
+              if (subscribeFunc && isSealed) {
+                const unsub = subscribeFunc((transaction: any) => {
+                  setResponse(transaction);
+                  if (isSealed(transaction)) {
+                    unsub();
+                  }
+                });
+              }
+            })
+            .catch((error) => {
+              setError(error?.message || "Error: Sending transaction failed.");
+            });
+        } else if (scriptType === ScriptTypes.CONTRACT) {
+          if (onInteractWithContract && contractInfo) {
+            onInteractWithContract(contractInfo, args, methodRef.current)
+              .then((result) => {
+                if (
+                  typeof result === "string" ||
+                  (result && !result.transactionId)
+                ) {
+                  setResult(result);
+                } else {
+                  setTxHash(result.transactionId);
+                  setResponse(result.transaction);
+                }
+              })
+              .catch((error) => {
+                setError(error?.message || "Error: Function called failed.");
+              });
+          }
+        } else {
+          if (onGetResource) {
+            onGetResource(args, methodRef.current)
+              .then((response: any) => {
+                if (response?.message) {
+                  setError(`Error: ${response.message}`);
+                  return;
+                }
+                setResult(response);
+              })
+              .catch((error) => {
+                setError(error?.message || "Error: Signing message failed.");
+              });
+          }
         }
+      } catch (error) {
+        setError(
+          error instanceof Error ? error.message : "Error: Execution failed."
+        );
       }
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Error: Execution failed."
-      );
-    }
-  }, [
-    scriptType,
-    contractInfo,
-    args,
-    script,
-    shouldSign,
-    signers,
-    scriptInfo,
-    scriptAbi,
-    onSendScript,
-    onSignMessage,
-    onSendTransactions,
-    onInteractWithContract,
-    onGetResource,
-  ]);
+    },
+    [
+      scriptType,
+      contractInfo,
+      args,
+      script,
+      shouldSign,
+      signers,
+      scriptInfo,
+      scriptAbi,
+      onSendScript,
+      onSignMessage,
+      onSendTransactions,
+      onInteractWithContract,
+      onGetResource,
+    ]
+  );
 
   useEffect(() => {
     if (shouldClearScript) {
@@ -321,7 +335,13 @@ const Editor: React.FC<EditorProps> = ({
         />
       )}
 
-      <Flex flex={3} height="100%" direction="column">
+      <Flex
+        as="form"
+        flex={3}
+        height="100%"
+        direction="column"
+        onSubmit={execute}
+      >
         <Tabs size="md" onChange={handleTabChange} index={scriptType}>
           <TabList>
             {TabNames.map((tab, index) => (
@@ -482,7 +502,7 @@ const Editor: React.FC<EditorProps> = ({
             )}
           </Flex>
           <Box mt={2}>
-            {args?.map(({ value, type, comment, name }, index) => (
+            {args?.map(({ value, type, comment, name, required }, index) => (
               <Flex key={index} align="center" mt={2}>
                 <Textarea
                   rows={1}
@@ -497,6 +517,7 @@ const Editor: React.FC<EditorProps> = ({
                     });
                     setArgs(updated);
                   }}
+                  required={required}
                   placeholder={comment}
                 />
                 {argTypes && (
@@ -668,7 +689,7 @@ const Editor: React.FC<EditorProps> = ({
                 />
               </FormControl>
             )}
-          <Button onClick={runScript} mt={2}>
+          <Button type="submit" mt={2}>
             Run
           </Button>
         </Flex>

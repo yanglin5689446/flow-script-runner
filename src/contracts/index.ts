@@ -15,6 +15,14 @@ import {
   contractAbi as rinkebyContractAbi,
   contractAddress as rinkebyContractAddress,
 } from "./rinkeby";
+import {
+  contractAbi as arbitrumContractAbi,
+  contractAddress as arbitrumContractAddress,
+} from "./arbitrum";
+import {
+  contractAbi as optimismContractAbi,
+  contractAddress as optimismContractAddress,
+} from "./optimism";
 import { programId, accountPubKey } from "./solanaDevnet";
 import { moduleName } from "./aptosDevnet";
 import { EvmChain, OtherChain } from "../types/ChainTypes";
@@ -42,6 +50,14 @@ export const ContractInfos: ContractInfosType = {
   [EvmChain.Avalanche]: {
     abi: fujiContractAbi,
     address: fujiContractAddress,
+  },
+  [EvmChain.Arbitrum]: {
+    abi: arbitrumContractAbi,
+    address: arbitrumContractAddress,
+  },
+  [EvmChain.Optimism]: {
+    abi: optimismContractAbi,
+    address: optimismContractAddress,
   },
   [OtherChain.Solana]: {
     programId,

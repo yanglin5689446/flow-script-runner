@@ -6,6 +6,8 @@ import { ContractInfos } from "../contracts";
 import { Chains, ChainsType, EvmChain, OtherChain } from "../types/ChainTypes";
 import { web3 as bscWeb3, bloctoSDK as bscSDK } from "./bscTestnet";
 import { web3 as fujiWeb3, bloctoSDK as fujiSDK } from "./fuji";
+import { web3 as arbitrumWeb3, bloctoSDK as arbitrumSDK } from "./arbitrum";
+import { web3 as optimismWeb3, bloctoSDK as optimismSDK } from "./optimism";
 import { web3 as mumbaiWeb3, bloctoSDK as mumbaiSDK } from "./mumbai";
 import {
   web3 as rinkebyWeb3,
@@ -89,6 +91,18 @@ export const ChainServices: ChainServicesType = {
   [Chains.Avalanche]: {
     web3: fujiWeb3,
     bloctoSDK: fujiSDK,
+    address: null,
+    contract: null,
+  },
+  [Chains.Arbitrum]: {
+    web3: arbitrumWeb3,
+    bloctoSDK: arbitrumSDK,
+    address: null,
+    contract: null,
+  },
+  [Chains.Optimism]: {
+    web3: optimismWeb3,
+    bloctoSDK: optimismSDK,
     address: null,
     contract: null,
   },
