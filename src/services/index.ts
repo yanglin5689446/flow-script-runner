@@ -10,10 +10,10 @@ import { web3 as arbitrumWeb3, bloctoSDK as arbitrumSDK } from "./arbitrum";
 import { web3 as optimismWeb3, bloctoSDK as optimismSDK } from "./optimism";
 import { web3 as mumbaiWeb3, bloctoSDK as mumbaiSDK } from "./mumbai";
 import {
-  web3 as rinkebyWeb3,
-  bloctoSDK as rinkebySDK,
+  web3 as goerliWeb3,
+  bloctoSDK as goerliSDK,
   ExtendedEvmBloctoSDK,
-} from "./rinkeby";
+} from "./goerli";
 import {
   bloctoSDK as solanaSDK,
   ExtendedSolaneBloctoSDK,
@@ -71,8 +71,8 @@ type ChainServicesType = FlowInfoType &
 export const ChainServices: ChainServicesType = {
   [Chains.Flow]: { address: null },
   [Chains.Ethereum]: {
-    web3: rinkebyWeb3,
-    bloctoSDK: rinkebySDK,
+    web3: goerliWeb3,
+    bloctoSDK: goerliSDK,
     address: null,
     contract: null,
   },

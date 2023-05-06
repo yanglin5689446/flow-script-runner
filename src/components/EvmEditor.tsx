@@ -13,7 +13,7 @@ import EvmChainSelect from "./EvmChainSelect";
 const typeKeys = Object.values(ArgTypes);
 
 const FaucetUrls = {
-  [EvmChain.Ethereum]: "https://rinkeby-faucet.com/",
+  [EvmChain.Ethereum]: "https://goerlifaucet.com/",
   [EvmChain.Bsc]: "https://testnet.binance.org/faucet-smart",
   [EvmChain.Polygon]: "https://faucet.polygon.technology/",
   [EvmChain.Avalanche]: "https://faucet.avax-test.network/",

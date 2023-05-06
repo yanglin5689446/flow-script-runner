@@ -1,6 +1,6 @@
 import Web3 from "web3";
 import BloctoSDK from "@blocto/sdk";
-import { ExtendedEvmBloctoSDK } from "./rinkeby";
+import { ExtendedEvmBloctoSDK } from "./goerli";
 
 const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 
