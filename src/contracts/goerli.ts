@@ -1,6 +1,6 @@
 import { AbiItem } from "web3-utils";
 
-const contractAddress = "0xe4500382e9e060925Eb9f60Ede902E9098F426d7";
+const contractAddress = "0xFB9688306D687F16C6d658Fa2A04e0fB59071212";
 const contractAbi: AbiItem[] = [
   {
     constant: true,

@@ -14,7 +14,7 @@ import {
 import {
   contractAbi as goerliContractAbi,
   contractAddress as goerliContractAddress,
-} from "./rinkeby";
+} from "./goerli";
 import {
   contractAbi as arbitrumContractAbi,
   contractAddress as arbitrumContractAddress,
