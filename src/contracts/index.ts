@@ -12,9 +12,9 @@ import {
   contractAddress as mumbaiContractAddress,
 } from "./mumbai";
 import {
-  contractAbi as rinkebyContractAbi,
-  contractAddress as rinkebyContractAddress,
-} from "./rinkeby";
+  contractAbi as goerliContractAbi,
+  contractAddress as goerliContractAddress,
+} from "./goerli";
 import {
   contractAbi as arbitrumContractAbi,
   contractAddress as arbitrumContractAddress,
@@ -36,8 +36,8 @@ type ContractInfosType = {
 
 export const ContractInfos: ContractInfosType = {
   [EvmChain.Ethereum]: {
-    abi: rinkebyContractAbi,
-    address: rinkebyContractAddress,
+    abi: goerliContractAbi,
+    address: goerliContractAddress,
   },
   [EvmChain.Bsc]: {
     abi: bscContractAbi,
