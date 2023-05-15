@@ -13,6 +13,7 @@ import ScriptTypes, {
   AptosScriptAbiKeys,
   PerInfo,
   PerScriptAbi,
+  SignMessagePayload,
 } from "../types/ScriptTypes";
 import Editor from "./Editor";
 
@@ -36,7 +37,7 @@ const formatTransactionArgs = (args: Arg[] | undefined) => {
           : currentValue.value;
     }
     return initial;
-  }, {});
+  }, {}) as SignMessagePayload;
 };
 
 const AptosEditor = (): ReactJSXElement => {
@@ -55,7 +56,7 @@ const AptosEditor = (): ReactJSXElement => {
   }, []);
 
   const handleSignMessage = useCallback((args) => {
-    return new Promise<void>((resolve) => {
+    return new Promise<unknown>((resolve) => {
       const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
       resolve(aptos.signMessage(formatTransactionArgs(args)));
     });
