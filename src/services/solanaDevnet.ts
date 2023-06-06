@@ -14,7 +14,7 @@ const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 const bloctoSDK = new BloctoSDK({
   solana: {
     net: isMainnet ? "mainnet-beta" : "devnet",
-    rpc: isMainnet ? "https://api.mainnet-beta.solana.com" : undefined,
+    rpc: isMainnet ? "https://api.metaplex.solana.com/" : undefined,
   },
   appId: process.env.REACT_APP_DAPP_ID,
 }) as ExtendedSolaneBloctoSDK;
