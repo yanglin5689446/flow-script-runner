@@ -215,7 +215,9 @@ const Editor: React.FC<EditorProps> = ({
             .catch((error) => {
               setError(error?.message || "Error: Signing message failed.");
             });
-        } else if (scriptType === ScriptTypes.TX) {
+        } else if (
+          [ScriptTypes.TX, ScriptTypes.USER_OPERATION].includes(scriptType)
+        ) {
           onSendTransactions(
             args,
             shouldSign,
