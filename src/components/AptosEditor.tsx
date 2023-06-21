@@ -123,7 +123,7 @@ const AptosEditor = (): ReactJSXElement => {
       isTransactionsExtraSignersAvailable
       isSandboxDisabled
       defaultTab={ScriptTypes.CONTRACT}
-      disabledTabs={[ScriptTypes.TX]}
+      disabledTabs={[ScriptTypes.TX, ScriptTypes.USER_OPERATION]}
       tabsShouldLoadDefaultTemplate={[
         ScriptTypes.SCRIPT,
         ScriptTypes.CONTRACT,

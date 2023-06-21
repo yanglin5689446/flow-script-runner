@@ -142,6 +142,7 @@ const SolanaEditor = (): ReactJSXElement => {
         ScriptTypes.SCRIPT,
         ScriptTypes.SIGN,
         ScriptTypes.RESOURCE,
+        ScriptTypes.USER_OPERATION,
       ]}
       tabsShouldLoadDefaultTemplate={[ScriptTypes.CONTRACT]}
       faucetUrl="https://solfaucet.com/"
