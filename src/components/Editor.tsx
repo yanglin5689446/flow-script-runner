@@ -55,6 +55,7 @@ const TabNames = [
   "Contract",
   "Sign Message",
   "Resource",
+  "User Operations",
 ];
 
 const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";

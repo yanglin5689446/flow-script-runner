@@ -5,6 +5,7 @@ import { Context } from "../context/Context";
 import * as ContractTemplates from "../scripts/evm/Contract";
 import * as SignMessageTemplates from "../scripts/evm/SignMessage";
 import * as TransactionsTemplates from "../scripts/evm/Transactions";
+import * as UserOperationsTemplates from "../scripts/evm/UserOperations";
 import { EvmChain } from "../types/ChainTypes";
 import ScriptTypes, { Arg, ArgTypes, PerInfo } from "../types/ScriptTypes";
 import Editor from "./Editor";
@@ -25,6 +26,7 @@ const MenuGroups = [
   { title: "Transactions", templates: TransactionsTemplates },
   { title: "Sign Message", templates: SignMessageTemplates },
   { title: "Contract", templates: ContractTemplates },
+  { title: "User Operations", templates: UserOperationsTemplates },
 ];
 
 const formatTransactionArgs = (args: Arg[] | undefined) => {
@@ -198,7 +200,11 @@ const EvmEditor = (): ReactJSXElement => {
       isSandboxDisabled
       shouldClearScript
       disabledTabs={[ScriptTypes.SCRIPT, ScriptTypes.RESOURCE]}
-      tabsShouldLoadDefaultTemplate={[ScriptTypes.SIGN, ScriptTypes.CONTRACT]}
+      tabsShouldLoadDefaultTemplate={[
+        ScriptTypes.SIGN,
+        ScriptTypes.CONTRACT,
+        ScriptTypes.USER_OPERATION,
+      ]}
       faucetUrl={(chain as EvmChain) ? FaucetUrls[chain as EvmChain] : ""}
     >
       <EvmChainSelect />
