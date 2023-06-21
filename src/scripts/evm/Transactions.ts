@@ -15,16 +15,6 @@ export const sendTokens = {
       to: args.receipient,
       value: args.amount,
     }),
-  // ChainServices[chain].bloctoSDK.ethereum.request({
-  //   method: "eth_sendTransaction",
-  //   params: [
-  //     {
-  //       from: account,
-  //       to: args.receipient,
-  //       value: "0.001",
-  //     },
-  //   ],
-  // }),
   args: [
     { type: ArgTypes.String, comment: "amount(wei)", name: "amount" },
     { type: ArgTypes.String, comment: "receipient", name: "receipient" },
