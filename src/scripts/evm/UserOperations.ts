@@ -67,7 +67,6 @@ export const sendTokens = {
       paymasterAndData,
       sender,
     } = args;
-    console.log("sensTokens");
     return ChainServices[chain].bloctoSDK.ethereum.sendUserOperation({
       callData,
       callGasLimit,
