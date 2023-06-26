@@ -101,8 +101,13 @@ const EvmEditor = (): ReactJSXElement => {
       shouldSign: boolean | undefined,
       signers: Array<{ privateKey: string; address: string }> | undefined,
       script: string,
-      method?: (...param: any[]) => Promise<any>
-    ): Promise<{ transactionId: string; transaction: any }> => {
+      method?: (...param: any[]) => Promise<any>,
+      isUserOperation?: boolean
+    ): Promise<{
+      transactionId?: string;
+      transaction?: any;
+      userOpHash?: string;
+    }> => {
       return new Promise(async (resolve, reject) => {
         if (!method) {
           return reject(new Error("Error: Transaction method is missing."));
@@ -111,28 +116,48 @@ const EvmEditor = (): ReactJSXElement => {
         const address = await checkArgumentsAndAddress(args);
         const formattedArgs = formatTransactionArgs(args);
 
-        method(address, formattedArgs, chain)
-          .then((transaction) => {
-            resolve({
-              transactionId: transaction.transactionHash,
-              transaction,
-            });
-            toast({
-              title: "Transaction is Sealed",
-              status: "success",
-              isClosable: true,
-              duration: 1000,
-            });
-          })
-          .catch((error) => {
-            reject(error);
-            toast({
-              title: "Transaction failed",
-              status: "error",
-              isClosable: true,
-              duration: 1000,
-            });
-          });
+        isUserOperation
+          ? method(address, formattedArgs, chain)
+              .then((transaction) => {
+                resolve({
+                  transactionId: transaction.transactionHash,
+                  transaction,
+                });
+                toast({
+                  title: "Transaction is Sealed",
+                  status: "success",
+                  isClosable: true,
+                  duration: 1000,
+                });
+              })
+              .catch((error) => {
+                reject(error);
+                toast({
+                  title: "Transaction failed",
+                  status: "error",
+                  isClosable: true,
+                  duration: 1000,
+                });
+              })
+          : method(address, formattedArgs, chain)
+              .then((userOpHash) => {
+                resolve({ userOpHash });
+                toast({
+                  title: "Transaction is Sealed",
+                  status: "success",
+                  isClosable: true,
+                  duration: 1000,
+                });
+              })
+              .catch((error) => {
+                reject(error);
+                toast({
+                  title: "Transaction failed",
+                  status: "error",
+                  isClosable: true,
+                  duration: 1000,
+                });
+              });
       });
     },
     [toast, checkArgumentsAndAddress, chain]

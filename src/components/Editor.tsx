@@ -66,10 +66,12 @@ interface EditorProps {
     shouldSign: boolean | undefined,
     signers: Array<{ privateKey: string; address: string }> | undefined,
     script: string,
-    method?: (...param: any[]) => Promise<any>
+    method?: (...param: any[]) => Promise<any>,
+    isUserOperation?: boolean
   ) => Promise<{
-    transactionId: string;
+    transactionId?: string;
     transaction?: any;
+    userOpHash?: string;
     subscribeFunc?: (callback: (transaction: any) => void) => () => void;
     isSealed?: (transaction: any) => boolean;
   }>;
@@ -215,9 +217,7 @@ const Editor: React.FC<EditorProps> = ({
             .catch((error) => {
               setError(error?.message || "Error: Signing message failed.");
             });
-        } else if (
-          [ScriptTypes.TX, ScriptTypes.USER_OPERATION].includes(scriptType)
-        ) {
+        } else if (scriptType === ScriptTypes.TX && onSendTransactions) {
           onSendTransactions(
             args,
             shouldSign,
@@ -226,8 +226,39 @@ const Editor: React.FC<EditorProps> = ({
             methodRef.current
           )
             .then(({ transactionId, transaction, subscribeFunc, isSealed }) => {
-              setTxHash(transactionId);
-              setResponse(transaction);
+              if (transactionId) {
+                setTxHash(transactionId);
+                setResponse(transaction);
+              }
+
+              if (subscribeFunc && isSealed) {
+                const unsub = subscribeFunc((transaction: any) => {
+                  setResponse(transaction);
+                  if (isSealed(transaction)) {
+                    unsub();
+                  }
+                });
+              }
+            })
+            .catch((error) => {
+              setError(error?.message || "Error: Sending transaction failed.");
+            });
+        } else if (
+          scriptType === ScriptTypes.USER_OPERATION &&
+          onSendTransactions
+        ) {
+          onSendTransactions(
+            args,
+            shouldSign,
+            signers,
+            script,
+            methodRef.current,
+            true
+          )
+            .then(({ userOpHash, subscribeFunc, isSealed }) => {
+              if (userOpHash) {
+                setTxHash(userOpHash);
+              }
 
               if (subscribeFunc && isSealed) {
                 const unsub = subscribeFunc((transaction: any) => {
