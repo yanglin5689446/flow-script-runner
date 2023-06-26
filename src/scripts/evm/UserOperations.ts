@@ -15,7 +15,14 @@ interface IUserOperation {
    */
   sender?: string;
 }
-const userOperationRestArgs = [
+
+interface Args {
+  type: ArgTypes;
+  comment: string;
+  name: string;
+  value?: string;
+}
+const userOperationRestArgs: Args[] = [
   { type: ArgTypes.Number, comment: "callGasLimit", name: "callGasLimit" },
   {
     type: ArgTypes.Number,
@@ -48,6 +55,16 @@ const userOperationRestArgs = [
     name: "sender",
   },
 ];
+
+function getModifiedArgs(args: Args[], name: string, newValue: string): Args[] {
+  return args.map((item) => {
+    if (item.name === name) {
+      return { ...item, value: newValue };
+    } else {
+      return item;
+    }
+  });
+}
 
 export const sendTokens = {
   type: ScriptTypes.USER_OPERATION,
@@ -133,7 +150,7 @@ export const transferErc20 = {
 
 export const setValue = {
   type: ScriptTypes.USER_OPERATION,
-  description: "Transfer erc20 token",
+  description: "Call setValue function on contract",
   method: (
     account: string,
     args: IUserOperation,
@@ -169,6 +186,53 @@ export const setValue = {
         "b61d27f6000000000000000000000000dc5fd9220511a7211719dd8206ec2d686054bcc000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000002455241077000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000",
     },
     ...userOperationRestArgs,
+  ],
+  shouldSign: true,
+};
+
+export const setValueWithCustomPaymaster = {
+  type: ScriptTypes.USER_OPERATION,
+  description: "Call setValue function on contract with custom paymaster",
+  method: (
+    account: string,
+    args: IUserOperation,
+    chain: EvmChain
+  ): Promise<any> => {
+    const {
+      callData,
+      callGasLimit,
+      verificationGasLimit,
+      preVerificationGas,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      paymasterAndData,
+      sender,
+    } = args;
+
+    return ChainServices[chain].bloctoSDK.ethereum.sendUserOperation({
+      callData,
+      callGasLimit,
+      verificationGasLimit,
+      preVerificationGas,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      paymasterAndData,
+      sender,
+    });
+  },
+  args: [
+    {
+      type: ArgTypes.String,
+      comment: "call data (hex)",
+      name: "callData",
+      value:
+        "b61d27f6000000000000000000000000dc5fd9220511a7211719dd8206ec2d686054bcc000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000002455241077000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000",
+    },
+    ...getModifiedArgs(
+      userOperationRestArgs,
+      "paymasterAndData",
+      "411bafa5a252F47e27B399Ab48e0A7aDcB4256A10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006492d7d9dbaab7fcd442c32259de3c1a450c3a79d134fc813702dd9689d0415261e0c9004a39173aa923a93df22b1067414927405f4c92ab2692e858570605804ca89d4c1c"
+    ),
   ],
   shouldSign: true,
 };
