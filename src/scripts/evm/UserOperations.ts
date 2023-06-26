@@ -10,10 +10,6 @@ interface IUserOperation {
   maxFeePerGas?: number;
   maxPriorityFeePerGas?: number;
   paymasterAndData?: string;
-  /**
-   *  If provided, please ensure it is same as login account.
-   */
-  sender?: string;
 }
 
 interface Args {
@@ -49,11 +45,6 @@ const userOperationRestArgs: Args[] = [
     comment: "paymasterAndData",
     name: "paymasterAndData",
   },
-  {
-    type: ArgTypes.String,
-    comment: "sender",
-    name: "sender",
-  },
 ];
 
 function getModifiedArgs(args: Args[], name: string, newValue: string): Args[] {
@@ -74,26 +65,7 @@ export const sendTokens = {
     args: IUserOperation,
     chain: EvmChain
   ): Promise<any> => {
-    const {
-      callData,
-      callGasLimit,
-      verificationGasLimit,
-      preVerificationGas,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-      paymasterAndData,
-      sender,
-    } = args;
-    return ChainServices[chain].bloctoSDK.ethereum.sendUserOperation({
-      callData,
-      callGasLimit,
-      verificationGasLimit,
-      preVerificationGas,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-      paymasterAndData,
-      sender,
-    });
+    return ChainServices[chain].bloctoSDK.ethereum.sendUserOperation(args);
   },
   args: [
     {
@@ -115,26 +87,7 @@ export const transferErc20 = {
     args: IUserOperation,
     chain: EvmChain
   ): Promise<any> => {
-    const {
-      callData,
-      callGasLimit,
-      verificationGasLimit,
-      preVerificationGas,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-      paymasterAndData,
-      sender,
-    } = args;
-    return ChainServices[chain].bloctoSDK.ethereum.sendUserOperation({
-      callData,
-      callGasLimit,
-      verificationGasLimit,
-      preVerificationGas,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-      paymasterAndData,
-      sender,
-    });
+    return ChainServices[chain].bloctoSDK.ethereum.sendUserOperation(args);
   },
   args: [
     {
@@ -156,26 +109,7 @@ export const setValue = {
     args: IUserOperation,
     chain: EvmChain
   ): Promise<any> => {
-    const {
-      callData,
-      callGasLimit,
-      verificationGasLimit,
-      preVerificationGas,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-      paymasterAndData,
-      sender,
-    } = args;
-    return ChainServices[chain].bloctoSDK.ethereum.sendUserOperation({
-      callData,
-      callGasLimit,
-      verificationGasLimit,
-      preVerificationGas,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-      paymasterAndData,
-      sender,
-    });
+    return ChainServices[chain].bloctoSDK.ethereum.sendUserOperation(args);
   },
   args: [
     {
@@ -198,27 +132,7 @@ export const setValueWithCustomPaymaster = {
     args: IUserOperation,
     chain: EvmChain
   ): Promise<any> => {
-    const {
-      callData,
-      callGasLimit,
-      verificationGasLimit,
-      preVerificationGas,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-      paymasterAndData,
-      sender,
-    } = args;
-
-    return ChainServices[chain].bloctoSDK.ethereum.sendUserOperation({
-      callData,
-      callGasLimit,
-      verificationGasLimit,
-      preVerificationGas,
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-      paymasterAndData,
-      sender,
-    });
+    return ChainServices[chain].bloctoSDK.ethereum.sendUserOperation(args);
   },
   args: [
     {
