@@ -257,7 +257,7 @@ const Editor: React.FC<EditorProps> = ({
           )
             .then(({ userOpHash, subscribeFunc, isSealed }) => {
               if (userOpHash) {
-                setTxHash(userOpHash);
+                setResult(userOpHash);
               }
 
               if (subscribeFunc && isSealed) {
