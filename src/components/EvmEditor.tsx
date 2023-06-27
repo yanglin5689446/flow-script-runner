@@ -116,7 +116,7 @@ const EvmEditor = (): ReactJSXElement => {
         const address = await checkArgumentsAndAddress(args);
         const formattedArgs = formatTransactionArgs(args);
 
-        isUserOperation
+        !isUserOperation
           ? method(address, formattedArgs, chain)
               .then((transaction) => {
                 resolve({
