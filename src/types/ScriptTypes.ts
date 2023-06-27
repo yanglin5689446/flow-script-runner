@@ -4,6 +4,7 @@ enum ScriptTypes {
   CONTRACT,
   SIGN,
   RESOURCE,
+  USER_OPERATION,
 }
 
 export default ScriptTypes;

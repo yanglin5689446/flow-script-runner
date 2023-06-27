@@ -210,7 +210,11 @@ const FlowEditor = (): ReactJSXElement => {
       onSendTransactions={handleSendTransactions}
       argTypes={typeKeys}
       isTransactionsExtraSignersAvailable
-      disabledTabs={[ScriptTypes.CONTRACT, ScriptTypes.RESOURCE]}
+      disabledTabs={[
+        ScriptTypes.CONTRACT,
+        ScriptTypes.RESOURCE,
+        ScriptTypes.USER_OPERATION,
+      ]}
       tabsShouldLoadDefaultTemplate={[ScriptTypes.SIGN]}
       onSendScript={handleSendScript}
       faucetUrl="https://testnet-faucet.onflow.org/fund-account"
