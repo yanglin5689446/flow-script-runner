@@ -14,7 +14,7 @@ export const sendSOL = {
   script: "",
   method: async (
     account: string,
-    args: { receipient: string; amount: string }
+    args: { recipient: string; amount: string }
   ): Promise<any> => {
     return new Promise(async (resolve, reject) => {
       try {
@@ -28,7 +28,7 @@ export const sendSOL = {
         transaction.add(
           SystemProgram.transfer({
             fromPubkey: publicKey,
-            toPubkey: new PublicKey(args.receipient),
+            toPubkey: new PublicKey(args.recipient),
             lamports: Number(args.amount),
           })
         );
@@ -50,7 +50,7 @@ export const sendSOL = {
   },
   args: [
     { type: ArgTypes.String, comment: "amount(lamports)", name: "amount" },
-    { type: ArgTypes.String, comment: "receipient", name: "receipient" },
+    { type: ArgTypes.String, comment: "recipient", name: "recipient" },
   ],
   isArgsAdjustable: false,
 };

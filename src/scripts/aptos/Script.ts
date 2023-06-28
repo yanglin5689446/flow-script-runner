@@ -94,7 +94,7 @@ export const transferTokenScript = {
     },
   },
   args: [
-    { type: AptosArgTypes.Address, comment: "receipient", name: "receipient" },
+    { type: AptosArgTypes.Address, comment: "recipient", name: "recipient" },
     { type: AptosArgTypes.Number, comment: "value", name: "value" },
   ],
 };
