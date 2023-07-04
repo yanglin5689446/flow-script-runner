@@ -61,7 +61,7 @@ export const transferAptosCoin = {
       comment: "coin type",
       value: "0x1::aptos_coin::AptosCoin",
     },
-    { type: AptosArgTypes.Address, comment: "receipient", name: "receipient" },
+    { type: AptosArgTypes.Address, comment: "recipient", name: "recipient" },
     { type: AptosArgTypes.Number, comment: "value", name: "value" },
   ],
 };

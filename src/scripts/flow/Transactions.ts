@@ -84,7 +84,7 @@ transaction(amount: UFix64, to: Address) {
 }`,
   args: [
     { type: "UFix64", comment: "amount" },
-    { type: "Address", comment: "receipient" },
+    { type: "Address", comment: "recipient" },
   ],
   shouldSign: true,
 };
@@ -112,7 +112,7 @@ transaction(amount: UFix64, to: Address) {
 }`,
   args: [
     { type: "UFix64", comment: "amount" },
-    { type: "Address", comment: "receipient" },
+    { type: "Address", comment: "recipient" },
   ],
   shouldSign: true,
 };
@@ -154,7 +154,7 @@ transaction(amount: UFix64, to: Address) {
 }`,
   args: [
     { type: "UFix64", comment: "amount" },
-    { type: "Address", comment: "receipient" },
+    { type: "Address", comment: "recipient" },
   ],
   shouldSign: true,
 };
@@ -196,7 +196,7 @@ transaction(amount: UFix64, to: Address) {
 }`,
   args: [
     { type: "UFix64", comment: "amount" },
-    { type: "Address", comment: "receipient" },
+    { type: "Address", comment: "recipient" },
   ],
   shouldSign: true,
 };
