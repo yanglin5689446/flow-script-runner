@@ -111,7 +111,9 @@ const SignTypedDataV3Editor = ({
     setDomain((prev) => {
       const chainIdIndex = prev.findIndex((item) => item[0] === "chainId");
       if (chainIdIndex !== -1) {
-        prev[chainIdIndex][1] = chainId || "0x5";
+        const newArray = [...prev];
+        newArray[chainIdIndex][1] = chainId || "0x5";
+        return newArray;
       }
       return prev;
     });
@@ -193,7 +195,9 @@ const SignTypedDataV4Editor = ({
     setDomain((prev) => {
       const chainIdIndex = prev.findIndex((item) => item[0] === "chainId");
       if (chainIdIndex !== -1) {
-        prev[chainIdIndex][1] = chainId || "0x5";
+        const newArray = [...prev];
+        newArray[chainIdIndex][1] = chainId || "0x5";
+        return newArray;
       }
       return prev;
     });
