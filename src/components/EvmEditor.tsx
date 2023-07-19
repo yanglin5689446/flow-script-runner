@@ -22,6 +22,7 @@ import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import EvmChainSelect from "./EvmChainSelect";
 import EvmRequestEditor from "./EvmEditors/EvmRequestEditor";
 import EvmSignEditor from "./EvmEditors/EvmSignEditor";
+import EvmUserOpEditor from "./EvmEditors/EvmUserOpEditor";
 import { EthereumTypes } from "@blocto/sdk";
 import {
   bloctoSDK,
@@ -201,7 +202,10 @@ const EvmEditor = (): ReactJSXElement => {
               <p>Contract</p>
             </TabPanel>
             <TabPanel>
-              <p>User Operation</p>
+              <EvmUserOpEditor
+                setRequestObject={setRequestObject}
+                account={account}
+              />
             </TabPanel>
           </TabPanels>
         </Tabs>
