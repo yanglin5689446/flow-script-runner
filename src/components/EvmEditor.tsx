@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   useToast,
   Box,
@@ -16,22 +16,12 @@ import {
 } from "@chakra-ui/react";
 import { CopyIcon } from "@chakra-ui/icons";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
-import { EvmChain } from "../types/ChainTypes";
 import EvmChainSelect from "./EvmChainSelect";
 import EvmRequestEditor from "./EvmEditors/EvmRequestEditor";
 import EvmSignEditor from "./EvmEditors/EvmSignEditor";
 import { EthereumTypes } from "@blocto/sdk";
-import { bloctoSDK, useEthereum } from "../services/evm";
+import { bloctoSDK, useEthereum, supportedChains } from "../services/evm";
 import ReactJson from "react-json-view";
-
-const FaucetUrls = {
-  [EvmChain.Ethereum]: "https://goerlifaucet.com/",
-  [EvmChain.Bsc]: "https://testnet.binance.org/faucet-smart",
-  [EvmChain.Polygon]: "https://faucet.polygon.technology/",
-  [EvmChain.Avalanche]: "https://faucet.avax-test.network/",
-  [EvmChain.Arbitrum]: "https://faucet.triangleplatform.com/arbitrum/goerli",
-  [EvmChain.Optimism]: "https://faucet.paradigm.xyz/",
-};
 
 const EvmEditor = (): ReactJSXElement => {
   const { account, chainId, connect, disconnect } = useEthereum();
@@ -41,7 +31,6 @@ const EvmEditor = (): ReactJSXElement => {
     useState<EthereumTypes.EIP1193RequestPayload>();
   const sendRequest = useCallback(async () => {
     if (!requestObject) return;
-    console.log(requestObject);
     try {
       const response = await bloctoSDK.ethereum.request(requestObject);
       console.log(response);
@@ -57,6 +46,10 @@ const EvmEditor = (): ReactJSXElement => {
         toast({ title: "Address copied!", status: "success", duration: 2000 })
       );
   }, [account, toast]);
+
+  const faucet = useMemo(() => {
+    return supportedChains.find((chain) => chain.chainId === chainId)?.faucet;
+  }, [chainId]);
 
   return (
     <Flex
@@ -90,6 +83,18 @@ const EvmEditor = (): ReactJSXElement => {
                 color="gray.800"
               >
                 {parseInt(chainId || "5", 16)}
+                {faucet && (
+                  <Box
+                    as="a"
+                    href={faucet}
+                    mx="7px"
+                    color="blue"
+                    fontSize="14px"
+                    textDecoration="underline"
+                  >
+                    Faucet
+                  </Box>
+                )}
               </Box>
             </StatNumber>
             <StatHelpText>
@@ -155,10 +160,23 @@ const EvmEditor = (): ReactJSXElement => {
         <Box width="100%" overflow="scroll">
           <Box width="100%" minWidth="fit-content">
             <ReactJson
-              src={requestObject as any}
+              src={
+                account
+                  ? (requestObject as any)
+                  : { Error: "Please connect first" }
+              }
               name={null}
               displayDataTypes={false}
               theme="tube"
+              onEdit={(data) => {
+                setRequestObject(data.updated_src as any);
+              }}
+              onAdd={(data) => {
+                setRequestObject(data.updated_src as any);
+              }}
+              onDelete={(data) => {
+                setRequestObject(data.updated_src as any);
+              }}
             />
           </Box>
         </Box>

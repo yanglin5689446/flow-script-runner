@@ -16,13 +16,14 @@ const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 export const supportedChains = [
   {
     name: "Ethereum Mainnet",
-    chainId: "1",
+    chainId: "0x1",
     rpcUrls: ["https://mainnet.infura.io/v3/ef5a5728e2354955b562d2ffa4ae5305"],
   },
   {
     name: "Ethereum Goerli",
-    chainId: "5",
+    chainId: "0x5",
     rpcUrls: ["https://rpc.ankr.com/eth_goerli"],
+    faucet: "https://goerlifaucet.com/",
   },
   {
     name: "Arbitrum Mainnet",
@@ -33,6 +34,7 @@ export const supportedChains = [
     name: "Arbitrum Testnet",
     chainId: "0x66eed",
     rpcUrls: ["https://goerli-rollup.arbitrum.io/rpc"],
+    faucet: "https://faucet.triangleplatform.com/arbitrum/goerli",
   },
   {
     name: "BSC",
@@ -43,6 +45,7 @@ export const supportedChains = [
     name: "BSC Testnet",
     chainId: "0x61",
     rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+    faucet: "https://testnet.binance.org/faucet-smart",
   },
   {
     name: "Avalanche Mainnet",
@@ -53,6 +56,7 @@ export const supportedChains = [
     name: "Avalanche Testnet",
     chainId: "0xa869",
     rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
+    faucet: "https://faucet.avax-test.network/",
   },
   {
     name: "Polygon Mainnet",
@@ -63,6 +67,7 @@ export const supportedChains = [
     name: "Polygon Testnet",
     chainId: "0x13881",
     rpcUrls: ["https://rpc-mumbai.maticvigil.com/"],
+    faucet: "https://faucet.polygon.technology/",
   },
   {
     name: "Optimism Mainnet",
@@ -73,6 +78,7 @@ export const supportedChains = [
     name: "Optimism Testnet",
     chainId: "0x01A4",
     rpcUrls: ["https://goerli.optimism.io"],
+    faucet: "https://faucet.paradigm.xyz/",
   },
 ];
 

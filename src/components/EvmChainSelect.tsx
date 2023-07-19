@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
@@ -10,6 +10,15 @@ const EvmChainSelect: React.FC = ({}): ReactJSXElement => {
     supportedChains.find(({ chainId }) => chainId === currentChainId)?.name ||
       "Ethereum Goerli"
   );
+  useEffect(() => {
+    const chainName = supportedChains.find(
+      ({ chainId }) => chainId === currentChainId
+    )?.name;
+    if (chainName) {
+      setChainName(chainName);
+    }
+  }, [currentChainId]);
+
   return (
     <Menu>
       <MenuButton as={Button} rightIcon={<ChevronDownIcon />} width="200px">
