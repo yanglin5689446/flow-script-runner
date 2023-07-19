@@ -58,7 +58,6 @@ type SolanaInfoType = {
 interface ChainServicesInterface {
   getChainAddress: (chain: ChainsType) => string | null;
   setChainAddress: (chain: ChainsType, address: string) => void;
-  getEvmChainContract: (chain: EvmChain) => Contract;
   getSolanaProgramInfo: () => SolanaProgramInfo;
 }
 
@@ -115,17 +114,6 @@ export const ChainServices: ChainServicesType = {
 
   setChainAddress(chain, address) {
     this[chain].address = address;
-  },
-
-  getEvmChainContract(chain) {
-    if (this[chain].contract === null) {
-      this[chain].contract = new this[chain].web3.eth.Contract(
-        ContractInfos[chain].abi,
-        ContractInfos[chain].address
-      );
-    }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this[chain].contract!;
   },
 
   getSolanaProgramInfo() {

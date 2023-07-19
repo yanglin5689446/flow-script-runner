@@ -22,13 +22,13 @@ export const getValue = {
     methodName,
     chain,
   }: Params): Promise<string> => {
-    let contract = ChainServices.getEvmChainContract(chain);
-    if (contractAddress && contractAbi) {
-      contract = new ChainServices[chain].web3.eth.Contract(
-        JSON.parse(contractAbi),
-        contractAddress
-      );
-    }
+    if (!contractAddress || !contractAbi) return Promise.reject();
+
+    const contract = new ChainServices[chain].web3.eth.Contract(
+      JSON.parse(contractAbi),
+      contractAddress
+    );
+
     return contract.methods[methodName || "value"]().call();
   },
   contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
@@ -58,13 +58,13 @@ export const getValue2 = {
     methodName,
     chain,
   }: Params): Promise<string> => {
-    let contract = ChainServices.getEvmChainContract(chain);
-    if (contractAddress && contractAbi) {
-      contract = new ChainServices[chain].web3.eth.Contract(
-        JSON.parse(contractAbi),
-        contractAddress
-      );
-    }
+    if (!contractAddress || !contractAbi) return Promise.reject();
+
+    const contract = new ChainServices[chain].web3.eth.Contract(
+      JSON.parse(contractAbi),
+      contractAddress
+    );
+
     return contract.methods[methodName || "value2"]().call();
   },
   contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
@@ -96,13 +96,13 @@ export const setValue = {
     args,
     chain,
   }: Params): Promise<any> => {
-    let contract = ChainServices.getEvmChainContract(chain);
-    if (contractAddress && contractAbi) {
-      contract = new ChainServices[chain].web3.eth.Contract(
-        JSON.parse(contractAbi),
-        contractAddress
-      );
-    }
+    if (!contractAddress || !contractAbi) return Promise.reject();
+
+    const contract = new ChainServices[chain].web3.eth.Contract(
+      JSON.parse(contractAbi),
+      contractAddress
+    );
+
     return contract.methods[methodName || "setValue"](...args).send({
       from: account,
     });
@@ -136,13 +136,13 @@ export const setValue2 = {
     args,
     chain,
   }: Params): Promise<any> => {
-    let contract = ChainServices.getEvmChainContract(chain);
-    if (contractAddress && contractAbi) {
-      contract = new ChainServices[chain].web3.eth.Contract(
-        JSON.parse(contractAbi),
-        contractAddress
-      );
-    }
+    if (!contractAddress || !contractAbi) return Promise.reject();
+
+    const contract = new ChainServices[chain].web3.eth.Contract(
+      JSON.parse(contractAbi),
+      contractAddress
+    );
+
     return contract.methods[methodName || "setValue2"](...args).send({
       from: account,
     });
@@ -177,13 +177,11 @@ export const triggerError = {
     args,
     chain,
   }: Params): Promise<any> => {
-    let contract = ChainServices.getEvmChainContract(chain);
-    if (contractAddress && contractAbi) {
-      contract = new ChainServices[chain].web3.eth.Contract(
-        JSON.parse(contractAbi),
-        contractAddress
-      );
-    }
+    if (!contractAddress || !contractAbi) return Promise.reject();
+    const contract = new ChainServices[chain].web3.eth.Contract(
+      JSON.parse(contractAbi),
+      contractAddress
+    );
     return contract.methods[methodName || "arithmeticError"](...args).send({
       from: account,
     });

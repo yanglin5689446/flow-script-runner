@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   useToast,
   Box,
@@ -23,8 +23,21 @@ import EvmChainSelect from "./EvmChainSelect";
 import EvmRequestEditor from "./EvmEditors/EvmRequestEditor";
 import EvmSignEditor from "./EvmEditors/EvmSignEditor";
 import { EthereumTypes } from "@blocto/sdk";
-import { bloctoSDK, useEthereum, supportedChains } from "../services/evm";
+import {
+  bloctoSDK,
+  useEthereum,
+  supportedChains,
+  dappAuth,
+} from "../services/evm";
 import ReactJson from "react-json-view";
+
+const signMethod = [
+  "eth_sign",
+  "personal_sign",
+  "eth_signTypedData",
+  "eth_signTypedData_v3",
+  "eth_signTypedData_v4",
+];
 
 const EvmEditor = (): ReactJSXElement => {
   const { account, chainId, connect, disconnect } = useEthereum();
@@ -33,10 +46,13 @@ const EvmEditor = (): ReactJSXElement => {
   const [requestObject, setRequestObject] =
     useState<EthereumTypes.EIP1193RequestPayload>();
   const [responseObject, setResponseObject] = useState<{
-    type: "sign" | "request";
+    type: "normal" | "sign";
     status: "info" | "warning" | "success" | "error";
     response: any;
   } | null>(null);
+  const [responseVerify, setResponseVerify] = useState<Record<any, any> | null>(
+    null
+  );
 
   const sendRequest = useCallback(async () => {
     if (!requestObject) return;
@@ -46,21 +62,29 @@ const EvmEditor = (): ReactJSXElement => {
       console.log(response);
       if (response === null) {
         setResponseObject({
-          type: "sign",
+          type: "normal",
           status: "success",
           response: "Success",
         });
         return;
       }
+      if (signMethod.includes(requestObject.method)) {
+        setResponseObject({
+          type: "sign",
+          status: "success",
+          response,
+        });
+        return;
+      }
       setResponseObject({
-        type: "sign",
+        type: "normal",
         status: "success",
         response: response,
       });
     } catch (e: any) {
       console.log(e);
       setResponseObject({
-        type: "sign",
+        type: "normal",
         status: "error",
         response: { code: e.code, error: e.message },
       });
@@ -78,6 +102,11 @@ const EvmEditor = (): ReactJSXElement => {
   const faucet = useMemo(() => {
     return supportedChains.find((chain) => chain.chainId === chainId)?.faucet;
   }, [chainId]);
+
+  useEffect(() => {
+    setResponseObject(null);
+    setResponseVerify(null);
+  }, [requestObject]);
 
   return (
     <Flex
@@ -179,7 +208,7 @@ const EvmEditor = (): ReactJSXElement => {
       </Flex>
 
       <Grid
-        templateRows="min-content min-content auto min-content"
+        templateRows="min-content min-content min-content auto min-content"
         gap="10px"
         width={{ base: "100%", md: "50%" }}
         p="10px"
@@ -240,7 +269,46 @@ const EvmEditor = (): ReactJSXElement => {
               )}
             </Alert>
           )}
+          {responseObject?.type === "sign" && (
+            <Box width="100%">
+              <Button
+                m="5px"
+                onClick={async () => {
+                  setResponseVerify(null);
+                  const message =
+                    requestObject?.method === "personal_sign"
+                      ? requestObject?.params?.[0]
+                      : requestObject?.params?.[1];
+                  console.log(message, responseObject.response, account);
+                  const verify = await dappAuth.isAuthorizedSigner(
+                    message,
+                    responseObject.response,
+                    account
+                  );
+                  setResponseVerify({ isValidSignature: verify });
+                }}
+              >
+                Verify Signature
+              </Button>
+            </Box>
+          )}
         </Box>
+
+        {responseVerify && (
+          <Alert
+            status={!responseVerify?.isValidSignature ? "error" : "success"}
+            alignItems="flex-start"
+            borderRadius="md"
+          >
+            <AlertIcon />
+            <ReactJson
+              src={responseVerify}
+              name={null}
+              displayDataTypes={false}
+              displayObjectSize={false}
+            />
+          </Alert>
+        )}
 
         <Button
           onClick={account ? sendRequest : connect}
