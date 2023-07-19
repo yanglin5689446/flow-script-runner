@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Flex,
+  Grid,
   Tab,
   TabList,
   Tabs,
@@ -13,6 +14,8 @@ import {
   StatLabel,
   StatNumber,
   StatHelpText,
+  Alert,
+  AlertIcon,
 } from "@chakra-ui/react";
 import { CopyIcon } from "@chakra-ui/icons";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
@@ -29,15 +32,40 @@ const EvmEditor = (): ReactJSXElement => {
 
   const [requestObject, setRequestObject] =
     useState<EthereumTypes.EIP1193RequestPayload>();
+  const [responseObject, setResponseObject] = useState<{
+    type: "sign" | "request";
+    status: "info" | "warning" | "success" | "error";
+    response: any;
+  } | null>(null);
+
   const sendRequest = useCallback(async () => {
     if (!requestObject) return;
     try {
+      setResponseObject(null);
       const response = await bloctoSDK.ethereum.request(requestObject);
       console.log(response);
-    } catch (e) {
+      if (response === null) {
+        setResponseObject({
+          type: "sign",
+          status: "success",
+          response: "Success",
+        });
+        return;
+      }
+      setResponseObject({
+        type: "sign",
+        status: "success",
+        response: response,
+      });
+    } catch (e: any) {
       console.log(e);
+      setResponseObject({
+        type: "sign",
+        status: "error",
+        response: { code: e.code, error: e.message },
+      });
     }
-  }, [requestObject]);
+  }, [requestObject, setResponseObject]);
 
   const copyAddress = useCallback(() => {
     window.navigator.clipboard
@@ -150,15 +178,25 @@ const EvmEditor = (): ReactJSXElement => {
         </Tabs>
       </Flex>
 
-      <Flex
-        justifyContent="space-between"
-        flexDirection="column"
+      <Grid
+        templateRows="min-content min-content auto min-content"
+        gap="10px"
         width={{ base: "100%", md: "50%" }}
         p="10px"
         borderLeft="1px solid #E2E8F0"
+        sx={{
+          lineBreak: "anywhere",
+        }}
       >
         <Box width="100%" overflow="scroll">
-          <Box width="100%" minWidth="fit-content">
+          Request
+          <Box
+            width="100%"
+            minWidth="fit-content"
+            borderRadius="md"
+            bgColor="rgb(35, 31, 32)"
+            p="5px"
+          >
             <ReactJson
               src={
                 account
@@ -181,10 +219,37 @@ const EvmEditor = (): ReactJSXElement => {
           </Box>
         </Box>
 
-        <Button onClick={account ? sendRequest : connect}>
+        <Box width="100%" overflow="scroll">
+          Response
+          {responseObject?.response && (
+            <Alert
+              status={responseObject.status}
+              alignItems="flex-start"
+              borderRadius="md"
+            >
+              <AlertIcon />
+              {typeof responseObject?.response === "string" ? (
+                <Box>{responseObject?.response}</Box>
+              ) : (
+                <ReactJson
+                  src={responseObject?.response}
+                  name={null}
+                  displayDataTypes={false}
+                  displayObjectSize={false}
+                />
+              )}
+            </Alert>
+          )}
+        </Box>
+
+        <Button
+          onClick={account ? sendRequest : connect}
+          gridRowEnd={-1}
+          alignSelf="end"
+        >
           {account ? "Send" : "Connect"}
         </Button>
-      </Flex>
+      </Grid>
     </Flex>
   );
 };
