@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import Web3 from "web3";
 import BloctoSDK, { EthereumProviderInterface } from "@blocto/sdk";
-import DappAuth from "@blocto/dappauth";
 
 export interface ExtendedEthereumProviderInterface
   extends EthereumProviderInterface {
@@ -100,8 +99,6 @@ bloctoSDK.ethereum.loadSwitchableNetwork(supportedChains);
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const web3 = new Web3(bloctoSDK.ethereum);
-
-export const dappAuth = new DappAuth(web3);
 
 export { web3, bloctoSDK };
 

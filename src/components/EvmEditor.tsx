@@ -23,14 +23,10 @@ import EvmChainSelect from "./EvmChainSelect";
 import EvmRequestEditor from "./EvmEditors/EvmRequestEditor";
 import EvmSignEditor from "./EvmEditors/EvmSignEditor";
 import EvmUserOpEditor from "./EvmEditors/EvmUserOpEditor";
-import { EthereumTypes } from "@blocto/sdk";
-import {
-  bloctoSDK,
-  useEthereum,
-  supportedChains,
-  dappAuth,
-} from "../services/evm";
+import type { EthereumTypes } from "@blocto/sdk";
+import { bloctoSDK, useEthereum, supportedChains } from "../services/evm";
 import ReactJson from "react-json-view";
+import isValidSignature from "../utils/isValidSignature";
 
 const signMethod = [
   "eth_sign",
@@ -279,13 +275,8 @@ const EvmEditor = (): ReactJSXElement => {
                 m="5px"
                 onClick={async () => {
                   setResponseVerify(null);
-                  const message =
-                    requestObject?.method === "personal_sign"
-                      ? requestObject?.params?.[0]
-                      : requestObject?.params?.[1];
-                  console.log(message, responseObject.response, account);
-                  const verify = await dappAuth.isAuthorizedSigner(
-                    message,
+                  const verify = await isValidSignature(
+                    requestObject,
                     responseObject.response,
                     account
                   );
