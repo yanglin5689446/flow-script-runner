@@ -43,7 +43,7 @@ const EvmEditor = (): ReactJSXElement => {
   const [requestObject, setRequestObject] =
     useState<EthereumTypes.EIP1193RequestPayload>();
   const [responseObject, setResponseObject] = useState<{
-    type: "normal" | "sign";
+    type: "normal" | "sign" | "userOp";
     status: "info" | "warning" | "success" | "error";
     response: any;
   } | null>(null);
@@ -68,6 +68,14 @@ const EvmEditor = (): ReactJSXElement => {
       if (signMethod.includes(requestObject.method)) {
         setResponseObject({
           type: "sign",
+          status: "success",
+          response,
+        });
+        return;
+      }
+      if (requestObject.method === "eth_sendUserOperation") {
+        setResponseObject({
+          type: "userOp",
           status: "success",
           response,
         });
@@ -287,11 +295,40 @@ const EvmEditor = (): ReactJSXElement => {
               </Button>
             </Box>
           )}
+          {responseObject?.type === "userOp" && (
+            <Box width="100%">
+              <Button
+                m="5px"
+                onClick={async () => {
+                  setResponseVerify(null);
+                  const userOpReceipt = await bloctoSDK.ethereum.request({
+                    jsonrpc: "2.0",
+                    id: 1,
+                    method: "eth_getUserOperationReceipt",
+                    params: [responseObject.response],
+                  });
+                  setResponseVerify(
+                    userOpReceipt?.result ||
+                      userOpReceipt?.error || {
+                        result: "Not yet processed. Please try again later.",
+                      }
+                  );
+                }}
+              >
+                Get UserOperation Receipt
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {responseVerify && (
           <Alert
-            status={!responseVerify?.isValidSignature ? "error" : "success"}
+            status={
+              responseVerify?.isValidSignature ||
+              responseVerify?.receipt?.success
+                ? "success"
+                : "error"
+            }
             alignItems="flex-start"
             borderRadius="md"
           >

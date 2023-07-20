@@ -72,7 +72,7 @@ const EvmUserOpEditor = ({
                     importTemplate(template);
                   }}
                 >
-                  {name}
+                  {template.name}
                 </MenuItem>
               ))}
             </MenuGroup>
