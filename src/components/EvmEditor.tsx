@@ -24,6 +24,7 @@ import EvmRequestEditor from "./EvmEditors/EvmRequestEditor";
 import EvmSignEditor from "./EvmEditors/EvmSignEditor";
 import EvmUserOpEditor from "./EvmEditors/EvmUserOpEditor";
 import EvmSendEditor from "./EvmEditors/EvmSendEditor";
+import EvmContractEditor from "./EvmEditors/EvmContractEditor";
 import type { EthereumTypes } from "@blocto/sdk";
 import { bloctoSDK, useEthereum, supportedChains } from "../services/evm";
 import ReactJson from "react-json-view";
@@ -219,7 +220,10 @@ const EvmEditor = (): ReactJSXElement => {
               />
             </TabPanel>
             <TabPanel>
-              <p>Contract</p>
+              <EvmContractEditor
+                setRequestObject={setRequestObject}
+                account={account}
+              />
             </TabPanel>
           </TabPanels>
         </Tabs>

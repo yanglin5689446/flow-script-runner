@@ -3,7 +3,7 @@ import { Box, Textarea, Grid } from "@chakra-ui/react";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import type { EthereumTypes } from "@blocto/sdk";
 
-const EvmUserOpEditor = ({
+const EvmSendEditor = ({
   setRequestObject,
   account,
 }: {
@@ -90,4 +90,4 @@ const EvmUserOpEditor = ({
   );
 };
 
-export default EvmUserOpEditor;
+export default EvmSendEditor;
