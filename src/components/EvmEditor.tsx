@@ -23,6 +23,7 @@ import EvmChainSelect from "./EvmChainSelect";
 import EvmRequestEditor from "./EvmEditors/EvmRequestEditor";
 import EvmSignEditor from "./EvmEditors/EvmSignEditor";
 import EvmUserOpEditor from "./EvmEditors/EvmUserOpEditor";
+import EvmSendEditor from "./EvmEditors/EvmSendEditor";
 import type { EthereumTypes } from "@blocto/sdk";
 import { bloctoSDK, useEthereum, supportedChains } from "../services/evm";
 import ReactJson from "react-json-view";
@@ -40,6 +41,7 @@ const EvmEditor = (): ReactJSXElement => {
   const { account, chainId, connect, disconnect } = useEthereum();
   const toast = useToast();
 
+  const [tabIndex, setTabIndex] = useState<number>(0);
   const [requestObject, setRequestObject] =
     useState<EthereumTypes.EIP1193RequestPayload>();
   const [responseObject, setResponseObject] = useState<{
@@ -111,7 +113,7 @@ const EvmEditor = (): ReactJSXElement => {
   useEffect(() => {
     setResponseObject(null);
     setResponseVerify(null);
-  }, [requestObject]);
+  }, [tabIndex]);
 
   return (
     <Flex
@@ -185,12 +187,13 @@ const EvmEditor = (): ReactJSXElement => {
             {account ? "Disconnect" : "Connect"}
           </Button>
         </Flex>
-        <Tabs size="md" isLazy={true} isFitted={true}>
+        <Tabs size="md" isLazy={true} index={tabIndex} onChange={setTabIndex}>
           <TabList>
             <Tab>Sign</Tab>
             <Tab>Request</Tab>
-            <Tab>Contract</Tab>
             <Tab>User Operation</Tab>
+            <Tab>Send</Tab>
+            <Tab>Contract</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
@@ -202,14 +205,21 @@ const EvmEditor = (): ReactJSXElement => {
             <TabPanel>
               <EvmRequestEditor setRequestObject={setRequestObject} />
             </TabPanel>
-            <TabPanel>
-              <p>Contract</p>
-            </TabPanel>
+
             <TabPanel>
               <EvmUserOpEditor
                 setRequestObject={setRequestObject}
                 account={account}
               />
+            </TabPanel>
+            <TabPanel>
+              <EvmSendEditor
+                setRequestObject={setRequestObject}
+                account={account}
+              />
+            </TabPanel>
+            <TabPanel>
+              <p>Contract</p>
             </TabPanel>
           </TabPanels>
         </Tabs>
@@ -255,7 +265,6 @@ const EvmEditor = (): ReactJSXElement => {
             />
           </Box>
         </Box>
-
         <Box width="100%" overflow="scroll">
           Response
           {responseObject?.response && (
@@ -320,7 +329,6 @@ const EvmEditor = (): ReactJSXElement => {
             </Box>
           )}
         </Box>
-
         {responseVerify && (
           <Alert
             status={
@@ -341,7 +349,6 @@ const EvmEditor = (): ReactJSXElement => {
             />
           </Alert>
         )}
-
         <Button
           onClick={account ? sendRequest : connect}
           gridRowEnd={-1}
