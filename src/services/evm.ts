@@ -76,7 +76,7 @@ export const supportedChains = [
   },
   {
     name: "Optimism Testnet",
-    chainId: "0x01A4",
+    chainId: "0x01a4",
     rpcUrls: ["https://goerli.optimism.io"],
     faucet: "https://faucet.paradigm.xyz/",
   },

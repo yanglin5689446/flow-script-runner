@@ -25,37 +25,37 @@ import {
 } from "./optimism";
 import { programId, accountPubKey } from "./solanaDevnet";
 import { moduleName } from "./aptosDevnet";
-import { EvmChain, OtherChain } from "../types/ChainTypes";
+import { OtherChain, EvmTestChain } from "../types/ChainTypes";
 
 type ContractInfosType = {
   [OtherChain.Solana]: { programId: string; accountPubKey: string };
   [OtherChain.Aptos]: { moduleName: string };
 } & {
-  [key in EvmChain]: { abi: AbiItem[] | AbiItem; address: string };
+  [key in EvmTestChain]: { abi: AbiItem[] | AbiItem; address: string };
 };
 
 export const ContractInfos: ContractInfosType = {
-  [EvmChain.Ethereum]: {
+  "0x5": {
     abi: goerliContractAbi,
     address: goerliContractAddress,
   },
-  [EvmChain.Bsc]: {
+  "0x61": {
     abi: bscContractAbi,
     address: bscContractAddress,
   },
-  [EvmChain.Polygon]: {
+  "0x13881": {
     abi: mumbaiContractAbi,
     address: mumbaiContractAddress,
   },
-  [EvmChain.Avalanche]: {
+  "0xa869": {
     abi: fujiContractAbi,
     address: fujiContractAddress,
   },
-  [EvmChain.Arbitrum]: {
+  "0x66eed": {
     abi: arbitrumContractAbi,
     address: arbitrumContractAddress,
   },
-  [EvmChain.Optimism]: {
+  "0x01a4": {
     abi: optimismContractAbi,
     address: optimismContractAddress,
   },

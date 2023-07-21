@@ -26,7 +26,7 @@ import EvmUserOpEditor from "./EvmEditors/EvmUserOpEditor";
 import EvmSendEditor from "./EvmEditors/EvmSendEditor";
 import EvmContractEditor from "./EvmEditors/EvmContractEditor";
 import type { EthereumTypes } from "@blocto/sdk";
-import { bloctoSDK, useEthereum, supportedChains } from "../services/evm";
+import { bloctoSDK, useEthereum, supportedChains, web3 } from "../services/evm";
 import ReactJson from "react-json-view";
 import isValidSignature from "../utils/isValidSignature";
 
@@ -81,6 +81,14 @@ const EvmEditor = (): ReactJSXElement => {
           type: "userOp",
           status: "success",
           response,
+        });
+        return;
+      }
+      if (web3.utils.isHex(response)) {
+        setResponseObject({
+          type: "normal",
+          status: "success",
+          response: web3.utils.hexToNumber(response).toString(),
         });
         return;
       }
@@ -223,6 +231,7 @@ const EvmEditor = (): ReactJSXElement => {
               <EvmContractEditor
                 setRequestObject={setRequestObject}
                 account={account}
+                chainId={chainId}
               />
             </TabPanel>
           </TabPanels>
