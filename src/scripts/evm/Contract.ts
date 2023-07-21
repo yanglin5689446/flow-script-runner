@@ -1,5 +1,5 @@
 import { ContractInfos } from "../../contracts";
-import { EvmTestChain } from "../../types/ChainTypes";
+import { EvmChainId } from "../../types/ChainTypes";
 import ScriptTypes, { PerInfo } from "../../types/ScriptTypes";
 
 export interface Params {
@@ -15,7 +15,7 @@ export const getValue = {
   script: "",
   description: "Read from the contract (value)",
   method: "eth_call",
-  contractInfo: (chain: EvmTestChain): Record<string, PerInfo> => ({
+  contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
       value: ContractInfos[chain].address,
@@ -37,7 +37,7 @@ export const getValue2 = {
   script: "",
   description: "Read from the contract (value2)",
   method: "eth_call",
-  contractInfo: (chain: EvmTestChain): Record<string, PerInfo> => ({
+  contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
       value: ContractInfos[chain].address,
@@ -59,7 +59,7 @@ export const setValue = {
   script: "",
   description: "Write with the contract method (value)",
   method: "eth_sendTransaction",
-  contractInfo: (chain: EvmTestChain): Record<string, PerInfo> => ({
+  contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
       value: ContractInfos[chain].address,
@@ -81,7 +81,7 @@ export const setValue2 = {
   script: "",
   description: "Write with the contract method (value2)",
   method: "eth_sendTransaction",
-  contractInfo: (chain: EvmTestChain): Record<string, PerInfo> => ({
+  contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
       value: ContractInfos[chain].address,
@@ -104,7 +104,7 @@ export const triggerError = {
   script: "",
   description: "Trigger an error with the contract method",
   method: "eth_sendTransaction",
-  contractInfo: (chain: EvmTestChain): Record<string, PerInfo> => ({
+  contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
       value: ContractInfos[chain].address,
