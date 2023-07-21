@@ -13,7 +13,7 @@ export interface Params {
 export const getValue = {
   type: ScriptTypes.CONTRACT,
   script: "",
-  description: "Read from the contract",
+  description: "Read from the contract (value)",
   method: "eth_call",
   contractInfo: (chain: EvmTestChain): Record<string, PerInfo> => ({
     contractAddress: {
@@ -35,7 +35,7 @@ export const getValue = {
 export const getValue2 = {
   type: ScriptTypes.CONTRACT,
   script: "",
-  description: "Read from the contract",
+  description: "Read from the contract (value2)",
   method: "eth_call",
   contractInfo: (chain: EvmTestChain): Record<string, PerInfo> => ({
     contractAddress: {
@@ -57,7 +57,7 @@ export const getValue2 = {
 export const setValue = {
   type: ScriptTypes.CONTRACT,
   script: "",
-  description: "Write with the contract method",
+  description: "Write with the contract method (value)",
   method: "eth_sendTransaction",
   contractInfo: (chain: EvmTestChain): Record<string, PerInfo> => ({
     contractAddress: {
@@ -79,7 +79,7 @@ export const setValue = {
 export const setValue2 = {
   type: ScriptTypes.CONTRACT,
   script: "",
-  description: "Write with the contract method",
+  description: "Write with the contract method (value2)",
   method: "eth_sendTransaction",
   contractInfo: (chain: EvmTestChain): Record<string, PerInfo> => ({
     contractAddress: {

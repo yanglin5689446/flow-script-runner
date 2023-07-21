@@ -345,8 +345,7 @@ const EvmEditor = (): ReactJSXElement => {
         {responseVerify && (
           <Alert
             status={
-              responseVerify?.isValidSignature ||
-              responseVerify?.receipt?.success
+              responseVerify?.isValidSignature || responseVerify?.success
                 ? "success"
                 : "error"
             }
@@ -359,6 +358,8 @@ const EvmEditor = (): ReactJSXElement => {
               name={null}
               displayDataTypes={false}
               displayObjectSize={false}
+              groupArraysAfterLength={5}
+              collapsed={true}
             />
           </Alert>
         )}

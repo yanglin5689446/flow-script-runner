@@ -158,7 +158,7 @@ const EvmContractEditor = ({
           />
           <Box mx="10px">Contract Abi:</Box>
           <Textarea
-            rows={1}
+            rows={5}
             value={contractAbi}
             onChange={(e) => {
               setContractAbi(e.target.value);
