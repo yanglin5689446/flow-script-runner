@@ -44,16 +44,18 @@ const EvmContractEditor = ({
   const [contractAbi, setContractAbi] = useState<string>("");
   const [methodName, setMethodName] = useState<string>("");
   const [methodArgs, setMethodArgs] = useState<(string | number)[]>([]);
+  const [placeholder, setPlaceholder] = useState<string[]>([""]);
   const importTemplate = useCallback(
     (template: {
       contractInfo: (chain: any) => Record<string, any>;
-      args: (string | number)[];
+      args: { placeholder: string; value: string | number }[];
       method: string;
     }) => {
       setContractAddress(template.contractInfo(chainId).contractAddress.value);
       setContractAbi(template.contractInfo(chainId).contractAbi.value);
       setMethodName(template.contractInfo(chainId).methodName.value);
-      setMethodArgs(template.args);
+      setMethodArgs(template.args.map((arg) => arg.value));
+      setPlaceholder(template.args.map((arg) => arg.placeholder));
       setRequestMethod(template.method);
     },
     [setContractAddress, setContractAbi, setMethodName, chainId]
@@ -201,7 +203,7 @@ const EvmContractEditor = ({
                   });
                 }}
                 required={i === 0}
-                placeholder="value"
+                placeholder={placeholder[i]}
               />
               <IconButton
                 ml={2}

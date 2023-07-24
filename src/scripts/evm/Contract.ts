@@ -1,18 +1,9 @@
 import { ContractInfos } from "../../contracts";
 import { EvmChainId } from "../../types/ChainTypes";
 import ScriptTypes, { PerInfo } from "../../types/ScriptTypes";
-
-export interface Params {
-  account: string;
-  contractAddress: string;
-  contractAbi: string;
-  methodName: string;
-  args: any[];
-}
+import erc20Abi from "../../contracts/erc20Abi";
 
 export const getValue = {
-  type: ScriptTypes.CONTRACT,
-  script: "",
   description: "Read from the contract (value)",
   method: "eth_call",
   contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
@@ -73,7 +64,7 @@ export const setValue = {
       value: "setValue",
     },
   }),
-  args: [0],
+  args: [{ placeholder: "value", value: 0 }],
 };
 
 export const setValue2 = {
@@ -96,7 +87,32 @@ export const setValue2 = {
       value: "setValue2",
     },
   }),
-  args: [0],
+  args: [{ placeholder: "value", value: "" }],
+};
+
+export const sendERC20Token = {
+  type: ScriptTypes.CONTRACT,
+  script: "",
+  description: "Send ERC20 token",
+  method: "eth_sendTransaction",
+  contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
+    contractAddress: {
+      comment: "contract address",
+      value: "",
+    },
+    contractAbi: {
+      comment: "contract abi",
+      value: JSON.stringify(erc20Abi),
+    },
+    methodName: {
+      comment: "method name",
+      value: "transfer",
+    },
+  }),
+  args: [
+    { placeholder: "to", value: "" },
+    { placeholder: "value", value: "" },
+  ],
 };
 
 export const triggerError = {
@@ -118,5 +134,5 @@ export const triggerError = {
       value: "arithmeticError",
     },
   }),
-  args: [0],
+  args: [{ placeholder: "value", value: 0 }],
 };
