@@ -2,6 +2,7 @@ export enum OtherChain {
   Flow = "flow",
   Solana = "solana",
   Aptos = "aptos",
+  Ethereum = "ethereum",
 }
 
 export enum EvmChain {
@@ -28,6 +29,6 @@ export enum EvmChainId {
   OptimismTestnet = "0x01a4",
 }
 
-export type ChainsType = OtherChain | EvmChain;
+export type ChainsType = OtherChain;
 
-export const Chains = { ...OtherChain, ...EvmChain };
+export const Chains = { ...OtherChain };

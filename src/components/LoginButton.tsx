@@ -11,7 +11,7 @@ import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import { Context } from "../context/Context";
 import { formatAddress } from "../utils/formatAddress";
 import { ArrowForwardIcon, ChevronDownIcon, CopyIcon } from "@chakra-ui/icons";
-import { EvmChain } from "../types/ChainTypes";
+import { OtherChain } from "../types/ChainTypes";
 
 const styles = {
   d: "flex",
@@ -44,7 +44,7 @@ const LoginButton = (): ReactJSXElement => {
       );
   }, [address, toast]);
 
-  if (chain === EvmChain.Ethereum) {
+  if (chain === OtherChain.Ethereum) {
     return <></>;
   }
 
