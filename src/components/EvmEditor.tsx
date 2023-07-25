@@ -38,21 +38,19 @@ const signMethod = [
   "eth_signTypedData_v4",
 ];
 
-interface IRequestObject extends EthereumTypes.EIP1193RequestPayload {
-  contractOutputType?: any;
-}
-
 const EvmEditor = (): ReactJSXElement => {
   const { account, chainId, connect, disconnect } = useEthereum();
   const toast = useToast();
 
   const [tabIndex, setTabIndex] = useState<number>(0);
-  const [requestObject, setRequestObject] = useState<IRequestObject>();
+  const [requestObject, setRequestObject] =
+    useState<EthereumTypes.EIP1193RequestPayload>();
   const [responseObject, setResponseObject] = useState<{
     type: "normal" | "sign" | "userOp" | "transaction" | "call";
     status: "info" | "warning" | "success" | "error";
     response: any;
   } | null>(null);
+  const [decodeType, setDecodeType] = useState<any>(null);
   const [responseVerify, setResponseVerify] = useState<Record<any, any> | null>(
     null
   );
@@ -61,10 +59,7 @@ const EvmEditor = (): ReactJSXElement => {
     if (!requestObject) return;
     try {
       setResponseObject(null);
-      const response = await bloctoSDK.ethereum.request({
-        method: requestObject.method,
-        params: requestObject.params,
-      });
+      const response = await bloctoSDK.ethereum.request(requestObject);
       console.log(response);
       switch (true) {
         case response === null:
@@ -94,10 +89,7 @@ const EvmEditor = (): ReactJSXElement => {
             status: "success",
             response: {
               raw: response,
-              decode: web3.eth.abi.decodeParameters(
-                requestObject.contractOutputType,
-                response
-              ),
+              decode: web3.eth.abi.decodeParameters(decodeType, response),
             },
           });
           return;
@@ -125,7 +117,7 @@ const EvmEditor = (): ReactJSXElement => {
         response: { code: e.code, error: e.message },
       });
     }
-  }, [requestObject, setResponseObject]);
+  }, [requestObject, decodeType, setResponseObject]);
 
   const copyAddress = useCallback(() => {
     window.navigator.clipboard
@@ -251,6 +243,7 @@ const EvmEditor = (): ReactJSXElement => {
             <TabPanel>
               <EvmContractEditor
                 setRequestObject={setRequestObject}
+                setDecodeType={setDecodeType}
                 account={account}
                 chainId={chainId}
               />
@@ -411,6 +404,7 @@ const EvmEditor = (): ReactJSXElement => {
           onClick={account ? sendRequest : connect}
           gridRowEnd={-1}
           alignSelf="end"
+          colorScheme={account ? "blue" : "red"}
         >
           {account ? "Send" : "Connect"}
         </Button>

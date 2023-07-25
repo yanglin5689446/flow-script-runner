@@ -25,17 +25,18 @@ import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import type { EthereumTypes } from "@blocto/sdk";
 import { web3 } from "../../services/evm";
 import * as ContractTemplate from "../../scripts/evm/Contract";
-interface IRequestObject extends EthereumTypes.EIP1193RequestPayload {
-  contractOutputType?: any;
-}
 const MenuGroups = [{ title: "Contract", templates: ContractTemplate }];
 
 const EvmContractEditor = ({
   setRequestObject,
+  setDecodeType,
   account,
   chainId,
 }: {
-  setRequestObject: Dispatch<SetStateAction<IRequestObject | undefined>>;
+  setRequestObject: Dispatch<
+    SetStateAction<EthereumTypes.EIP1193RequestPayload | undefined>
+  >;
+  setDecodeType: Dispatch<SetStateAction<any>>;
   account: string | null;
   chainId: string | null;
 }): ReactJSXElement => {
@@ -87,10 +88,11 @@ const EvmContractEditor = ({
             },
             "latest",
           ],
-          contractOutputType: JSON.parse(contractAbi).find(
-            (m: any) => m.name === methodName
-          ).outputs,
         });
+        setDecodeType(
+          JSON.parse(contractAbi).find((m: any) => m.name === methodName)
+            .outputs
+        );
       } else {
         setRequestObject({
           method: requestMethod,
@@ -108,6 +110,7 @@ const EvmContractEditor = ({
     account,
     contractAddress,
     setRequestObject,
+    setDecodeType,
     requestMethod,
     contractAbi,
     methodName,
