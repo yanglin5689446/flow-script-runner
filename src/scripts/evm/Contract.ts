@@ -95,7 +95,7 @@ export const sendERC20Token = {
   script: "",
   description: "Send ERC20 token",
   method: "eth_sendTransaction",
-  contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
+  contractInfo: (): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
       value: "",

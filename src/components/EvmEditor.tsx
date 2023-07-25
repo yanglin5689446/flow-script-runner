@@ -38,15 +38,18 @@ const signMethod = [
   "eth_signTypedData_v4",
 ];
 
+interface IRequestObject extends EthereumTypes.EIP1193RequestPayload {
+  contractOutputType?: any;
+}
+
 const EvmEditor = (): ReactJSXElement => {
   const { account, chainId, connect, disconnect } = useEthereum();
   const toast = useToast();
 
   const [tabIndex, setTabIndex] = useState<number>(0);
-  const [requestObject, setRequestObject] =
-    useState<EthereumTypes.EIP1193RequestPayload>();
+  const [requestObject, setRequestObject] = useState<IRequestObject>();
   const [responseObject, setResponseObject] = useState<{
-    type: "normal" | "sign" | "userOp";
+    type: "normal" | "sign" | "userOp" | "transaction" | "call";
     status: "info" | "warning" | "success" | "error";
     response: any;
   } | null>(null);
@@ -58,45 +61,62 @@ const EvmEditor = (): ReactJSXElement => {
     if (!requestObject) return;
     try {
       setResponseObject(null);
-      const response = await bloctoSDK.ethereum.request(requestObject);
-      console.log(response);
-      if (response === null) {
-        setResponseObject({
-          type: "normal",
-          status: "success",
-          response: "Success",
-        });
-        return;
-      }
-      if (signMethod.includes(requestObject.method)) {
-        setResponseObject({
-          type: "sign",
-          status: "success",
-          response,
-        });
-        return;
-      }
-      if (requestObject.method === "eth_sendUserOperation") {
-        setResponseObject({
-          type: "userOp",
-          status: "success",
-          response,
-        });
-        return;
-      }
-      if (web3.utils.isHex(response)) {
-        setResponseObject({
-          type: "normal",
-          status: "success",
-          response: web3.utils.hexToNumber(response).toString(),
-        });
-        return;
-      }
-      setResponseObject({
-        type: "normal",
-        status: "success",
-        response: response,
+      const response = await bloctoSDK.ethereum.request({
+        method: requestObject.method,
+        params: requestObject.params,
       });
+      console.log(response);
+      switch (true) {
+        case response === null:
+          setResponseObject({
+            type: "normal",
+            status: "success",
+            response: "Success",
+          });
+          return;
+        case signMethod.includes(requestObject.method):
+          setResponseObject({
+            type: "sign",
+            status: "success",
+            response,
+          });
+          return;
+        case requestObject.method === "eth_sendUserOperation":
+          setResponseObject({
+            type: "userOp",
+            status: "success",
+            response,
+          });
+          return;
+        case requestObject.method === "eth_call": {
+          setResponseObject({
+            type: "call",
+            status: "success",
+            response: {
+              raw: response,
+              decode: web3.eth.abi.decodeParameters(
+                requestObject.contractOutputType,
+                response
+              ),
+            },
+          });
+          return;
+        }
+        case requestObject.method === "eth_sendTransaction":
+          setResponseObject({
+            type: "transaction",
+            status: "success",
+            response,
+          });
+          return;
+        default:
+          setResponseObject({
+            type: "normal",
+            status: "success",
+            response: response,
+          });
+          return;
+      }
     } catch (e: any) {
       console.log(e);
       setResponseObject({
@@ -342,11 +362,34 @@ const EvmEditor = (): ReactJSXElement => {
               </Button>
             </Box>
           )}
+          {responseObject?.type === "transaction" && (
+            <Box width="100%">
+              <Button
+                m="5px"
+                onClick={async () => {
+                  setResponseVerify(null);
+                  const receipt = await bloctoSDK.ethereum.request({
+                    method: "eth_getTransactionReceipt",
+                    params: [responseObject.response],
+                  });
+                  setResponseVerify(
+                    receipt || {
+                      result: "Not yet processed. Please try again later.",
+                    }
+                  );
+                }}
+              >
+                Get Transaction Receipt
+              </Button>
+            </Box>
+          )}
         </Box>
         {responseVerify && (
           <Alert
             status={
-              responseVerify?.isValidSignature || responseVerify?.success
+              responseVerify?.isValidSignature ||
+              responseVerify?.success ||
+              responseVerify?.status === "0x1"
                 ? "success"
                 : "error"
             }
@@ -360,7 +403,7 @@ const EvmEditor = (): ReactJSXElement => {
               displayDataTypes={false}
               displayObjectSize={false}
               groupArraysAfterLength={5}
-              collapsed={true}
+              collapsed={1}
             />
           </Alert>
         )}

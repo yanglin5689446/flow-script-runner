@@ -25,7 +25,9 @@ import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import type { EthereumTypes } from "@blocto/sdk";
 import { web3 } from "../../services/evm";
 import * as ContractTemplate from "../../scripts/evm/Contract";
-
+interface IRequestObject extends EthereumTypes.EIP1193RequestPayload {
+  contractOutputType?: any;
+}
 const MenuGroups = [{ title: "Contract", templates: ContractTemplate }];
 
 const EvmContractEditor = ({
@@ -33,9 +35,7 @@ const EvmContractEditor = ({
   account,
   chainId,
 }: {
-  setRequestObject: Dispatch<
-    SetStateAction<EthereumTypes.EIP1193RequestPayload | undefined>
-  >;
+  setRequestObject: Dispatch<SetStateAction<IRequestObject | undefined>>;
   account: string | null;
   chainId: string | null;
 }): ReactJSXElement => {
@@ -75,20 +75,34 @@ const EvmContractEditor = ({
         console.log(e);
         return;
       }
-      const params: any[] = [
-        {
-          from: account,
-          to: contractAddress,
-          data: data,
-        },
-      ];
+
       if (requestMethod === "eth_call") {
-        params.push("latest");
+        setRequestObject({
+          method: requestMethod,
+          params: [
+            {
+              from: account,
+              to: contractAddress,
+              data: data,
+            },
+            "latest",
+          ],
+          contractOutputType: JSON.parse(contractAbi).find(
+            (m: any) => m.name === methodName
+          ).outputs,
+        });
+      } else {
+        setRequestObject({
+          method: requestMethod,
+          params: [
+            {
+              from: account,
+              to: contractAddress,
+              data: data,
+            },
+          ],
+        });
       }
-      setRequestObject({
-        method: requestMethod,
-        params,
-      });
     }
   }, [
     account,
