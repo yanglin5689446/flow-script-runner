@@ -1,5 +1,5 @@
 import EIP712Util from "eth-eip712-util";
-import ERC1271ABI from "./abi/ERC1271.json";
+import ERC1271ABI from "../contracts/abi/ERC1271.json";
 import { web3 } from "../services/evm";
 import DappAuth from "@blocto/dappauth";
 import type { EthereumTypes } from "@blocto/sdk";

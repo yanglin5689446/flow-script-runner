@@ -1,7 +1,7 @@
 import { ContractInfos } from "../../contracts";
 import { EvmChainId } from "../../types/ChainTypes";
 import ScriptTypes, { PerInfo } from "../../types/ScriptTypes";
-import erc20Abi from "../../contracts/erc20Abi";
+import erc20Abi from "../../contracts/abi/ERC20";
 
 export const getValue = {
   description: "Read from the contract (value)",
