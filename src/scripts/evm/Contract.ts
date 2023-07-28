@@ -134,5 +134,7 @@ export const triggerError = {
       value: "arithmeticError",
     },
   }),
-  args: [{ placeholder: "value", value: 0 }],
+  args: [
+    { placeholder: "value (Input below 100 to trigger an error)", value: 0 },
+  ],
 };

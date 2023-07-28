@@ -4,12 +4,12 @@ import { AddIcon, CloseIcon } from "@chakra-ui/icons";
 
 const ParamEditor = ({
   title,
-  param,
-  setParam,
+  params,
+  setParams,
 }: {
   title: string;
-  param: string[][];
-  setParam: React.Dispatch<React.SetStateAction<string[][]>>;
+  params: string[][];
+  setParams: React.Dispatch<React.SetStateAction<string[][]>>;
 }): React.ReactElement => {
   return (
     <Flex mt={3} ml={1} flexDirection="column">
@@ -23,20 +23,20 @@ const ParamEditor = ({
           size="xs"
           colorScheme="blue"
           onClick={() => {
-            setParam((prev) => [...prev, ["", ""]]);
+            setParams((prev) => [...prev, ["", ""]]);
           }}
         />
       </Flex>
 
       <Flex flexDir="column" mt={2}>
-        {param?.map((p, i) => (
+        {params?.map((param, i) => (
           <Flex key={i} my="5px" alignItems="center">
             <Textarea
               width="40%"
               rows={1}
-              value={p[0]}
+              value={param[0]}
               onChange={(e) => {
-                setParam((prev) => {
+                setParams((prev) => {
                   const newParam = [...prev];
                   newParam[i][0] = e.target.value;
                   return newParam;
@@ -48,9 +48,9 @@ const ParamEditor = ({
             <Box mx="10px">:</Box>
             <Textarea
               rows={1}
-              value={p[1]}
+              value={param[1]}
               onChange={(e) => {
-                setParam((prev) => {
+                setParams((prev) => {
                   const newParam = [...prev];
                   newParam[i][1] = e.target.value;
                   return newParam;
@@ -67,7 +67,7 @@ const ParamEditor = ({
               size="xs"
               colorScheme="red"
               onClick={() => {
-                setParam((prev) => {
+                setParams((prev) => {
                   const newParam = [...prev];
                   newParam.splice(i, 1);
                   return newParam;

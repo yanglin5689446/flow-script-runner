@@ -93,8 +93,8 @@ const EvmUserOpEditor = ({
 
       <ParamEditor
         title="Other Param"
-        param={otherParam}
-        setParam={setOtherParam}
+        params={otherParam}
+        setParams={setOtherParam}
       />
     </Flex>
   );

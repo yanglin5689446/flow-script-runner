@@ -19,7 +19,6 @@ const isValidSignature = async (
   try {
     if (method === "personal_sign") {
       const challenge = params?.[0];
-      console.log("personal_sign", challenge, signature, address, dappAuth);
       const isAuthorizedSigner = await dappAuth.isAuthorizedSigner(
         challenge,
         signature,

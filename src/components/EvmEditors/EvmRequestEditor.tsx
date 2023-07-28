@@ -32,20 +32,20 @@ const EvmRequestEditor = ({
   >;
 }): ReactJSXElement => {
   const [method, setMethod] = useState<string>("");
-  const [param, setParam] = useState<string[][]>([["", ""]]);
+  const [params, setParams] = useState<string[][]>([["", ""]]);
   const importTemplate = useCallback(
     (template: EthereumTypes.EIP1193RequestPayload) => {
       setMethod(template.method);
-      setParam(Object.entries(template?.params?.[0] || {}));
+      setParams(Object.entries(template?.params?.[0] || {}));
     },
     []
   );
   useEffect(() => {
     setRequestObject({
       method,
-      params: [Object.fromEntries(param)],
+      params: [Object.fromEntries(params)],
     });
-  }, [method, param, setRequestObject]);
+  }, [method, params, setRequestObject]);
 
   return (
     <Flex flexDirection="column">
@@ -89,7 +89,7 @@ const EvmRequestEditor = ({
         />
       </Flex>
 
-      <ParamEditor title="Params" param={param} setParam={setParam} />
+      <ParamEditor title="Params" params={params} setParams={setParams} />
     </Flex>
   );
 };

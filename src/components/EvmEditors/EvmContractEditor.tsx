@@ -78,6 +78,7 @@ const EvmContractEditor = ({
       }
 
       if (requestMethod === "eth_call") {
+        // see https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_call
         setRequestObject({
           method: requestMethod,
           params: [
@@ -207,11 +208,11 @@ const EvmContractEditor = ({
           />
         </Flex>
         <Flex flexDir="column" mt={2}>
-          {methodArgs?.map((p, i) => (
+          {methodArgs?.map((value, i) => (
             <Flex key={i} my="5px" alignItems="center">
               <Textarea
                 rows={1}
-                value={p}
+                value={value}
                 onChange={(e) => {
                   setMethodArgs((prev) => {
                     const newParam = [...prev];

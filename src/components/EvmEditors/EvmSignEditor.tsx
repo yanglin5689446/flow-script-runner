@@ -120,13 +120,13 @@ const SignTypedDataV3Editor = ({
   }, [chainId]);
   return (
     <>
-      <ParamEditor title="domain" param={domain} setParam={setDomain} />
-      <ParamEditor title="message" param={message} setParam={setMessage} />
-      <ParamEditor title="types" param={types} setParam={setTypes} />
+      <ParamEditor title="domain" params={domain} setParams={setDomain} />
+      <ParamEditor title="message" params={message} setParams={setMessage} />
+      <ParamEditor title="types" params={types} setParams={setTypes} />
       <ParamEditor
         title="primaryType"
-        param={primaryType}
-        setParam={setPrimaryType}
+        params={primaryType}
+        setParams={setPrimaryType}
       />
     </>
   );
@@ -205,13 +205,13 @@ const SignTypedDataV4Editor = ({
 
   return (
     <>
-      <ParamEditor title="domain" param={domain} setParam={setDomain} />
-      <ParamEditor title="message" param={message} setParam={setMessage} />
-      <ParamEditor title="types" param={types} setParam={setTypes} />
+      <ParamEditor title="domain" params={domain} setParams={setDomain} />
+      <ParamEditor title="message" params={message} setParams={setMessage} />
+      <ParamEditor title="types" params={types} setParams={setTypes} />
       <ParamEditor
         title="primaryType"
-        param={primaryType}
-        setParam={setPrimaryType}
+        params={primaryType}
+        setParams={setPrimaryType}
       />
     </>
   );
