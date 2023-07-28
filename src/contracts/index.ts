@@ -1,69 +1,74 @@
 import { AbiItem } from "web3-utils";
-import {
-  contractAbi as bscContractAbi,
-  contractAddress as bscContractAddress,
-} from "./bsc";
-import {
-  contractAbi as fujiContractAbi,
-  contractAddress as fujiContractAddress,
-} from "./fuji";
-import {
-  contractAbi as mumbaiContractAbi,
-  contractAddress as mumbaiContractAddress,
-} from "./mumbai";
-import {
-  contractAbi as goerliContractAbi,
-  contractAddress as goerliContractAddress,
-} from "./goerli";
-import {
-  contractAbi as arbitrumContractAbi,
-  contractAddress as arbitrumContractAddress,
-} from "./arbitrum";
-import {
-  contractAbi as optimismContractAbi,
-  contractAddress as optimismContractAddress,
-} from "./optimism";
-import { programId, accountPubKey } from "./solanaDevnet";
-import { moduleName } from "./aptosDevnet";
-import { EvmChain, OtherChain } from "../types/ChainTypes";
+import { OtherChain, EvmChainId } from "../types/ChainTypes";
+import valueDappAbi from "./valueDappAbi";
+
+const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 
 type ContractInfosType = {
   [OtherChain.Solana]: { programId: string; accountPubKey: string };
   [OtherChain.Aptos]: { moduleName: string };
 } & {
-  [key in EvmChain]: { abi: AbiItem[] | AbiItem; address: string };
+  [key in EvmChainId]: { abi: AbiItem[] | AbiItem; address: string };
 };
 
 export const ContractInfos: ContractInfosType = {
-  [EvmChain.Ethereum]: {
-    abi: goerliContractAbi,
-    address: goerliContractAddress,
+  [EvmChainId.Ethereum]: {
+    abi: valueDappAbi,
+    address: "0x009c403BdFaE357d82AAef2262a163287c30B739",
   },
-  [EvmChain.Bsc]: {
-    abi: bscContractAbi,
-    address: bscContractAddress,
+  [EvmChainId.EthereumGoerli]: {
+    abi: valueDappAbi,
+    address: "0x009c403BdFaE357d82AAef2262a163287c30B739",
   },
-  [EvmChain.Polygon]: {
-    abi: mumbaiContractAbi,
-    address: mumbaiContractAddress,
+  [EvmChainId.Bsc]: {
+    abi: valueDappAbi,
+    address: "0x009c403BdFaE357d82AAef2262a163287c30B739",
   },
-  [EvmChain.Avalanche]: {
-    abi: fujiContractAbi,
-    address: fujiContractAddress,
+  [EvmChainId.BscTestnet]: {
+    abi: valueDappAbi,
+    address: "0x009c403BdFaE357d82AAef2262a163287c30B739",
   },
-  [EvmChain.Arbitrum]: {
-    abi: arbitrumContractAbi,
-    address: arbitrumContractAddress,
+  [EvmChainId.Polygon]: {
+    abi: valueDappAbi,
+    address: "0xD76bAA840e3D5AE1C5E5C7cEeF1C1A238687860e",
   },
-  [EvmChain.Optimism]: {
-    abi: optimismContractAbi,
-    address: optimismContractAddress,
+  [EvmChainId.PolygonTestnet]: {
+    abi: valueDappAbi,
+    address: "0x009c403BdFaE357d82AAef2262a163287c30B739",
+  },
+  [EvmChainId.Avalanche]: {
+    abi: valueDappAbi,
+    address: "0x009c403BdFaE357d82AAef2262a163287c30B739",
+  },
+  [EvmChainId.AvalancheTestnet]: {
+    abi: valueDappAbi,
+    address: "0xD76bAA840e3D5AE1C5E5C7cEeF1C1A238687860e",
+  },
+  [EvmChainId.Arbitrum]: {
+    abi: valueDappAbi,
+    address: "0x806243c7368a90D957592B55875eF4C3353C5bEa",
+  },
+  [EvmChainId.ArbitrumTestnet]: {
+    abi: valueDappAbi,
+    address: "0x009c403BdFaE357d82AAef2262a163287c30B739",
+  },
+  [EvmChainId.Optimism]: {
+    abi: valueDappAbi,
+    address: "0x806243c7368a90D957592B55875eF4C3353C5bEa",
+  },
+  [EvmChainId.OptimismTestnet]: {
+    abi: valueDappAbi,
+    address: "0x009c403BdFaE357d82AAef2262a163287c30B739",
   },
   [OtherChain.Solana]: {
-    programId,
-    accountPubKey,
+    programId: isMainnet
+      ? "EN2Ln23fzm4qag1mHfx7FDJwDJog5u4SDgqRY256ZgFt"
+      : "G4YkbRN4nFQGEUg4SXzPsrManWzuk8bNq9JaMhXepnZ6",
+    accountPubKey: isMainnet
+      ? "EajAHVxAVvf4yNUu37ZEh8QS7Lk5bw9yahTGiTSL1Rwt"
+      : "4AXy5YYCXpMapaVuzKkz25kVHzrdLDgKN3TiQvtf1Eu8",
   },
   [OtherChain.Aptos]: {
-    moduleName,
+    moduleName: "0x1::coin",
   },
 };

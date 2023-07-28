@@ -1,44 +1,19 @@
 import { ContractInfos } from "../../contracts";
-import { ChainServices } from "../../services";
-import { ChainsType, EvmChain } from "../../types/ChainTypes";
-import ScriptTypes, { ArgTypes, PerInfo } from "../../types/ScriptTypes";
-
-interface Params {
-  account: string;
-  contractAddress: string;
-  contractAbi: string;
-  methodName: string;
-  args: any[];
-  chain: EvmChain;
-}
+import { EvmChainId } from "../../types/ChainTypes";
+import ScriptTypes, { PerInfo } from "../../types/ScriptTypes";
+import erc20Abi from "../../contracts/abi/ERC20";
 
 export const getValue = {
-  type: ScriptTypes.CONTRACT,
-  script: "",
-  description: "Read from the contract",
-  method: ({
-    contractAddress,
-    contractAbi,
-    methodName,
-    chain,
-  }: Params): Promise<string> => {
-    let contract = ChainServices.getEvmChainContract(chain);
-    if (contractAddress && contractAbi) {
-      contract = new ChainServices[chain].web3.eth.Contract(
-        JSON.parse(contractAbi),
-        contractAddress
-      );
-    }
-    return contract.methods[methodName || "value"]().call();
-  },
-  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
+  description: "Read from the contract (value)",
+  method: "eth_call",
+  contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
-      value: ContractInfos[chain as EvmChain].address,
+      value: ContractInfos[chain].address,
     },
     contractAbi: {
       comment: "contract abi",
-      value: JSON.stringify(ContractInfos[chain as EvmChain].abi),
+      value: JSON.stringify(ContractInfos[chain].abi),
     },
     methodName: {
       comment: "method name",
@@ -51,30 +26,16 @@ export const getValue = {
 export const getValue2 = {
   type: ScriptTypes.CONTRACT,
   script: "",
-  description: "Read from the contract",
-  method: ({
-    contractAddress,
-    contractAbi,
-    methodName,
-    chain,
-  }: Params): Promise<string> => {
-    let contract = ChainServices.getEvmChainContract(chain);
-    if (contractAddress && contractAbi) {
-      contract = new ChainServices[chain].web3.eth.Contract(
-        JSON.parse(contractAbi),
-        contractAddress
-      );
-    }
-    return contract.methods[methodName || "value2"]().call();
-  },
-  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
+  description: "Read from the contract (value2)",
+  method: "eth_call",
+  contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
-      value: ContractInfos[chain as EvmChain].address,
+      value: ContractInfos[chain].address,
     },
     contractAbi: {
       comment: "contract abi",
-      value: JSON.stringify(ContractInfos[chain as EvmChain].abi),
+      value: JSON.stringify(ContractInfos[chain].abi),
     },
     methodName: {
       comment: "method name",
@@ -87,74 +48,38 @@ export const getValue2 = {
 export const setValue = {
   type: ScriptTypes.CONTRACT,
   script: "",
-  description: "Write with the contract method",
-  method: ({
-    account,
-    contractAddress,
-    contractAbi,
-    methodName,
-    args,
-    chain,
-  }: Params): Promise<any> => {
-    let contract = ChainServices.getEvmChainContract(chain);
-    if (contractAddress && contractAbi) {
-      contract = new ChainServices[chain].web3.eth.Contract(
-        JSON.parse(contractAbi),
-        contractAddress
-      );
-    }
-    return contract.methods[methodName || "setValue"](...args).send({
-      from: account,
-    });
-  },
-  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
+  description: "Write with the contract method (value)",
+  method: "eth_sendTransaction",
+  contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
-      value: ContractInfos[chain as EvmChain].address,
+      value: ContractInfos[chain].address,
     },
     contractAbi: {
       comment: "contract abi",
-      value: JSON.stringify(ContractInfos[chain as EvmChain].abi),
+      value: JSON.stringify(ContractInfos[chain].abi),
     },
     methodName: {
       comment: "method name",
       value: "setValue",
     },
   }),
-  args: [{ type: ArgTypes.Number, comment: "value(number)", name: "value" }],
+  args: [{ placeholder: "value", value: 0 }],
 };
 
 export const setValue2 = {
   type: ScriptTypes.CONTRACT,
   script: "",
-  description: "Write with the contract method",
-  method: ({
-    account,
-    contractAddress,
-    contractAbi,
-    methodName,
-    args,
-    chain,
-  }: Params): Promise<any> => {
-    let contract = ChainServices.getEvmChainContract(chain);
-    if (contractAddress && contractAbi) {
-      contract = new ChainServices[chain].web3.eth.Contract(
-        JSON.parse(contractAbi),
-        contractAddress
-      );
-    }
-    return contract.methods[methodName || "setValue2"](...args).send({
-      from: account,
-    });
-  },
-  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
+  description: "Write with the contract method (value2)",
+  method: "eth_sendTransaction",
+  contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
-      value: ContractInfos[chain as EvmChain].address,
+      value: ContractInfos[chain].address,
     },
     contractAbi: {
       comment: "contract abi",
-      value: JSON.stringify(ContractInfos[chain as EvmChain].abi),
+      value: JSON.stringify(ContractInfos[chain].abi),
     },
     methodName: {
       comment: "method name",
@@ -162,52 +87,54 @@ export const setValue2 = {
       value: "setValue2",
     },
   }),
-  args: [{ type: ArgTypes.Number, comment: "value2(number)", name: "value" }],
+  args: [{ placeholder: "value", value: "" }],
+};
+
+export const sendERC20Token = {
+  type: ScriptTypes.CONTRACT,
+  script: "",
+  description: "Send ERC20 token",
+  method: "eth_sendTransaction",
+  contractInfo: (): Record<string, PerInfo> => ({
+    contractAddress: {
+      comment: "contract address",
+      value: "",
+    },
+    contractAbi: {
+      comment: "contract abi",
+      value: JSON.stringify(erc20Abi),
+    },
+    methodName: {
+      comment: "method name",
+      value: "transfer",
+    },
+  }),
+  args: [
+    { placeholder: "to", value: "" },
+    { placeholder: "value", value: "" },
+  ],
 };
 
 export const triggerError = {
   type: ScriptTypes.CONTRACT,
   script: "",
   description: "Trigger an error with the contract method",
-  method: ({
-    account,
-    contractAddress,
-    contractAbi,
-    methodName,
-    args,
-    chain,
-  }: Params): Promise<any> => {
-    let contract = ChainServices.getEvmChainContract(chain);
-    if (contractAddress && contractAbi) {
-      contract = new ChainServices[chain].web3.eth.Contract(
-        JSON.parse(contractAbi),
-        contractAddress
-      );
-    }
-    return contract.methods[methodName || "arithmeticError"](...args).send({
-      from: account,
-    });
-  },
-  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
+  method: "eth_sendTransaction",
+  contractInfo: (chain: EvmChainId): Record<string, PerInfo> => ({
     contractAddress: {
       comment: "contract address",
-      value: ContractInfos[chain as EvmChain].address,
+      value: ContractInfos[chain].address,
     },
     contractAbi: {
       comment: "contract abi",
-      value: JSON.stringify(ContractInfos[chain as EvmChain].abi),
+      value: JSON.stringify(ContractInfos[chain].abi),
     },
     methodName: {
       comment: "method name",
-
       value: "arithmeticError",
     },
   }),
   args: [
-    {
-      type: ArgTypes.Number,
-      comment: "Input below 100 can trigger an error",
-      name: "a",
-    },
+    { placeholder: "value (Input below 100 to trigger an error)", value: 0 },
   ],
 };

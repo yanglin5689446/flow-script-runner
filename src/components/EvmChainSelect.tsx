@@ -1,31 +1,47 @@
-import React, { useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
-import { startCase } from "lodash";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
-import { Context } from "../context/Context";
-import { EvmChain } from "../types/ChainTypes";
+import { supportedChains, bloctoSDK, useEthereum } from "../services/evm";
 
 const EvmChainSelect: React.FC = ({}): ReactJSXElement => {
-  const { chain, switchChain } = useContext(Context);
+  const { chainId: currentChainId } = useEthereum();
+  const [chainName, setChainName] = useState(
+    supportedChains.find(({ chainId }) => chainId === currentChainId)?.name ||
+      "Ethereum Goerli"
+  );
+  useEffect(() => {
+    const chainName = supportedChains.find(
+      ({ chainId }) => chainId === currentChainId
+    )?.name;
+    if (chainName) {
+      setChainName(chainName);
+    }
+  }, [currentChainId]);
+
   return (
     <Menu>
-      <MenuButton as={Button} rightIcon={<ChevronDownIcon />} width="130px">
-        {startCase(chain)}
+      <MenuButton as={Button} rightIcon={<ChevronDownIcon />} width="200px">
+        {chainName}
       </MenuButton>
       <MenuList>
-        {Object.values(EvmChain).map((chain) => (
+        {supportedChains.map(({ name, chainId }) => (
           <MenuItem
-            key={chain}
+            key={chainId}
             pl={5}
             color="gray.700"
             onClick={() => {
-              if (switchChain) {
-                switchChain(chain);
-              }
+              bloctoSDK.ethereum
+                .request({
+                  method: "wallet_switchEthereumChain",
+                  params: [{ chainId }],
+                })
+                .then(() => {
+                  setChainName(name);
+                });
             }}
           >
-            {startCase(chain)}
+            {name}
           </MenuItem>
         ))}
       </MenuList>

@@ -11,6 +11,7 @@ import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import { Context } from "../context/Context";
 import { formatAddress } from "../utils/formatAddress";
 import { ArrowForwardIcon, ChevronDownIcon, CopyIcon } from "@chakra-ui/icons";
+import { OtherChain } from "../types/ChainTypes";
 
 const styles = {
   d: "flex",
@@ -32,7 +33,7 @@ const styles = {
 };
 
 const LoginButton = (): ReactJSXElement => {
-  const { address, login, logout } = useContext(Context);
+  const { address, login, logout, chain } = useContext(Context);
   const toast = useToast();
 
   const copyAddress = useCallback(() => {
@@ -42,6 +43,10 @@ const LoginButton = (): ReactJSXElement => {
         toast({ title: "Address copied!", status: "success", duration: 2000 })
       );
   }, [address, toast]);
+
+  if (chain === OtherChain.Ethereum) {
+    return <></>;
+  }
 
   return address ? (
     <Menu>
