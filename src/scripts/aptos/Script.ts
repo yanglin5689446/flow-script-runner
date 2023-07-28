@@ -24,7 +24,9 @@ export const transferTokenScript = {
         .map((arg: any) => arg.value);
       const normalArgs = args
         .filter((arg: any) => arg.type !== "type_arg")
-        .map((arg: any) => arg.value);
+        .map((arg: any) =>
+          arg.type === AptosArgTypes.Array ? JSON.parse(arg.value) : arg.value
+        );
       const { bytecode } = scriptInfo;
       const abi = Object.keys(scriptAbi).reduce<Record<string, any>>(
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

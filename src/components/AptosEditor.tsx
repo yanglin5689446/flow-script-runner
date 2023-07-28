@@ -34,6 +34,8 @@ const formatTransactionArgs = (args: Arg[] | undefined) => {
           ? +currentValue.value
           : currentValue.type === AptosArgTypes.Bool && currentValue.value
           ? JSON.parse(currentValue.value.toLowerCase())
+          : currentValue.type === AptosArgTypes.Array && currentValue.value
+          ? JSON.parse(currentValue.value)
           : currentValue.value;
     }
     return initial;
