@@ -61,7 +61,7 @@ const SignTypedDataV3Editor = ({
 }): ReactJSXElement => {
   const { chainId } = useEthereum();
   const [domain, setDomain] = useState<string[][]>([
-    ["chainId", chainId || "0x5"],
+    ["chainId", Number(chainId).toString() || "5"],
     ["name", "Ether Mail"],
     ["version", "1"],
     ["verifyingContract", "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"],
@@ -112,7 +112,7 @@ const SignTypedDataV3Editor = ({
       const chainIdIndex = prev.findIndex((item) => item[0] === "chainId");
       if (chainIdIndex !== -1) {
         const newArray = [...prev];
-        newArray[chainIdIndex][1] = chainId || "0x5";
+        newArray[chainIdIndex][1] = Number(chainId).toString() || "5";
         return newArray;
       }
       return prev;
@@ -139,7 +139,7 @@ const SignTypedDataV4Editor = ({
 }): ReactJSXElement => {
   const { chainId } = useEthereum();
   const [domain, setDomain] = useState<string[][]>([
-    ["chainId", chainId || "0x5"],
+    ["chainId", Number(chainId).toString() || "5"],
     ["name", "Ether Mail"],
     ["version", "1"],
     ["verifyingContract", "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"],
@@ -196,7 +196,7 @@ const SignTypedDataV4Editor = ({
       const chainIdIndex = prev.findIndex((item) => item[0] === "chainId");
       if (chainIdIndex !== -1) {
         const newArray = [...prev];
-        newArray[chainIdIndex][1] = chainId || "0x5";
+        newArray[chainIdIndex][1] = Number(chainId).toString() || "5";
         return newArray;
       }
       return prev;
