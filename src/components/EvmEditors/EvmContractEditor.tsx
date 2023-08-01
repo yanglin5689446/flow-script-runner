@@ -64,13 +64,13 @@ const EvmContractEditor = ({
 
   useEffect(() => {
     if (account) {
-      if (!contractAbi) return;
-      const contract = new web3.eth.Contract(
-        JSON.parse(contractAbi),
-        contractAddress
-      );
+      if (!contractAbi || !contractAddress) return;
       let data;
       try {
+        const contract = new web3.eth.Contract(
+          JSON.parse(contractAbi),
+          contractAddress
+        );
         data = contract.methods[methodName](...methodArgs).encodeABI();
       } catch (e) {
         console.log(e);

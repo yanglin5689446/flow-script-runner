@@ -22,6 +22,38 @@ function parseJsonString(str: string) {
   }
 }
 
+const EthSignEditor = ({
+  account,
+  setRequestObject,
+}: {
+  account: string | null;
+  setRequestObject: Dispatch<
+    SetStateAction<EthereumTypes.EIP1193RequestPayload | undefined>
+  >;
+}): ReactJSXElement => {
+  const [message, setMessage] = useState<string>("test");
+
+  useEffect(() => {
+    setRequestObject({
+      method: "eth_sign",
+      params: [account, "0x" + Buffer.from(message).toString("hex")],
+    });
+  }, [message, account, setRequestObject]);
+
+  return (
+    <Flex my="20px" alignItems="center">
+      <Box mx="10px">Message:</Box>
+      <Textarea
+        rows={1}
+        value={message}
+        onChange={(e) => {
+          setMessage(e.target.value);
+        }}
+      />
+    </Flex>
+  );
+};
+
 const PersonalSignEditor = ({
   account,
   setRequestObject,
@@ -244,7 +276,6 @@ const EvmSignEditor = ({
         variant="soft-rounded"
         colorScheme="green"
         isLazy={true}
-        isFitted={true}
         onChange={() => {
           setRequestObject({
             method,
@@ -255,8 +286,8 @@ const EvmSignEditor = ({
         <Box fontWeight="bold" my="10px">
           Method
         </Box>
-        <TabList>
-          <Tab>PersonalSign</Tab>
+        <TabList flexWrap="wrap">
+          <Tab>personal_sign</Tab>
           <Tab
             onClick={() => {
               setMethod("eth_signTypedData_v3");
@@ -270,6 +301,13 @@ const EvmSignEditor = ({
             }}
           >
             signTypedData_v4
+          </Tab>
+          <Tab
+            onClick={() => {
+              setMethod("eth_sign");
+            }}
+          >
+            eth_sign
           </Tab>
         </TabList>
 
@@ -285,6 +323,12 @@ const EvmSignEditor = ({
           </TabPanel>
           <TabPanel p="0">
             <SignTypedDataV4Editor setParam={setParam} />
+          </TabPanel>
+          <TabPanel p="0">
+            <EthSignEditor
+              account={account}
+              setRequestObject={setRequestObject}
+            />
           </TabPanel>
         </TabPanels>
       </Tabs>
