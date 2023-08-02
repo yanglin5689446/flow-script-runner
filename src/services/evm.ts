@@ -126,15 +126,23 @@ export const useEthereum = (): {
     bloctoSDK.ethereum.chainId
   );
   useEffect(() => {
-    bloctoSDK.ethereum.on("accountsChanged", (accounts) => {
+    const handleAccountsChanged = (accounts: string[]) => {
       setAccount(accounts[0]);
-    });
-    bloctoSDK.ethereum.on("chainChanged", (chainId) => {
+    };
+    const handleChainChanged = (chainId: string) => {
       setChainId(chainId);
-    });
-    bloctoSDK.ethereum.on("disconnect", () => {
+    };
+    const handleDisconnect = () => {
       setAccount(null);
-    });
+    };
+    bloctoSDK.ethereum.on("accountsChanged", handleAccountsChanged);
+    bloctoSDK.ethereum.on("chainChanged", handleChainChanged);
+    bloctoSDK.ethereum.on("disconnect", handleDisconnect);
+    return () => {
+      bloctoSDK.ethereum.off("accountsChanged", handleAccountsChanged);
+      bloctoSDK.ethereum.off("chainChanged", handleChainChanged);
+      bloctoSDK.ethereum.off("disconnect", handleDisconnect);
+    };
   }, []);
 
   return {
