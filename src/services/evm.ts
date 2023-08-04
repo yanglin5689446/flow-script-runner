@@ -18,67 +18,79 @@ export const supportedChains = [
     name: "Ethereum Mainnet",
     chainId: "0x1",
     rpcUrls: ["https://mainnet.infura.io/v3/ef5a5728e2354955b562d2ffa4ae5305"],
+    environment: "mainnet",
   },
   {
     name: "Ethereum Goerli",
     chainId: "0x5",
     rpcUrls: ["https://rpc.ankr.com/eth_goerli"],
     faucet: "https://goerlifaucet.com/",
+    environment: "testnet",
   },
   {
     name: "Arbitrum Mainnet",
     chainId: "0xa4b1",
     rpcUrls: ["https://arb1.arbitrum.io/rpc"],
+    environment: "mainnet",
   },
   {
     name: "Arbitrum Testnet",
     chainId: "0x66eed",
     rpcUrls: ["https://goerli-rollup.arbitrum.io/rpc"],
     faucet: "https://faucet.triangleplatform.com/arbitrum/goerli",
+    environment: "testnet",
   },
   {
     name: "BSC",
     chainId: "0x38",
     rpcUrls: ["https://bsc-dataseed.binance.org/"],
+    environment: "mainnet",
   },
   {
     name: "BSC Testnet",
     chainId: "0x61",
     rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
     faucet: "https://testnet.binance.org/faucet-smart",
+    environment: "testnet",
   },
   {
     name: "Avalanche Mainnet",
     chainId: "0xa86a",
     rpcUrls: ["https://rpc.ankr.com/avalanche"],
+    environment: "mainnet",
   },
   {
     name: "Avalanche Testnet",
     chainId: "0xa869",
     rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
     faucet: "https://faucet.avax-test.network/",
+    environment: "testnet",
   },
   {
     name: "Polygon Mainnet",
     chainId: "0x89",
     rpcUrls: ["https://polygon-rpc.com"],
+    environment: "mainnet",
   },
   {
     name: "Polygon Testnet",
     chainId: "0x13881",
     rpcUrls: ["https://rpc-mumbai.maticvigil.com/"],
     faucet: "https://faucet.polygon.technology/",
+    environment: "testnet",
   },
   {
     name: "Optimism Mainnet",
     chainId: "0x000a",
     rpcUrls: ["https://mainnet.optimism.io"],
+    environment: "mainnet",
   },
   {
     name: "Optimism Testnet",
     chainId: "0x01a4",
     rpcUrls: ["https://goerli.optimism.io"],
     faucet: "https://faucet.paradigm.xyz/",
+    environment: "testnet",
   },
 ];
 
@@ -114,15 +126,23 @@ export const useEthereum = (): {
     bloctoSDK.ethereum.chainId
   );
   useEffect(() => {
-    bloctoSDK.ethereum.on("accountsChanged", (accounts) => {
+    const handleAccountsChanged = (accounts: string[]) => {
       setAccount(accounts[0]);
-    });
-    bloctoSDK.ethereum.on("chainChanged", (chainId) => {
+    };
+    const handleChainChanged = (chainId: string) => {
       setChainId(chainId);
-    });
-    bloctoSDK.ethereum.on("disconnect", () => {
+    };
+    const handleDisconnect = () => {
       setAccount(null);
-    });
+    };
+    bloctoSDK.ethereum.on("accountsChanged", handleAccountsChanged);
+    bloctoSDK.ethereum.on("chainChanged", handleChainChanged);
+    bloctoSDK.ethereum.on("disconnect", handleDisconnect);
+    return () => {
+      bloctoSDK.ethereum.off("accountsChanged", handleAccountsChanged);
+      bloctoSDK.ethereum.off("chainChanged", handleChainChanged);
+      bloctoSDK.ethereum.off("disconnect", handleDisconnect);
+    };
   }, []);
 
   return {

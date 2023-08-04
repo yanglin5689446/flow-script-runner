@@ -16,8 +16,11 @@ import {
   StatHelpText,
   Alert,
   AlertIcon,
+  Tag,
+  TagLabel,
+  TagLeftIcon,
 } from "@chakra-ui/react";
-import { CopyIcon } from "@chakra-ui/icons";
+import { CopyIcon, AddIcon } from "@chakra-ui/icons";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import EvmChainSelect from "./EvmChainSelect";
 import EvmRequestEditor from "./EvmEditors/EvmRequestEditor";
@@ -131,6 +134,13 @@ const EvmEditor = (): ReactJSXElement => {
     return supportedChains.find((chain) => chain.chainId === chainId)?.faucet;
   }, [chainId]);
 
+  const isMainnet = useMemo(() => {
+    return (
+      supportedChains.find((chain) => chain.chainId === chainId)
+        ?.environment === "mainnet"
+    );
+  }, [chainId]);
+
   useEffect(() => {
     setResponseObject(null);
     setResponseVerify(null);
@@ -162,24 +172,32 @@ const EvmEditor = (): ReactJSXElement => {
             <StatNumber>
               {chainId}
               <Box
+                display="inline-flex"
                 as="span"
                 ml="5px"
                 fontSize="12px"
                 fontWeight="regular"
                 color="gray.800"
+                alignItems="flex-end"
+                gap="5px"
               >
                 {parseInt(chainId || "5", 16)}
                 {faucet && (
-                  <Box
+                  <Tag
                     as="a"
                     href={faucet}
-                    mx="7px"
-                    color="blue"
-                    fontSize="14px"
-                    textDecoration="underline"
+                    size="sm"
+                    colorScheme="blue"
+                    variant="subtle"
                   >
-                    Faucet
-                  </Box>
+                    <TagLeftIcon boxSize="10px" as={AddIcon} />
+                    <TagLabel>Faucet</TagLabel>
+                  </Tag>
+                )}
+                {isMainnet && (
+                  <Tag size="sm" colorScheme="red" variant="subtle">
+                    Mainnet
+                  </Tag>
                 )}
               </Box>
             </StatNumber>

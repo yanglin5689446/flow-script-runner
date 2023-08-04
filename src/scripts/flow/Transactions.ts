@@ -201,7 +201,7 @@ transaction(amount: UFix64, to: Address) {
   shouldSign: true,
 };
 
-export const triggerError = {
+export const triggerMalicious = {
   type: ScriptTypes.TX,
   script: "",
   args: [],
