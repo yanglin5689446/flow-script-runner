@@ -2,6 +2,7 @@ import React, { useEffect, useState, Dispatch, SetStateAction } from "react";
 import { Box, Textarea, Grid } from "@chakra-ui/react";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import type { EthereumTypes } from "@blocto/sdk";
+import { web3 } from "../../services/evm";
 
 const EvmSendEditor = ({
   setRequestObject,
@@ -30,7 +31,7 @@ const EvmSendEditor = ({
         sendObj.to = toString;
       }
       if (valueString) {
-        sendObj.value = "0x" + Number(valueString).toString(16);
+        sendObj.value = "0x" + web3.utils.toHex(valueString);
       }
       if (dataString) {
         sendObj.data = dataString;
