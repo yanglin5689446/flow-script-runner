@@ -31,7 +31,7 @@ const EvmSendEditor = ({
         sendObj.to = toString;
       }
       if (valueString) {
-        sendObj.value = "0x" + web3.utils.toHex(valueString);
+        sendObj.value = web3.utils.toHex(valueString);
       }
       if (dataString) {
         sendObj.data = dataString;
