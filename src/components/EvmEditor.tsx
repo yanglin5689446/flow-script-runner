@@ -167,7 +167,7 @@ const EvmEditor = (): ReactJSXElement => {
           flexShrink={1}
           gap="10px"
         >
-          <Stat maxWidth="220px">
+          <Stat maxWidth="230px">
             <StatLabel>Current ChainId</StatLabel>
             <StatNumber>
               {chainId}
