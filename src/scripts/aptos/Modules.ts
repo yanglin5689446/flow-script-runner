@@ -1,127 +1,151 @@
 import { ContractInfos } from "../../contracts";
 import { ChainServices } from "../../services";
-import { Chains, ChainsType, OtherChain } from "../../types/ChainTypes";
-import ScriptTypes, { AptosArgTypes, PerInfo } from "../../types/ScriptTypes";
+import { Chains } from "../../types/ChainTypes";
+import ScriptTypes, { PerInfo, Arg } from "../../types/ScriptTypes";
+import { MODULE_ARGS } from "./ModuleArgs";
+
+interface EntryFunctionTx {
+  arguments: Arg[] | undefined;
+  function: string;
+  type: string;
+  type_arguments: any[] | undefined;
+}
 
 export const transferAptosCoin = {
   type: ScriptTypes.CONTRACT,
   script: "",
   description: "Transfer Aptos coin to other address",
   method: (
-    contractInfo: {
-      moduleName: {
-        comment: string;
-        value: string;
-      };
-      method: {
-        comment: string;
-        value: string;
-      };
-    },
-    args: Record<string, any>
+    transaction: EntryFunctionTx
   ): Promise<any | { is_init: number; number: number }> => {
-    return new Promise(async (resolve, reject) => {
-      const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
-      const typeArgs = args
-        .filter((arg: any) => arg.type === "type_arg")
-        .map((arg: any) => arg.value);
-      const normalArgs = args
-        .filter((arg: any) => arg.type !== "type_arg")
-        .map((arg: any) => arg.value);
-      const { moduleName, method } = contractInfo;
-      const funcName = `${moduleName.value}::${method.value}`;
-      const transaction = {
-        arguments: normalArgs,
-        function: funcName,
-        type: "entry_function_payload",
-        type_arguments: typeArgs,
-      };
-
-      try {
-        const result = await aptos.signAndSubmitTransaction(transaction);
-        resolve(result.hash);
-      } catch (error) {
-        reject(error);
-      }
-    });
+    const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
+    return aptos.signAndSubmitTransaction(transaction);
   },
-  contractInfo: (chain: ChainsType): Record<string, PerInfo> => ({
+  contractInfo: (): Record<string, PerInfo> => ({
     moduleName: {
       comment: "module name",
-      value: ContractInfos[chain as OtherChain.Aptos].moduleName,
+      value: "0x1::coin",
     },
     method: {
       comment: "method",
       value: "transfer",
     },
   }),
-  args: [
-    {
-      type: AptosArgTypes.TypeArg,
-      comment: "coin type",
-      value: "0x1::aptos_coin::AptosCoin",
-    },
-    { type: AptosArgTypes.Address, comment: "recipient", name: "recipient" },
-    { type: AptosArgTypes.Number, comment: "value", name: "value" },
-  ],
+  args: MODULE_ARGS["transferAptosCoin"],
 };
+
+export const sendArguments = {
+  type: ScriptTypes.CONTRACT,
+  script: "",
+  description:
+    "Send all kinds of arguments to the contract to see if it works as expected",
+  method: (
+    transaction: EntryFunctionTx
+  ): Promise<any | { is_init: number; number: number }> => {
+    const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
+    return aptos.signAndSubmitTransaction(transaction);
+  },
+  contractInfo: (): Record<string, PerInfo> => ({
+    moduleName: {
+      comment: "module name",
+      value: `${ContractInfos[Chains.Aptos].address}::hello_world`,
+    },
+    method: {
+      comment: "method",
+      value: "doge_is_dope",
+    },
+  }),
+  args: MODULE_ARGS["sendArguments"],
+};
+
+export const mintNFT = {
+  type: ScriptTypes.CONTRACT,
+  script: "",
+  description: "Mint Aptos v2 NFT",
+  method: (
+    transaction: EntryFunctionTx
+  ): Promise<any | { is_init: number; number: number }> => {
+    const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
+    return aptos.signAndSubmitTransaction(transaction);
+  },
+  contractInfo: (): Record<string, PerInfo> => ({
+    moduleName: {
+      comment: "module name",
+      value: `${ContractInfos[Chains.Aptos].address}::hero`,
+    },
+    method: {
+      comment: "method",
+      value: "mint",
+    },
+  }),
+  args: MODULE_ARGS["mintNFT"],
+};
+
+export const sendTxWithNFT = {
+  type: ScriptTypes.CONTRACT,
+  script: "",
+  description: "Send tx with object arguments",
+  method: (
+    transaction: EntryFunctionTx
+  ): Promise<any | { is_init: number; number: number }> => {
+    const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
+    return aptos.signAndSubmitTransaction(transaction);
+  },
+  contractInfo: (): Record<string, PerInfo> => ({
+    moduleName: {
+      comment: "module name",
+      value: `${ContractInfos[Chains.Aptos].address}::hero`,
+    },
+    method: {
+      comment: "method",
+      value: "summon_hero",
+    },
+  }),
+  args: MODULE_ARGS["sendTxWithNFT"],
+};
+
+export const logGenerics = {
+  type: ScriptTypes.CONTRACT,
+  script: "",
+  description: "Send tx with generic object arguments",
+  method: (
+    transaction: EntryFunctionTx
+  ): Promise<any | { is_init: number; number: number }> => {
+    const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
+    return aptos.signAndSubmitTransaction(transaction);
+  },
+  contractInfo: (): Record<string, PerInfo> => ({
+    moduleName: {
+      comment: "module name",
+      value: `${ContractInfos[Chains.Aptos].address}::hello_world`,
+    },
+    method: {
+      comment: "method",
+      value: "log_generics",
+    },
+  }),
+  args: MODULE_ARGS["logGenerics"],
+};
+
 export const triggerError = {
   type: ScriptTypes.CONTRACT,
   script: "",
   description: "Trigger an error with the contract method",
   method: (
-    contractInfo: {
-      moduleName: {
-        comment: string;
-        value: string;
-      };
-      method: {
-        comment: string;
-        value: string;
-      };
-    },
-    args: Record<string, any>
+    transaction: EntryFunctionTx
   ): Promise<any | { is_init: number; number: number }> => {
-    return new Promise(async (resolve, reject) => {
-      const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
-      const typeArgs = args
-        .filter((arg: any) => arg.type === "type_arg")
-        .map((arg: any) => arg.value);
-      const normalArgs = args
-        .filter((arg: any) => arg.type !== "type_arg")
-        .map((arg: any) => arg.value);
-      const { moduleName, method } = contractInfo;
-      const funcName = `0x9b5d846cbf4791539914a41d8f3067937009421bf2b33ca499612b48f5aa1dd1::${moduleName.value}::${method.value}`;
-      const transaction = {
-        arguments: normalArgs,
-        function: funcName,
-        type: "entry_function_payload",
-        type_arguments: typeArgs,
-      };
-
-      try {
-        const result = await aptos.signAndSubmitTransaction(transaction);
-        resolve(result.hash);
-      } catch (error) {
-        reject(error);
-      }
-    });
+    const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
+    return aptos.signAndSubmitTransaction(transaction);
   },
   contractInfo: (): Record<string, PerInfo> => ({
     moduleName: {
       comment: "module name",
-      value: "test",
+      value: `${ContractInfos[Chains.Aptos].address}::hello_world`,
     },
     method: {
       comment: "method",
       value: "arithmetic_error_entry",
     },
   }),
-  args: [
-    {
-      type: AptosArgTypes.Number,
-      comment: "Input below 100 can trigger an error",
-      name: "value",
-    },
-  ],
+  args: MODULE_ARGS["triggerError"],
 };
