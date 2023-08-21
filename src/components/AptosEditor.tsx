@@ -26,17 +26,36 @@ const MenuGroups = [
   { title: "Resource", templates: AptosResourceTemplate },
 ];
 
-const formatTransactionArgs = (args: Arg[] | undefined) => {
+const NUMBERS = [AptosArgTypes.U8, AptosArgTypes.U16, AptosArgTypes.U32];
+
+const formatArg = (type: AptosArgTypes, value: any): any => {
+  if (NUMBERS.includes(type)) {
+    return +value;
+  }
+
+  if (type === AptosArgTypes.Bool && value) {
+    return JSON.parse(value.toLowerCase());
+  }
+
+  if (
+    (type === AptosArgTypes.Array || type === AptosArgTypes.Object) &&
+    value
+  ) {
+    try {
+      return JSON.parse(value);
+    } catch (error) {}
+  }
+
+  return value;
+};
+
+const formatSigningArgs = (args: Arg[] | undefined) => {
   return args?.reduce((initial: { [key: string]: any }, currentValue: Arg) => {
     if (currentValue.name) {
-      initial[currentValue.name] =
-        currentValue.type === AptosArgTypes.Number
-          ? +currentValue.value
-          : currentValue.type === AptosArgTypes.Bool && currentValue.value
-          ? JSON.parse(currentValue.value.toLowerCase())
-          : currentValue.type === AptosArgTypes.Array && currentValue.value
-          ? JSON.parse(currentValue.value)
-          : currentValue.value;
+      initial[currentValue.name] = formatArg(
+        currentValue.type,
+        currentValue.value
+      );
     }
     return initial;
   }, {}) as AptosTypes.SignMessagePayload;
@@ -60,7 +79,7 @@ const AptosEditor = (): ReactJSXElement => {
   const handleSignMessage = useCallback((args) => {
     return new Promise<AptosTypes.SignMessageResponse>((resolve) => {
       const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
-      resolve(aptos.signMessage(formatTransactionArgs(args)));
+      resolve(aptos.signMessage(formatSigningArgs(args)));
     });
   }, []);
 
@@ -71,8 +90,24 @@ const AptosEditor = (): ReactJSXElement => {
       method?: (...param: any[]) => Promise<any>
     ) => {
       return new Promise<string>((resolve, reject) => {
-        method?.(contractInfo, args)
-          .then((hash) => resolve(hash))
+        const typeArgs = args
+          ?.filter((arg: any) => arg.type === "type_arg")
+          .map((arg: any) => arg.value);
+        const normalArgs = args
+          ?.filter((arg: any) => arg.type !== "type_arg")
+          .map((arg: any) => formatArg(arg.type, arg.value));
+
+        const { moduleName, method: moduleMethod } = contractInfo;
+        const funcName = `${moduleName.value}::${moduleMethod.value}`;
+        const transaction = {
+          arguments: normalArgs,
+          function: funcName,
+          type: "entry_function_payload",
+          type_arguments: typeArgs,
+        };
+
+        method?.(transaction)
+          .then(({ hash }) => resolve(hash))
           .catch((error) => {
             reject(error);
             toast({
@@ -92,12 +127,43 @@ const AptosEditor = (): ReactJSXElement => {
       script: string,
       args?: Arg[],
       method?: (...param: any[]) => Promise<any>,
-      scriptInfo?: Record<string, PerInfo>,
+      scriptInfo?: Record<"bytecode", PerInfo>,
       scriptAbi?: Record<AptosScriptAbiKeys, PerScriptAbi>
     ) => {
       return new Promise<string>((resolve, reject) => {
-        method?.(scriptInfo, args, scriptAbi)
-          .then((hash) => resolve(hash))
+        const typeArgs = args
+          ?.filter((arg: any) => arg.type === "type_arg")
+          .map((arg: any) => arg.value);
+        const normalArgs = args
+          ?.filter((arg: any) => arg.type !== "type_arg")
+          .map((arg: any) => formatArg(arg.type, arg.value));
+
+        if (!scriptInfo || !scriptAbi) {
+          return reject("scriptInfo or scriptAbi is undefined");
+        }
+
+        const { bytecode } = scriptInfo;
+        const abi = Object.keys(scriptAbi).reduce<Record<string, any>>(
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          (initial, currentValue: AptosScriptAbiKeys) => {
+            initial[currentValue] = scriptAbi[currentValue].format
+              ? scriptAbi[currentValue].format?.(scriptAbi[currentValue].value)
+              : scriptAbi[currentValue].value;
+            return initial;
+          },
+          {}
+        );
+
+        const transaction = {
+          type: "script_payload",
+          code: { bytecode: bytecode.value, abi },
+          type_arguments: typeArgs,
+          arguments: normalArgs,
+        };
+
+        method?.(transaction)
+          .then(({ hash }) => resolve(hash))
           .catch((error) => {
             reject(error);
             toast({

@@ -6,7 +6,7 @@ const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
 
 type ContractInfosType = {
   [OtherChain.Solana]: { programId: string; accountPubKey: string };
-  [OtherChain.Aptos]: { moduleName: string };
+  [OtherChain.Aptos]: { address: string };
 } & {
   [key in EvmChainId]: { abi: AbiItem[] | AbiItem; address: string };
 };
@@ -69,6 +69,7 @@ export const ContractInfos: ContractInfosType = {
       : "4AXy5YYCXpMapaVuzKkz25kVHzrdLDgKN3TiQvtf1Eu8",
   },
   [OtherChain.Aptos]: {
-    moduleName: "0x1::coin",
+    address:
+      "0x4282ed29feb89781cd4da44a5bb1d23ff7e31a9dd64536233792efe78b4a494d",
   },
 };

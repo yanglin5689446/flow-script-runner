@@ -26,10 +26,16 @@ export enum AptosArgTypes {
   TypeArg = "type_arg",
   Address = "address",
   String = "string",
-  Number = "number",
+  U8 = "u8",
+  U16 = "u16",
+  U32 = "u32",
+  U64 = "u64",
+  U128 = "u128",
+  U256 = "u256",
   Bool = "boolean",
   Bytes = "bytes",
-  Array = "array",
+  Array = "array  (vector)",
+  Object = "object",
 }
 
 export interface PerInfo {
