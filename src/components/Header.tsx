@@ -15,7 +15,6 @@ import { Chains } from "../types/ChainTypes";
 export const TabInfos = [
   { name: "Flow", chain: Chains.Flow },
   { name: "EVM", chain: Chains.Ethereum },
-  { name: "Solana", chain: Chains.Solana },
   { name: "Aptos", chain: Chains.Aptos },
 ];
 

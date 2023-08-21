@@ -1,6 +1,5 @@
 export enum OtherChain {
   Flow = "flow",
-  Solana = "solana",
   Aptos = "aptos",
   Ethereum = "ethereum",
 }

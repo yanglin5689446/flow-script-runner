@@ -2,10 +2,7 @@ import { AbiItem } from "web3-utils";
 import { OtherChain, EvmChainId } from "../types/ChainTypes";
 import valueDappAbi from "./valueDappAbi";
 
-const isMainnet = process.env.REACT_APP_NETWORK === "mainnet";
-
 type ContractInfosType = {
-  [OtherChain.Solana]: { programId: string; accountPubKey: string };
   [OtherChain.Aptos]: { address: string };
 } & {
   [key in EvmChainId]: { abi: AbiItem[] | AbiItem; address: string };
@@ -59,14 +56,6 @@ export const ContractInfos: ContractInfosType = {
   [EvmChainId.OptimismTestnet]: {
     abi: valueDappAbi,
     address: "0x009c403BdFaE357d82AAef2262a163287c30B739",
-  },
-  [OtherChain.Solana]: {
-    programId: isMainnet
-      ? "EN2Ln23fzm4qag1mHfx7FDJwDJog5u4SDgqRY256ZgFt"
-      : "G4YkbRN4nFQGEUg4SXzPsrManWzuk8bNq9JaMhXepnZ6",
-    accountPubKey: isMainnet
-      ? "EajAHVxAVvf4yNUu37ZEh8QS7Lk5bw9yahTGiTSL1Rwt"
-      : "4AXy5YYCXpMapaVuzKkz25kVHzrdLDgKN3TiQvtf1Eu8",
   },
   [OtherChain.Aptos]: {
     address:
