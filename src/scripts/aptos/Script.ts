@@ -72,7 +72,7 @@ export const transferTokenScript = {
   ],
 };
 
-export const sendArgumentsnScript = {
+export const sendArgumentsScript = {
   type: ScriptTypes.SCRIPT,
   script: "",
   description:
