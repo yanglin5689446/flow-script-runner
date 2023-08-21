@@ -1,57 +1,22 @@
 import { ChainServices } from "../../services";
 import { Chains } from "../../types/ChainTypes";
-import ScriptTypes, {
-  AptosArgTypes,
-  AptosScriptAbiKeys,
-  Arg,
-  PerInfo,
-  PerScriptAbi,
-} from "../../types/ScriptTypes";
+import ScriptTypes, { AptosArgTypes } from "../../types/ScriptTypes";
 
 export const transferTokenScript = {
   type: ScriptTypes.SCRIPT,
   script: "",
   description: "Transfer token by sending a script payload transaction",
-  method: (
-    scriptInfo: { bytecode: PerInfo },
-    args: Arg[],
-    scriptAbi: Record<AptosScriptAbiKeys, PerScriptAbi>
-  ): Promise<any | { is_init: number; number: number }> => {
-    return new Promise(async (resolve, reject) => {
-      const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
-      const typeArgs = args
-        .filter((arg: any) => arg.type === "type_arg")
-        .map((arg: any) => arg.value);
-      const normalArgs = args
-        .filter((arg: any) => arg.type !== "type_arg")
-        .map((arg: any) =>
-          arg.type === AptosArgTypes.Array ? JSON.parse(arg.value) : arg.value
-        );
-      const { bytecode } = scriptInfo;
-      const abi = Object.keys(scriptAbi).reduce<Record<string, any>>(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        (initial, currentValue: AptosScriptAbiKeys) => {
-          initial[currentValue] = scriptAbi[currentValue].format
-            ? scriptAbi[currentValue].format?.(scriptAbi[currentValue].value)
-            : scriptAbi[currentValue].value;
-          return initial;
-        },
-        {}
-      );
-      const transaction = {
-        type: "script_payload",
-        code: { bytecode: bytecode.value, abi },
-        type_arguments: typeArgs,
-        arguments: normalArgs,
-      };
-      try {
-        const result = await aptos.signAndSubmitTransaction(transaction);
-        resolve(result.hash);
-      } catch (error) {
-        reject(error);
-      }
-    });
+  method: (transaction: {
+    type: string;
+    code: {
+      bytecode: string | undefined;
+      abi: string;
+    };
+    type_arguments: any[] | undefined;
+    arguments: any[] | undefined;
+  }): Promise<any | { is_init: number; number: number }> => {
+    const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
+    return aptos.signAndSubmitTransaction(transaction);
   },
   scriptInfo: {
     bytecode: {
@@ -112,46 +77,17 @@ export const sendArgumentsnScript = {
   script: "",
   description:
     "Send all kinds of arguments to the contract by sending a script payload transaction",
-  method: (
-    scriptInfo: { bytecode: PerInfo },
-    args: Arg[],
-    scriptAbi: Record<AptosScriptAbiKeys, PerScriptAbi>
-  ): Promise<any | { is_init: number; number: number }> => {
-    return new Promise(async (resolve, reject) => {
-      const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
-      const typeArgs = args
-        .filter((arg: any) => arg.type === "type_arg")
-        .map((arg: any) => arg.value);
-      const normalArgs = args
-        .filter((arg: any) => arg.type !== "type_arg")
-        .map((arg: any) =>
-          arg.type === AptosArgTypes.Array ? JSON.parse(arg.value) : arg.value
-        );
-      const { bytecode } = scriptInfo;
-      const abi = Object.keys(scriptAbi).reduce<Record<string, any>>(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        (initial, currentValue: AptosScriptAbiKeys) => {
-          initial[currentValue] = scriptAbi[currentValue].format
-            ? scriptAbi[currentValue].format?.(scriptAbi[currentValue].value)
-            : scriptAbi[currentValue].value;
-          return initial;
-        },
-        {}
-      );
-      const transaction = {
-        type: "script_payload",
-        code: { bytecode: bytecode.value, abi },
-        type_arguments: typeArgs,
-        arguments: normalArgs,
-      };
-      try {
-        const result = await aptos.signAndSubmitTransaction(transaction);
-        resolve(result.hash);
-      } catch (error) {
-        reject(error);
-      }
-    });
+  method: (transaction: {
+    type: string;
+    code: {
+      bytecode: string | undefined;
+      abi: string;
+    };
+    type_arguments: any[] | undefined;
+    arguments: any[] | undefined;
+  }): Promise<any | { is_init: number; number: number }> => {
+    const aptos = ChainServices[Chains.Aptos]?.bloctoSDK?.aptos;
+    return aptos.signAndSubmitTransaction(transaction);
   },
   scriptInfo: {
     bytecode: {

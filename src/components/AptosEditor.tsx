@@ -127,12 +127,43 @@ const AptosEditor = (): ReactJSXElement => {
       script: string,
       args?: Arg[],
       method?: (...param: any[]) => Promise<any>,
-      scriptInfo?: Record<string, PerInfo>,
+      scriptInfo?: Record<"bytecode", PerInfo>,
       scriptAbi?: Record<AptosScriptAbiKeys, PerScriptAbi>
     ) => {
       return new Promise<string>((resolve, reject) => {
-        method?.(scriptInfo, args, scriptAbi)
-          .then((hash) => resolve(hash))
+        const typeArgs = args
+          ?.filter((arg: any) => arg.type === "type_arg")
+          .map((arg: any) => arg.value);
+        const normalArgs = args
+          ?.filter((arg: any) => arg.type !== "type_arg")
+          .map((arg: any) => formatArg(arg.type, arg.value));
+
+        if (!scriptInfo || !scriptAbi) {
+          return reject("scriptInfo or scriptAbi is undefined");
+        }
+
+        const { bytecode } = scriptInfo;
+        const abi = Object.keys(scriptAbi).reduce<Record<string, any>>(
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          (initial, currentValue: AptosScriptAbiKeys) => {
+            initial[currentValue] = scriptAbi[currentValue].format
+              ? scriptAbi[currentValue].format?.(scriptAbi[currentValue].value)
+              : scriptAbi[currentValue].value;
+            return initial;
+          },
+          {}
+        );
+
+        const transaction = {
+          type: "script_payload",
+          code: { bytecode: bytecode.value, abi },
+          type_arguments: typeArgs,
+          arguments: normalArgs,
+        };
+
+        method?.(transaction)
+          .then(({ hash }) => resolve(hash))
           .catch((error) => {
             reject(error);
             toast({

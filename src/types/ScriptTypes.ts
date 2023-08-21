@@ -34,7 +34,7 @@ export enum AptosArgTypes {
   U256 = "u256",
   Bool = "boolean",
   Bytes = "bytes",
-  Array = "array",
+  Array = "array  (vector)",
   Object = "object",
 }
 
