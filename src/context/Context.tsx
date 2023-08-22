@@ -56,10 +56,6 @@ const ContextProvider: React.FC = ({ children }) => {
       }
       return;
     }
-    if (chain === Chains.Solana) {
-      const { bloctoSDK } = ChainServices[chain];
-      await bloctoSDK?.solana?.request({ method: "disconnect" });
-    }
     if (chain === Chains.Aptos) {
       const { bloctoSDK } = ChainServices[chain];
       await bloctoSDK?.aptos.disconnect();
@@ -79,10 +75,7 @@ const ContextProvider: React.FC = ({ children }) => {
     }
 
     let accounts = [];
-    if (chain === Chains.Solana) {
-      const { bloctoSDK } = ChainServices[chain];
-      accounts = await bloctoSDK?.solana?.request({ method: "connect" });
-    } else if (chain === Chains.Aptos) {
+    if (chain === Chains.Aptos) {
       const { bloctoSDK } = ChainServices[chain];
       const result = await bloctoSDK?.aptos?.connect();
       accounts = [result.address];

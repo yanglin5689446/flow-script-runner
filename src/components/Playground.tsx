@@ -5,7 +5,6 @@ import { Chains } from "../types/ChainTypes";
 import EvmEditor from "./EvmEditor";
 import FlowEditor from "./FlowEditor";
 import AptosEditor from "./AptosEditor";
-import SolanaEditor from "./SolanaEditor";
 
 const Playground = (): ReactJSXElement => {
   const { chain } = useContext(Context);
@@ -16,10 +15,6 @@ const Playground = (): ReactJSXElement => {
 
   if (chain === Chains.Aptos) {
     return <AptosEditor />;
-  }
-
-  if (chain === Chains.Solana) {
-    return <SolanaEditor />;
   }
 
   return <EvmEditor />;
