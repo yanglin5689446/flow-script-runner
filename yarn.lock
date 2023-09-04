@@ -1311,10 +1311,10 @@
     "@onflow/util-template" "^1.0.1"
     "@onflow/util-uid" "^1.0.1"
 
-"@blocto/sdk@^0.6.0-beta.7":
-  version "0.6.0-beta.7"
-  resolved "https://registry.yarnpkg.com/@blocto/sdk/-/sdk-0.6.0-beta.7.tgz#15068940730d0b8c637a896378335dc5a9801aec"
-  integrity sha512-zqn0B78U998YnH1/eAIuIzr53KyWlfxA2sYQpDBVy3053x6ahqJJfFJwXuBhr3l3CA98YdW4qXMtWxF1q1qljA==
+"@blocto/sdk@^0.7.0-beta.1":
+  version "0.7.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@blocto/sdk/-/sdk-0.7.0-beta.1.tgz#fd264c6c390d14b2878e61598c46400fc510724e"
+  integrity sha512-TelgLHrN6W+xN8/gG/Ka65nknFyqidl+zabnAQsJVEjIQ7bQZ1Vng4H5eAujywP4lC2fjghxrlAcYxfDFp1Zzg==
   dependencies:
     buffer "^6.0.3"
     eip1193-provider "^1.0.1"
