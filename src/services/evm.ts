@@ -81,13 +81,13 @@ export const supportedChains = [
   },
   {
     name: "Optimism Mainnet",
-    chainId: "0x000a",
+    chainId: "0xa",
     rpcUrls: ["https://mainnet.optimism.io"],
     environment: "mainnet",
   },
   {
     name: "Optimism Testnet",
-    chainId: "0x01a4",
+    chainId: "0x1a4",
     rpcUrls: ["https://goerli.optimism.io"],
     faucet: "https://faucet.paradigm.xyz/",
     environment: "testnet",
