@@ -126,23 +126,24 @@ const EvmUserOpEditor = ({
           />
         </Box>
       ) : (
-        <Flex my="20px" alignItems="center">
-          <Box mx="10px">callData:</Box>
-          <Textarea
-            rows={2}
-            value={callData}
-            onChange={(e) => {
-              setCallData(e.target.value);
-            }}
+        <>
+          <Flex my="20px" alignItems="center">
+            <Box mx="10px">callData:</Box>
+            <Textarea
+              rows={2}
+              value={callData}
+              onChange={(e) => {
+                setCallData(e.target.value);
+              }}
+            />
+          </Flex>
+          <ParamEditor
+            title="Other Param"
+            params={otherParam}
+            setParams={setOtherParam}
           />
-        </Flex>
+        </>
       )}
-
-      <ParamEditor
-        title="Other Param"
-        params={otherParam}
-        setParams={setOtherParam}
-      />
     </Flex>
   );
 };
