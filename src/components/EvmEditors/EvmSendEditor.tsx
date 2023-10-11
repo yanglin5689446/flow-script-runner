@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Dispatch, SetStateAction } from "react";
+import React, { useEffect, useState, Dispatch } from "react";
 import { Box, Textarea, Grid } from "@chakra-ui/react";
 import { ReactJSXElement } from "@emotion/react/types/jsx-namespace";
 import type { EthereumTypes } from "@blocto/sdk";
@@ -9,7 +9,7 @@ const EvmSendEditor = ({
   account,
 }: {
   setRequestObject: Dispatch<
-    SetStateAction<EthereumTypes.EIP1193RequestPayload | undefined>
+    EthereumTypes.EIP1193RequestPayload["params"] | undefined
   >;
   account: string | null;
 }): ReactJSXElement => {
@@ -36,19 +36,9 @@ const EvmSendEditor = ({
       if (dataString) {
         sendObj.data = dataString;
       }
-      setRequestObject({
-        method: "eth_sendTransaction",
-        params: [sendObj],
-      });
+      setRequestObject([sendObj]);
     }
-  }, [
-    account,
-    fromString,
-    toString,
-    dataString,
-    valueString,
-    setRequestObject,
-  ]);
+  }, [account, fromString, toString, dataString, valueString]);
   useEffect(() => {
     setFrom(account || "");
   }, [account]);

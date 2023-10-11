@@ -8,11 +8,13 @@ interface IUserOperation {
   paymasterAndData?: string;
 }
 export interface IUserOperationTemplate {
+  id: string;
   name: string;
   userOpObj: IUserOperation;
 }
 
 export const sendTokens: IUserOperationTemplate = {
+  id: "sendTokens",
   name: "Send native token",
   userOpObj: {
     callData:
@@ -21,6 +23,7 @@ export const sendTokens: IUserOperationTemplate = {
 };
 
 export const transferErc20: IUserOperationTemplate = {
+  id: "transferErc20",
   name: "Transfer erc20 token",
   userOpObj: {
     callData:
@@ -29,6 +32,7 @@ export const transferErc20: IUserOperationTemplate = {
 };
 
 export const setValueWithCustomPaymaster: IUserOperationTemplate = {
+  id: "setValueWithCustomPaymaster",
   name: "Set value with custom paymaster",
   userOpObj: {
     callData:
@@ -39,9 +43,18 @@ export const setValueWithCustomPaymaster: IUserOperationTemplate = {
 };
 
 export const getNft: IUserOperationTemplate = {
+  id: "getNft",
   name: "Mint NFT",
   userOpObj: {
     callData:
       "b61d27f600000000000000000000000000005ea00ac477b1030ce78506496e8c2de24bf5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000084161ac21f000000000000000000000000fd8ec18d48ac1f46b600e231da07d1da8209ceef0000000000000000000000000000a26b00c1f0df003000390027140000faa7190000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000",
+  },
+};
+
+export const sendTransaction: IUserOperationTemplate = {
+  id: "sendTransaction",
+  name: "Send transaction",
+  userOpObj: {
+    callData: "",
   },
 };
