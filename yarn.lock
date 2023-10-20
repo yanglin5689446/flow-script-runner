@@ -1311,10 +1311,10 @@
     "@onflow/util-template" "^1.0.1"
     "@onflow/util-uid" "^1.0.1"
 
-"@blocto/sdk@^0.7.0-beta.1":
-  version "0.7.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@blocto/sdk/-/sdk-0.7.0-beta.1.tgz#fd264c6c390d14b2878e61598c46400fc510724e"
-  integrity sha512-TelgLHrN6W+xN8/gG/Ka65nknFyqidl+zabnAQsJVEjIQ7bQZ1Vng4H5eAujywP4lC2fjghxrlAcYxfDFp1Zzg==
+"@blocto/sdk@^0.7.1-beta.0":
+  version "0.7.1-beta.0"
+  resolved "https://registry.yarnpkg.com/@blocto/sdk/-/sdk-0.7.1-beta.0.tgz#31faf2c2e9838df37d76ad23d2714f69057c2ddb"
+  integrity sha512-HfEmzO3uqwdrT7M01lYtyAJGHqO6B6w8mgkyXNcrVIn4p9JOqAxblY2DijJqwqQGwUFuteqFZqTaAllBjYUEuw==
   dependencies:
     buffer "^6.0.3"
     eip1193-provider "^1.0.1"
@@ -4927,9 +4927,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000981, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001125, caniuse-lite@^1.0.30001286:
-  version "1.0.30001298"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001298.tgz#0e690039f62e91c3ea581673d716890512e7ec52"
-  integrity sha512-AcKqikjMLlvghZL/vfTHorlQsLDhGRalYf1+GmWCf5SCMziSGjRYQW/JEksj14NaYHIR6KIhrFAy0HV5C25UzQ==
+  version "1.0.30001551"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001551.tgz"
+  integrity sha512-vtBAez47BoGMMzlbYhfXrMV1kvRF2WP/lqiMuDu1Sb4EE4LKEgjopFDSRtZfdVnslNRpOqV/woE+Xgrwj6VQlg==
 
 capture-exit@^2.0.0:
   version "2.0.0"
