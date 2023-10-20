@@ -38,6 +38,7 @@ const EvmSendEditor = ({
       }
       setRequestObject([sendObj]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account, fromString, toString, dataString, valueString]);
   useEffect(() => {
     setFrom(account || "");
