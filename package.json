@@ -63,6 +63,7 @@
     "prettier": "^2.5.1"
   },
   "resolutions": {
-    "react-error-overlay": "6.0.9"
+    "react-error-overlay": "6.0.9",
+    "acorn": "npm:acorn-with-stage3"
   }
 }
