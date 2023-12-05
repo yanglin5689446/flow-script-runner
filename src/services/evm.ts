@@ -17,7 +17,9 @@ export const supportedChains = [
   {
     name: "Ethereum Mainnet",
     chainId: "0x1",
-    rpcUrls: ["https://mainnet.infura.io/v3/ef5a5728e2354955b562d2ffa4ae5305"],
+    rpcUrls: [
+      `https://mainnet.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`,
+    ],
     environment: "mainnet",
   },
   {
@@ -100,7 +102,7 @@ const bloctoSDK = new BloctoSDK({
     chainId: isMainnet ? "0x1" : "0x5",
     // (required for Ethereum) JSON RPC endpoint
     rpc: isMainnet
-      ? "https://mainnet.infura.io/v3/ef5a5728e2354955b562d2ffa4ae5305"
+      ? `https://mainnet.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`
       : "https://rpc.ankr.com/eth_goerli",
   },
   appId: process.env.REACT_APP_DAPP_ID,
